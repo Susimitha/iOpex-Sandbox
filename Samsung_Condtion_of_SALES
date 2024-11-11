@@ -1,0 +1,154 @@
+<apex:page controller="ContractSignatureCtrl" sidebar="false" showHeader="false">
+  
+  <style>
+    .bPageBlock .pbTitle {
+      width: 100%;
+      text-align: center;
+    }
+
+    .bPageBlock .pbBody .dataCol {
+      border: 0px;
+    }
+
+    .bPageBlock .pbBody .labelCol {
+      border: 0px;
+    }
+
+    .commandButton {
+      color: white !important;
+      background: #0096FF !important;
+      width: 150px;
+      float: right;
+    }
+    
+        .frm{             
+                margin-left:25px !important;
+                margin-right:25px !important;
+                padding-left:25px !important;
+                padding-right:25px !important;
+                font-size:15px;
+         }
+  </style>
+  <script>
+    ! function() {
+      var canvas, lastX, lastY;
+
+      function start(event) {
+        lastX = event.offsetX;
+        lastY = event.offsetY;
+        document.body.addEventListener("mousemove", draw);
+        document.body.addEventListener("mouseup", end);
+      }
+
+      function draw(event) {
+        var context = canvas.getContext("2d");
+        if (event.target === canvas) {
+          context.fillStyle = "black";
+          context.strokeStyle = "black";
+          context.beginPath();
+          context.moveTo(lastX, lastY);
+          context.lineTo(event.offsetX, event.offsetY, 3);
+          context.stroke();
+          lastX = event.offsetX;
+          lastY = event.offsetY;
+        }
+        event.preventDefault();
+      }
+
+      function end(event) {
+        document.body.removeEventListener("mousemove", draw);
+        document.body.removeEventListener("mouseup", end);
+        canvas.removeEventListener("mouseenter", mouseenter);
+        event.preventDefault();
+      }
+
+      function save(event) {
+        event.preventDefault();
+        saveImageToServer(canvas.toDataURL("image/jpeg").split(/;base64,/)[1]);
+      }
+
+      function init() {
+        var context;
+        canvas = document.getElementById("signature");
+        canvas.addEventListener("mousedown", start);
+        context = canvas.getContext("2d");
+        context.fillStyle = "white";
+        context.fillRect(1, 1, canvas.width, canvas.height);
+        document.getElementById("save").addEventListener("click", save);
+      }
+
+      function resetForm() {
+        document.getElementById("signature");
+        context.clear();
+      }
+      window.addEventListener('DOMContentLoaded', init);
+    }()
+  </script>
+  <style>
+    #signature {
+      border: 1px solid black;
+    }
+  </style>
+  <script>
+    function callSave() {
+      var r = confirm("Your signature has been saved!");
+      if (r == true) {
+        callSav();
+      }
+    }
+    
+  </script>
+  <apex:form id="pg1" styleClass="frm"><br/><br/>
+    <!-- <apex:image id="SamsungLogo" value="{!$Resource.SamsungLogo}" alt="Samsung logo with address" width="300px"/><br/><br/> -->
+    <!-- Begin Default Content REMOVE THIS -->
+    <apex:pageblock title="SAMSUNG SEMICONDUCTOR, INC. STANDARD TERMS AND CONDITIONS OF SALE" mode="mainDetail">
+      <br />
+      <br /><!-- <h1> -->
+      The following Terms and Conditions apply to any purchase of products (“Products”) that you (“Customer”) make from Samsung Semiconductor, Inc. (“Samsung”). <br />
+        <br /> 1. Application of Terms. The terms and conditions in this document exclusively govern and control, and entirely supersede, and are in lieu of the terms and conditions in, the Customer&#39;s purchase order or any other document offered or proposed by Customer. All other terms or conditions of sale proposed or offered by Customer are hereby expressly rejected in the entirety. No other terms shall be valid unless specifically agreed to in writing and signed by Samsung. Failure of Samsung to object to the provisions in any document sent by Customer shall not be deemed a waiver of these terms or acceptance of any terms the Customer may have requested. Samsung’s sale of Products covered by this document are governed only by these terms and conditions of sale. Customer shall be deemed to have expressly accepted these terms and conditions of sale if Customer requests or receives delivery of any Products. These terms supersede all other terms submitted or proposed by Customer, as well as all prior terms in any quotation, purchase order, or otherwise. In the event that Samsung consents to modify any of the following terms, such modification shall be in a signed writing between the parties which references the change to these terms or shall be expressly stated on the face of these terms and endorsed by Samsung. All requests for Product are subject to approval by Samsung, and Samsung reserves the right to restrict or allocate Product. <br />
+        <br /> 2. Order Placement. From time to time, Customer shall place orders for products with Samsung. Samsung may acknowledge the order, but acknowledgement itself is not acceptance of the order. Once Samsung accepts an order, the order may not be cancelled or rescheduled without the consent of Samsung. <br />
+        <br /> 3. Limited Warranty. Samsung warrants to Customer only, and not to Customer’s affiliates or customers or any other third parties, that Products shall remain free from defects in Samsung&#39;s manufacturing workmanship and materials for a period of twelve (12) months from the date of shipment by Samsung. This warranty shall be conditioned upon receipt by Samsung of notice of any alleged covered manufacturing defect in material or workmanship within thirty (30) days after discovery, subject to the warranty period. This warranty will not apply if the Product fails due to improper application, use, modifications, handling, installation, removal, repairs, or is subjected to abuse or improper use. Customer’s sole remedy, and Samsung’s sole duty, for any breach of this warranty will be for Samsung, at Samsung’s option, to repair or replace the defective Product or to issue a credit to Customer in the amount of the purchase price paid for such Product. In no event shall Samsung be responsible for any costs associated with the removal (or re-installation) of Products from (or into) items into which such Products have been integrated by Customer (or other third parties), or costs associated with other products into which the Product may have been integrated or used. Customer will return defective Products to Samsung, with Samsung’s prior consent and according to Samsung’s RMA policy, freight prepaid F.O.B. Samsung’s designated return facility. These are the sole and exclusive remedies of Customer under this warranty. SAMSUNG DISCLAIMS ALL OTHER WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR ANY PARTICULAR PURPOSE, COURSE OF DEALING, NON-INFRINGEMENT, OR USAGE OF TRADE. <br />
+        <br /> 4. Particular Uses. Customer acknowledges that the Products are not designed for, and Samsung has no desire to make Products available for, including without limitation, life support, critical care, medical, safety equipment, or similar applications where Product failure could result in loss of life or personal or physical harm, or any military or defense application, or any governmental procurement to which special terms or provisions may apply (e.g. FARS, DFARS, etc.). Accordingly, Samsung disclaims all liability, and Customer assumes all risks arising from any such or similar application of the Products. <br />
+        <br /> 5. CONSEQUENTIAL DAMAGES. IN NO EVENT WILL SAMSUNG BE LIABLE FOR ANY COSTS OR PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES OR FOR ANY CONSEQUENTIAL, SPECIAL, INCIDENTAL, INDIRECT, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION LOST PROFITS, WHETHER THE CLAIM IS BASED ON CONTRACT, TORT, STRICT LIABILITY, OR ANY OTHER THEORY OF LAW OR EQUITY, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. <br />
+        <br /> 6. Limitations. Samsung’s liability under the sales hereunder from any cause whatsoever shall in no event exceed a refund of the purchase price paid by Customer to Samsung for such Product giving rise to such liability. The above disclaimers and exclusions include any liability that may arise out of third party claims against Customer. This allocation of risk is reflected in the price of the Products. <br />
+        <br /> 7. Prices and Payment. Customer shall pay the prices quoted in writing by Samsung. Prices quoted are C.I.P. named location unless otherwise specified. Price quotes are firm for a period not to exceed ten (10) days, unless otherwise indicated by Samsung. Payment is due net thirty (30) days from the date of invoice, unless Samsung designates cash in advance or cash on delivery terms or otherwise agreed upon in writing. As a condition of sales, a monthly interest charge equal to the maximum permitted by law will be assessed to all accounts not paid when due, unless waived in writing by Samsung. Customer shall not offset any amount due to Samsung against any amount owed or alleged to be owed from Customer under this agreement or otherwise, unless such withholding is agreed in writing by Samsung. Customer shall pay all reasonable collection costs (including attorneys&#39; fees). Acceptance of partial payment of any invoice will not constitute waiver of the balance. Creditworthiness is inherently subjective, and Samsung reserves the right to alter, suspend, or withdraw credit at any time. In addition to the price, Customer shall pay any sales tax, tax, duty, fee, or other charge imposed by a government authority on the sale of the Products at or after the C.I.P. point as well as any bank, wire or FX fees associated with Customer payment such that Samsung receives the full amount due. <br />
+        <br /> 8. Shipment. All Product is sold, and prices quoted, C.I.P named destination. Title and risk of loss pass to Customer at the delivery point (i.e. where the goods are taken in charge by the first carrier at the place of shipment), per Incoterm 2020 rules. Customer shall be responsible for all costs associated with shipping and insurance as well as any necessary customs clearances and duties (at or after the delivery point, per Incoterm 2020 rules). Delivery dates acknowledged or confirmed by Samsung are estimates only, and Samsung shall not be responsible for delays in shipment or delivery or any resulting claims or damages. <br />
+        <br /> 9. Rescheduling and Cancellations. Orders cannot be cancelled or rescheduled without the prior consent of Samsung. <br />
+        <br /> 10. Intellectual Property Indemnity and Proprietary Rights. Subject to the conditions below, Samsung will at its expense defend or settle (at its option) any third party claim against Customer arising from the infringement of any patent, copyright, mask work right, trade secret, or other intellectual property right by Product in the jurisdiction where title passes from Samsung to Customer, and will pay any final judgment entered against Customer in such claim, provided Customer notifies Samsung in writing of such claim immediately after knowing of it and cooperates in its defense as requested by Samsung. To limit its liability and in full satisfaction of its obligations hereunder (including defense obligations), Samsung may at any time modify or replace the affected Products to avoid an infringement, obtain a license to cure an infringement, or give Customer a full refund of the subject Product’s purchase price (subject to return of the subject Product). Samsung’s duty to defend and indemnify will not apply if the alleged infringement arises from: the combination of the Products with any other goods or products; the modification of any Products by a party other than Samsung; or any specifications or directives of Customer used by Samsung in making the Products; and will not apply to any settlement made by Customer without Samsung’s consent. THE FOREGOING STATES THE ENTIRE RESPONSIBILITY OF SAMSUNG, AND THE EXCLUSIVE REMEDY OF CUSTOMER, WITH RESPECT TO ANY ALLEGED INTELLECTUAL PROPERTY RIGHT INFRINGEMENT OR TRADE SECRET VIOLATION BY THE PRODUCTS. Samsung retains ownership of all rights to designs, technical data, and any other intellectual property relating to the Products, and to any models, drawings, patterns, composites, molds, masks, fixtures, and tools used in making them, and nothing in this sale conveys any license, expressly or by implication or estoppel, under any such rights to Customer. <br />
+        <br />
+        <br /> 11. Modifications/Jurisdiction. All approvals, consents, notices, and other communications required or permitted hereunder shall be in writing, even if not specifically designated herein. These terms may only be modified in a signed writing by an authorized employee of Samsung. The parties agree to the laws of the State of California, consent to personal jurisdiction with the courts located in Santa Clara County, California, and agree to exclusive venue with such courts located in Santa Clara County, California. <br />
+        <br />
+        <br />
+        <br /><h1> Customer Signature for acknowledgement of T’s and C’s: </h1> <br />
+        <br />
+      <!-- </h1> -->
+      <!-- End Default Content REMOVE THIS -->
+      <apex:actionFunction action="{!saveImage2}" name="saveImageToServer" reRender="">
+        <apex:param assignTo="{!fileData}" name="data" value="" />
+      </apex:actionFunction>
+      <canvas id="signature" width="350" height="100" required="true" />
+      <br />
+      <br />
+      <div>
+          <button onclick="javascript:resetForm();return false;" style="height:20px;width:110px;" >Clear Signature</button>
+      </div><br/>
+      <!-- <input type="button" id="clear" style="height:20px;width:110px;" value="Clear Signature" onclick="resetForm()" /> -->
+      &nbsp; &nbsp;
+      <div>
+          <button onclick="javascript:callSave();" style="height:20px;width:110px;" id="save">Save Signature</button>
+      </div> **Note: Please save the signature before submitting!**<br />
+      <!-- <input type="button" id="save" style="height:20px;width:110px;" value="Save Signature" onclick="callSave()" />
+      &nbsp; &nbsp; **Note: Please save the signature before submitting!** <br /> -->
+      <br />
+      <br />
+      
+      <!-- <div>
+          <button onclick="javascript:gotoLinkFlow(false)();" id="save">Launch Flow</button>
+      </div> -->
+      
+      <apex:commandButton value="Next" action="{!saveAndSuccess2}" styleClass="commandButton" /> <!-- conditions of sales button -->
+      <br />
+      
+     </apex:pageblock>
+  </apex:form>
+</apex:page>
