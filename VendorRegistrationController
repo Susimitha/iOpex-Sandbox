@@ -1,0 +1,536 @@
+public with sharing class VendorRegistrationController {
+    /*
+    *********************************************************
+    Apex Class Name    : VendorRegistrationController
+    Created Date       : 12.07.2024
+    @description       : Vendor Registration Form Portal
+    @author            : iOpex
+    Modification Log:
+    Ver   Date             Author               Modification
+    1     12.07.2024	   iOpex				
+    *********************************************************
+    */  
+       /* @AuraEnabled(cacheable=true)
+        public static List<String> getPicklistValues(String objectName, String fieldName) {
+            //To get the picklist value from VendorRegistration Object
+            List<String> picklistValues = new List<String>();
+                Schema.DescribeFieldResult fieldResult = Schema.getGlobalDescribe().get(objectName).getDescribe().fields.getMap().get(fieldName).getDescribe();
+                List<Schema.PicklistEntry> values = fieldResult.getPicklistValues();
+        
+                for (Schema.PicklistEntry value : values) {
+                    picklistValues.add(value.getLabel());
+                }
+        
+                return picklistValues;
+        }*/
+             
+           @AuraEnabled
+            public static string saveVendorRegistration(Map<String, Object> formData) {
+          
+             Vendor_Registration__c vr = new Vendor_Registration__c();
+    
+            Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Vendor_Registration__c.fields.getMap();
+    
+            for (String fieldName : formData.keySet()) {
+                Object fieldValue = formData.get(fieldName);
+                Schema.SObjectField field = fieldMap.get(fieldName);
+                Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
+    
+                if (fieldDescribe.getType() == Schema.DisplayType.Double) {
+                    vr.put(fieldName, Decimal.valueOf((String)fieldValue));
+                } else if (fieldDescribe.getType() == Schema.DisplayType.Integer) {
+                    vr.put(fieldName, Integer.valueOf((String)fieldValue));
+                } else if (fieldDescribe.getType() == Schema.DisplayType.Date) {
+                    vr.put(fieldName, Date.valueOf((String)fieldValue));
+                } else if (fieldDescribe.getType() == Schema.DisplayType.DateTime) {
+                    vr.put(fieldName, DateTime.valueOf((String)fieldValue));
+                } else {
+                    vr.put(fieldName, fieldValue);
+                }
+            }
+    
+            try {
+                upsert vr;
+               vrSubmittedNotification.SendVRSubmittedEmail(vr.Id);
+                return vr.Id;
+            } catch (Exception e) {
+                throw new AuraHandledException(e.getMessage());
+            }
+        }
+        
+        @AuraEnabled(cacheable=true)
+        public static void getvr(Vendor_Registration__c vr_record) {
+         Vendor_Registration__c vr=new Vendor_Registration__c();
+         vr.Preferred_Payment_Method__c=vr.Preferred_Payment_Method__c;   
+        }
+    
+    
+    
+        /*
+        @AuraEnabled(cacheable=true)
+        //public static string fileupload(List<Object> filesUploaded,Id vrid) {
+            public static string fileupload(Object fileupload,Id vrid) {
+            try{
+            // for( Integer i = 0 ; i < filesUploaded.size() ; i++){
+                    system.debug('>> for');
+                    FileInfo fileData  = (FileInfo)JSON.deserialize(JSON.serialize(fileupload), FileInfo.class);
+                    system.debug('>> after fileData');
+                    
+                    ContentVersion cv = createContentVersion(fileData.VersionData, fileData.Title);
+                    
+                    ContentDocumentLink cdl = createContentLink(cv.Id, vrid);
+               // }
+    
+                return 'Successful';
+            }
+            catch(Exception e){
+                return e.getMessage();
+            }
+            } 
+        
+    public class FileInfo {
+            public String Title;
+            public Blob VersionData;
+        }
+        private static ContentVersion createContentVersion(Blob versionData, String filename) {
+            ContentVersion cv = new ContentVersion();
+            cv.VersionData = versionData;
+            cv.Title = filename;
+            cv.PathOnClient = filename;
+            try {
+              insert cv;
+              return cv;
+            } catch(DMLException e) {
+              System.debug(e);
+              return null;
+            }
+          }
+          private static ContentDocumentLink createContentLink(String contentVersionId, String recordId) {
+            if (contentVersionId == null || recordId == null) { return null; }
+        ContentDocumentLink cdl = new ContentDocumentLink();
+        cdl.ContentDocumentId = [
+        SELECT ContentDocumentId 
+        FROM ContentVersion 
+        WHERE Id =: contentVersionId
+        ].ContentDocumentId;
+        cdl.LinkedEntityId = recordId;
+        // ShareType is either 'V', 'C', or 'I'
+        // V = Viewer, C = Collaborator, I = Inferred
+        cdl.ShareType = 'V';
+        try {
+        insert cdl;
+        return cdl;
+        } catch(DMLException e) {
+        System.debug(e);
+        return null;
+        }
+        }*/
+       @AuraEnabled
+        public static String uploadFile(String fileDataJson, Id recordId) {
+            try {
+                FileInfo fileData = (FileInfo) JSON.deserialize(fileDataJson, FileInfo.class);
+                
+                ContentVersion cv = new ContentVersion();
+                cv.VersionData = EncodingUtil.base64Decode(fileData.VersionData);
+                cv.Title = fileData.Title;
+                cv.PathOnClient = fileData.Title;
+    
+                insert cv;
+    
+                ContentDocumentLink cdl = new ContentDocumentLink();
+                cdl.ContentDocumentId = [
+                    SELECT ContentDocumentId 
+                    FROM ContentVersion 
+                    WHERE Id = :cv.Id
+                ].ContentDocumentId;
+                cdl.LinkedEntityId = recordId;
+                cdl.ShareType = 'V';
+    
+                insert cdl;
+                
+                Vendor_Registration__c vr=new Vendor_Registration__c();
+                vr.Attachments_Created__c =true;
+                vr.Id=recordId;
+                update vr;
+                return 'File uploaded successfully';
+            } catch (Exception e) {
+                throw new AuraHandledException('File upload failed: ' + e.getMessage());
+            }
+        }
+        //------------------VR File upload on each stage
+         @AuraEnabled
+        public static ContentVersion uploadFilehome(String recordId,String stage, String fileName, String base64Data) {
+            // Decode the Base64 data
+            Blob fileBody = Blob.valueOf(base64Data);
+    
+            // Create ContentVersion for file upload
+            ContentVersion file = new ContentVersion();
+            file.VersionData = fileBody;
+            file.Title = fileName;
+            file.PathOnClient = fileName;
+            file.FirstPublishLocationId = recordId;
+            file.RMA_Stage__c=stage;
+            insert file;
+            Vendor_Registration__c vr=new Vendor_Registration__c();
+            vr.Id=recordId;
+             
+            if(stage=='Pending Accounting Review'){
+                vr.isAccountingUploadFile__c=true;
+            }
+            else if(stage=='Accounting Registration'){
+                 vr.isAccountingRegistrationUploadFile__c=true;
+            }
+            else if(stage=='Accounting Verification'){
+                 vr.isAccountingVerificationUploadFile__c=true;
+            }
+            else if(stage=='Pending Tax Review'){
+                 vr.isTaxUploadFile__c=true;
+            }
+            else if(stage=='Pending Purchasing Review'){
+                 vr.isPurchasingUploadFile__c=true;
+            }
+           
+                update vr; 
+            
+           
+            return file;
+        }
+          @AuraEnabled
+        public static void deleteFile(String contentDocumentId) {
+            // Delete the associated ContentDocument
+            try {
+                ContentDocument document = [SELECT Id FROM ContentDocument WHERE Id = :contentDocumentId LIMIT 1];
+                delete document;
+            } catch (Exception e) {
+                throw new AuraHandledException('Error deleting file: ' + e.getMessage());
+            }
+        }
+        //----------------------End
+    
+        public class FileInfo {
+            public String Title;
+            public String VersionData;
+        }
+        @AuraEnabled(cacheable=true)
+        public static List<Vendor_Registration__c> getVendorRegistrationRecords(string status,Date fromDate,Date toDate) {
+            String query = 'SELECT Id, Name, TIN_Check_Status__c, Validate_Status__c, isAccountingUploadFile__c, isAccountingRegistrationUploadFile__c, isAccountingVerificationUploadFile__c, isPurchasingUploadFile__c, isTaxUploadFile__c, IsValid__c, GIACT_Status__c, Verbal_Confirmation_Status__c, Penny_Test_Status__c, VR_Vendor_Status_Display__c, VendorCode__c, ProcessingDay__c, Validate__c, Name_on_the_Invoice__c, Status_Display_for_all_others__c, createdDate, Vendor_Type__c, Registration_Type__c, LastModifiedDate, Penny_Test_Timestamp__c, Verbal_Confirmation_Timestamp__c, GIACT_Timestamp__c, TIN_Check_Timestamp__c,Penny_Test_Modified_Timestamp__c,Verbal_Confirmation_Modified_Timestamp__c,	TIN_Check_Modified_Timestamp__c,GIACT_Modified_Timestamp__c,Reason_for_Rejection__c FROM Vendor_Registration__c ';
+         List<String> conditions = new List<String>();
+            if (fromDate != null) {
+                //conditions += 'DAY_ONLY(createdDate) >= :fromDate';
+                conditions.add('DAY_ONLY(createdDate) >= :fromDate');
+            }
+            if (toDate != null) {
+               // conditions += 'DAY_ONLY(createdDate) <= :toDate';
+                 conditions.add('DAY_ONLY(createdDate) <= :toDate');
+            }
+             if (!String.isBlank(status)) {
+                conditions.add('Status_Display_for_all_others__c =\'' + status+'\'') ;
+            }
+    
+        if (!conditions.isEmpty()) {
+            query += ' WHERE ' + String.join(conditions, ' AND ');
+        }
+    
+        query += ' ORDER BY createdDate DESC';
+        System.debug('query: ' + query);
+        return Database.query(query);
+        } 
+        @AuraEnabled(cacheable=true)
+        public static List<Vendor_Registration__c> getVendorRegistrationRecordsdetails() {
+            String query = 'SELECT Id, Name,TIN_Check_Status__c,GIACT_Status__c,Verbal_Confirmation_Status__c,Penny_Test_Status__c,CreatedDate, Registration_Type__c, Status_Display_for_all_others__c, VR_Vendor_Status_Display__c FROM Vendor_Registration__c ORDER BY createdDate DESC ';
+            return Database.query(query);
+        }
+        @AuraEnabled(cacheable=false)
+        public static string handleactions(List<Vendor_Registration__c> approvedrecords) {
+            try{
+           /*  List<Vendor_Registration__c> vrstatus=new List<Vendor_Registration__c>();
+             List<Vendor_Registration__c> vrlist=[SELECT Id, Stage__c, Status_Display_for_all_others__c FROM Vendor_Registration__c WHERE Id IN : approvedrecords ];
+             for(Vendor_Registration__c v:vrlist){
+                 Vendor_Registration__c vr=new Vendor_Registration__c();
+                 vr.Id=v.Id;
+                  vr.Status_Display_for_all_others__c=status;
+                  vrstatus.add(vr);
+             }*/
+             
+                 // Perform DML operation only once
+             if (!approvedrecords.isEmpty()) {
+                 update approvedrecords;
+                   // Fetch only the records that match the given Stage criteria
+                   List<Vendor_Registration__c> approvedStatusRecords = [
+                                SELECT Id, Name,Name_on_the_Invoice__c,Vendor_Contact__c, Vendor_Email__c, Status_Display_for_all_others__c
+                                FROM Vendor_Registration__c
+                                WHERE Id IN :approvedrecords AND Status_Display_for_all_others__c = 'Approved' // Filter by 'Approved' stage
+                                ];
+                 //to fetch rejected records
+                 List<Vendor_Registration__c> rejectedStatusRecords = [
+                                SELECT Id, Name,Name_on_the_Invoice__c,	Reason_for_Rejection__c,Vendor_Contact__c, Vendor_Email__c, Status_Display_for_all_others__c
+                                FROM Vendor_Registration__c
+                                WHERE Id IN :approvedrecords AND Status_Display_for_all_others__c = 'rejected' // Filter by 'Approved' stage
+                                ];
+                 if(!approvedStatusRecords.isEmpty()){
+                     vrApprovedRejectedEmailNotification.SendVRApprovedRejectedEmail(approvedStatusRecords,'Approved');
+                 }
+                  if(!rejectedStatusRecords.isEmpty()){
+                     vrApprovedRejectedEmailNotification.SendVRApprovedRejectedEmail(rejectedStatusRecords,'rejected');
+                 }
+                 
+             }
+                 return 'sucess';
+             }
+             catch(Exception e){
+                 return e.getmessage();
+             }
+            
+         }
+        /*public static string handleactions(List<Id> approvedrecords,string action,string status) {
+           try{
+            List<Vendor_Registration__c> vrstatus=new List<Vendor_Registration__c>();
+            List<Vendor_Registration__c> vrlist=[SELECT Id, Stage__c, Status_Display_for_all_others__c FROM Vendor_Registration__c WHERE Id IN : approvedrecords ];
+            for(Vendor_Registration__c v:vrlist){
+                Vendor_Registration__c vr=new Vendor_Registration__c();
+                vr.Id=v.Id;
+                 vr.Status_Display_for_all_others__c=status;
+                 vrstatus.add(vr);
+            }
+            
+                // Perform DML operation only once
+            if (!vrstatus.isEmpty()) {
+                update vrstatus;
+            }
+                return 'sucess';
+            }
+            catch(Exception e){
+                return e.getmessage();
+            }
+           
+        } */
+        /*@AuraEnabled(cacheable=false)
+        public static string handleVendorcodeactions(Id updaterecord,string vendorCode) {
+            Vendor_Registration__c vr=new Vendor_Registration__c();
+            vr.Id=updaterecord;
+             vr.VendorCode__c=vendorCode;
+             try{
+             update vr;
+             return 'sucess';
+             }
+             catch(Exception e){
+                return e.getmessage();
+            }
+    
+    
+        }*/
+        @AuraEnabled
+        public static String handleVendorcodeactions(List<Map<String, String>> vendorUpdates) {
+            try {
+                List<Vendor_Registration__c> recordsToUpdate = new List<Vendor_Registration__c>();
+    
+                for (Map<String, String> updateMap : vendorUpdates) {
+                    String recordId = updateMap.get('recordId');
+                    String vendorCode = updateMap.get('vendorCode');
+    
+                    // Create the SObject instance and set its fields
+                    Vendor_Registration__c record = new Vendor_Registration__c();
+                    record.Id = recordId;
+                    record.VendorCode__c = vendorCode; // Replace with your actual field API name
+    
+                    recordsToUpdate.add(record);
+                }
+    
+                // Perform the bulk update
+                update recordsToUpdate;
+    
+                return 'success';
+            } catch (Exception e) {
+                System.debug('Error updating vendor codes: ' + e.getMessage());
+                return 'error';
+            }
+        }
+        
+        @AuraEnabled(cacheable=false)
+        public static string handleValidateaction(Id updaterecord,String validateStatus) {
+            Vendor_Registration__c vr=new Vendor_Registration__c();
+            vr.Id=updaterecord;
+            if(validateStatus=='pass')
+            {
+                vr.Validate__c='Pass';
+            }
+             else{
+                vr.Validate__c = 'Fail';
+             }
+            
+             try{
+             update vr;
+             return 'sucess';
+             }
+             catch(Exception e){
+                return e.getmessage();
+            }
+    }
+    
+    
+    @AuraEnabled(cacheable=true)
+    public static Map<String, String> getCategoryData(Id recordId) {
+        system.debug('recordId'+recordId);
+        Vendor_Registration__c record = [SELECT Id, TIN_Check_Status__c, GIACT_Status__c, Verbal_Confirmation_Status__c, Penny_Test_Status__c,TIN_Check_Timestamp__c,GIACT_Timestamp__c,Verbal_Confirmation_Timestamp__c,Penny_Test_Timestamp__c
+        FROM Vendor_Registration__c
+        WHERE Id = :recordId
+        LIMIT 1];
+                Map<String, String> data = new Map<String, String>();
+                data.put('tin', record.TIN_Check_Status__c);
+                data.put('giact', record.GIACT_Status__c);
+                data.put('verbal', record.Verbal_Confirmation_Status__c);
+                data.put('penny', record.Penny_Test_Status__c);
+    
+                // Add timestamps to the response
+            data.put('tinTimestamp', record.TIN_Check_Timestamp__c);
+            data.put('giactTimestamp', record.GIACT_Timestamp__c);
+            data.put('verbalTimestamp', record.Verbal_Confirmation_Timestamp__c);
+            data.put('pennyTimestamp', record.Penny_Test_Timestamp__c);
+            return data;
+    
+    }
+    
+    
+    @AuraEnabled(cacheable=false)
+    public static string saveSelectionProcess(Id recordId, Map<String, String> categoryData){
+       system.debug('handle validate Action');
+    
+        
+       Vendor_Registration__c record = new Vendor_Registration__c();
+       record.Id = recordId; // Get the record ID dynamically if needed
+    
+        // Map the values from LWC to Salesforce fields (both status and timestamp)
+        record.TIN_Check_Status__c = categoryData.get('tin');
+        if (record.TIN_Check_Timestamp__c == null) {
+            record.TIN_Check_Timestamp__c = categoryData.get('tinTimestamp');
+        }
+    
+            record.GIACT_Status__c = categoryData.get('giact');
+            if (record.GIACT_Timestamp__c == null) {
+                record.GIACT_Timestamp__c = categoryData.get('giactTimestamp');
+            }
+    
+            record.Verbal_Confirmation_Status__c = categoryData.get('verbal');
+            if (record.Verbal_Confirmation_Timestamp__c == null) {
+                record.Verbal_Confirmation_Timestamp__c = categoryData.get('verbalTimestamp');
+            }
+    
+            record.Penny_Test_Status__c = categoryData.get('penny');
+            if (record.Penny_Test_Timestamp__c == null) {
+                record.Penny_Test_Timestamp__c = categoryData.get('pennyTimestamp');
+            }
+        
+        // New: Save the Validate Status ('Pass' or 'Fail')
+       // validateResult.Validate__c = validateAction.get('Validate_Status__c');*/
+    
+        // Save the record
+        try {
+            update record;
+            return 'success';
+        } catch (Exception e) {
+            return e.getmessage();
+        }
+    }
+    
+    
+    
+    // Working In process by Nivetha
+        @AuraEnabled(cacheable=false)
+        public static string handleValidateResult(Id updaterecord, Boolean validationStatus){
+           system.debug('handle validate Action');
+            Vendor_Registration__c validateResult = new Vendor_Registration__c();
+            validateResult.Id=updaterecord;
+       //  Save the Validate Status ('Pass' or 'Fail')
+            validateResult.IsValid__c = validationStatus;
+    
+            // Save the record
+            try {
+                update validateResult;
+                system.debug('validate Result is '+validateResult);
+                return 'success';
+            } catch (Exception e) {
+                return e.getmessage();
+            }
+        }
+    @AuraEnabled(cacheable=true)
+        public static Vendor_Registration__c getVendorFormValues(String recordId) {
+            try {
+                return [
+                    SELECT Name_as_shown_on_your_W_9__c,
+                           Name_of_organization_beneficial_owner__c,
+                           DBA_Business_Name_Disregarded_Entity__c,
+                           Company_Address__c,
+                           City__c,
+                           State__c,
+                           Zip_Code__c,
+                           Tax_ID__c,
+                           Name_on_the_Invoice__c,
+                           Registration_Type__c,
+                           Reason_for_bank_change__c,
+                           Preferred_Payment_Method__c,
+                           Bank_Account_Beneficiary_Name__c,
+                           Bank_ACH_Routing_Number__c,
+                           Banking_Support_Provided__c,
+                           Bank_Name__c,
+                           Bank_Account_Number__c,
+                           Bank_Address__c,
+                           Bank_Contact_Name__c,
+                           Bank_Contact_Title_Position__c,
+                           Bank_City__c,
+                           Bank_State__c,
+                           Bank_Zip_Code__c,
+                           Bank_Contact_Email__c,
+                           Remittance_Address__c,
+                           Remittance_Address_City__c,
+                           Remittance_State__c,
+                           Remittance_Address_Zip_Code__c,
+                           Primary_Contact_Name__c,
+                           Primary_Contact_Title_Position__c,
+                           A_R_Contact_Person_Name__c,
+                           A_R_Contact_Person_Title_Position__c,
+                           Phone_Number__c,
+                           Primary_Contact_Email__c,
+                           A_R_Contact_Phone_Number__c,
+                           A_R_Contact_Email__c,
+                           Samsung_Contact_Name__c,
+                           Samsung_Contact_Email__c,
+                           Foreign_TIN__c,
+                           Name_of_disregarded_entity__c,
+                           International_State__c,
+                           Country__c,
+                           Entity_Type_applies_to_you__c,
+                           Describe_servicetype_or_Delivered_SSI__c,
+                           Receiving_Payment_Service__c,
+                           Invoice_Currency__c,
+                           Account_Beneficiary_Name__c,
+                           International_Bank_Account_Number_IBAN__c,
+                           Swift_Bank_Identifier_Code_IBC__c,
+                           International_Bank_State__c,
+                           Bank_Country__c,
+                           Agree_terms__c,
+                           Sign_Date__c,
+                           Signer_Name__c,
+                           Signer_Title__c,
+                           Signature_Image__c,
+                           RecordTypeId,
+                           PaymentTerm_other__c,
+                           Id
+                    FROM Vendor_Registration__c
+                    WHERE Id = :recordId
+                    LIMIT 1
+                ];
+            } catch (Exception e) {
+                throw new AuraHandledException('Error retrieving form data: ' + e.getMessage());
+            }
+        }
+         // Helper method for testing in Anonymous Apex
+        public static void testGetVendorRegistrationRecords() {
+            Map<String, Object> filters = new Map<String, Object>();
+            //filters.put('submissionDate', 2023-01-01); // Sample date
+            filters.put('registrationType', 'Type A');   // Sample registration type
+            Date fromDate=Date.today()-4;
+            Date toDate=Date.today()+4;
+          List<Vendor_Registration__c> records = getVendorRegistrationRecords('Pending Accounting Review',fromDate,toDate);
+           // System.debug('Retrieved records: ' + records);
+        }
+    }
