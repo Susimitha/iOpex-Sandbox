@@ -1,0 +1,226 @@
+public with Sharing class CreditApplicationPortal {
+  public Id currentRecordId { get; set; }
+  List<Credit_Application__c> request;
+  
+    public String legalBusinessName { get; set; }
+  public date dateEstablished { get; set; }
+  public String phone { get; set; }
+  public string submittersEmail { get; set; }
+  public String dba { get; set; }
+  public String website { get; set; }
+
+  public String physicalAddress { get; set; }
+  public String city { get; set; }
+  public String state { get; set; }
+  public String zip { get; set; }
+
+  public String BillingAddress { get; set; }
+  public String baCity { get; set; }
+  public String baState { get; set; }
+  public String baZip { get; set; }
+
+  public String president { get; set; }
+  public String treasurer { get; set; }
+  public String vicePresident { get; set; }
+  public String controller { get; set; }
+  public boolean corporation { get; set; }
+  public boolean limitedPartnership { get; set; }
+  public boolean generalPartnership { get; set; }
+  public boolean soleOwnership { get; set; }
+  public boolean subsidiaryOf { get; set; }
+  public boolean divisionOf { get; set; }
+  public string parentCompany { get; set; }
+  public string debtSelectedValue { get; set; }
+  public string pcAddress { get; set; }
+  public string pcCity { get; set; }
+  public string pcState { get; set; }
+  public string pcZip { get; set; }
+  public string typeOfBusiness { get; set; }
+  public decimal noOfEmp { get; set; }
+  public string emailElectronicSubmission { get; set; }
+  public string apContactName { get; set; }
+  public string apEmail { get; set; }
+  public string apPhone { get; set; }
+  public string creditLineDesired { get; set; }
+  public string purchasingAgent { get; set; }
+  public string merchForResaleValue { get; set; }
+
+  public String br1Name { get; set; }
+  public String br1Phone { get; set; }
+  public String br1Fax { get; set; }
+  public String br1Address { get; set; }
+  public String br1City { get; set; }
+  public String br1State { get; set; }
+  public String br1Zip { get; set; }
+
+  public String br2Name { get; set; }
+  public String br2Phone { get; set; }
+  public String br2Fax { get; set; }
+  public String br2Address { get; set; }
+  public String br2City { get; set; }
+  public String br2State { get; set; }
+  public String br2Zip { get; set; }
+
+  public String br3Name { get; set; }
+  public String br3Phone { get; set; }
+  public String br3Fax { get; set; }
+  public String br3Address { get; set; }
+  public String br3City { get; set; }
+  public String br3State { get; set; }
+  public String br3Zip { get; set; }
+
+  public CreditApplicationPortal() {}
+ 
+  public ApexPages.StandardSetController stdSetController {get; set;}
+  public Credit_Application__c application { get; set; }
+  public Credit_Application__c ehs;
+  
+
+  public CreditApplicationPortal(ApexPages.StandardController controller) {
+    this.ehs = (Credit_Application__c)controller.getRecord();
+    corporation = true;
+    //formId = controller.getId();
+   // request = [SELECT Id  FROM Credit_Application__c WHERE Id = :ApexPages.currentPage().getParameters().get('id')];
+   
+  }
+
+  public void saveUpdates() {
+    this.stdSetController.save();
+  }
+
+
+  public pageReference save() {
+    // insert request;
+    Credit_Application__c CA = new Credit_Application__c();
+    // Adding all the fields of Credit applications
+    ca.Legal_Business_Name__c = legalBusinessName;
+    ca.Date_Established__c = dateEstablished;
+    ca.Phone__c = phone;
+    ca.Submitter_s_Email__c = submittersEmail;
+    ca.DBA__c = legalBusinessName;
+    ca.Website__c = website;
+
+    ca.Physical_Address__c = physicalAddress;
+    ca.City__c = city;
+    ca.State__c = state;
+    ca.Zip__c = zip;
+
+    ca.Billing_Address__c = BillingAddress;
+    ca.BA_City__c = baCity;
+    ca.BA_State__c = baState;
+    ca.BA_Zip__c = baZip;
+
+    ca.President__c = president;
+    ca.Treasurer__c = treasurer;
+    ca.Vice_President__c = vicePresident;
+    ca.Controller__c = controller;
+    
+    system.debug('>>>>> before corporation: '+corporation);
+    //ca.Corporation__c = corporation;
+    if(corporation==null || corporation==false){
+        ca.Corporation__c = false;
+    }
+    else{
+        ca.Corporation__c = true;
+    }
+    system.debug('>>>>> after ca.Corporation__c: '+ca.Corporation__c);
+    
+    //ca.Limited_Partnership__c = limitedPartnership;
+    system.debug('>>>>> before limitedPartnership: '+limitedPartnership);
+    if(limitedPartnership==null||limitedPartnership==false){
+        ca.Limited_Partnership__c = false;
+    }
+    else{
+        ca.Limited_Partnership__c = true;
+    }
+    system.debug('>>>>> after ca.Limited_Partnership__c: '+ca.Limited_Partnership__c);
+            
+    //ca.General_Partnership__c = generalPartnership;
+    if(generalPartnership==null||generalPartnership==false){
+        ca.General_Partnership__c = false;
+    }
+    else{
+        ca.General_Partnership__c = true;
+    }
+        
+    //ca.Sole_Ownership__c = soleOwnership;
+    if(soleOwnership==null||soleOwnership==false){
+        ca.Sole_Ownership__c = false;
+    }
+    else{
+        ca.Sole_Ownership__c = true;
+    }
+    
+    //ca.Subsidiary_of__c = subsidiaryOf;
+    if(subsidiaryOf==null||subsidiaryOf==false){
+        ca.Subsidiary_of__c = false;
+    }
+    else{
+        ca.Subsidiary_of__c = true;
+    }
+    
+    //ca.Division_of__c = divisionOf;
+    if(divisionOf==null||divisionOf==false){
+        ca.Division_of__c = false;
+    }
+    else{
+        ca.Division_of__c = true;
+    }           
+        
+    ca.Parent_Company__c = parentCompany;
+    ca.Does_Parent_Company_Guarantee_Debts__c = debtSelectedValue;
+    ca.PC_Address__c = pcAddress;
+    ca.PC_City__c = pcCity;
+    ca.PC_State__c = pcState;
+    ca.PC_Zip__c = pcZip;
+
+    ca.Type_of_Business__c = typeOfBusiness;
+    ca.Number_of_Employees__c = noOfEmp;
+    ca.Email_Address_for_Electronic_Submission__c = emailElectronicSubmission;
+    ca.AP_Contact_Name__c = apContactName;
+    ca.AP_Contact_Email__c = apEmail;
+    ca.AP_Contact_Phone_Number__c = apPhone;
+    ca.Credit_Line_Desired__c = creditLineDesired;
+    ca.Purchasing_Agent__c = purchasingAgent;
+    ca.Is_Merchandise_for_Resale__c = merchForResaleValue;
+
+    ca.Bank_References_Name_1__c = br1Name;
+    ca.Bank_References_Phone_1__c = br1Phone;
+    ca.Bank_References_Fax_1__c = br1Fax;
+    ca.Bank_References_Address_1__c = br1Address;
+    ca.Bank_References_City_1__c = br1City;
+    ca.Bank_References_State_1__c = br1State;
+    ca.Bank_References_Zip_1__c = br1Zip;
+
+    ca.Bank_References_Name_2__c = br2Name;
+    ca.Bank_References_Phone_2__c = br2Phone;
+    ca.Bank_References_Fax_2__c = br2Fax;
+    ca.Bank_References_Address_2__c = br2Address;
+    ca.Bank_References_City_2__c = br2City;
+    ca.Bank_References_State_2__c = br2State;
+    ca.Bank_References_Zip_2__c = br2Zip;
+
+    ca.Bank_References_Name_3__c = br3Name;
+    ca.Bank_References_Phone_3__c = br3Phone;
+    ca.Bank_References_Fax_3__c = br3Fax;
+    ca.Bank_References_Address_3__c = br3Address;
+    ca.Bank_References_City_3__c = br3City;
+    ca.Bank_References_State_3__c = br3State;
+    ca.Bank_References_Zip_3__c = br3Zip;
+
+    insert CA;
+    String CAID = (String)CA.Id;
+
+    PageReference pageRef = new PageReference('/apex/Signature_Test');
+    pageRef.getParameters().put('Id', CA.Id);
+    pageRef.setRedirect(true);
+    return pageRef;
+  }
+
+  // submit application landing page button
+  public PageReference openForm() {
+    PageReference pageRef = new PageReference('/apex/CreditApplicationPage1');
+    pageRef.setRedirect(true);
+    return pageRef;
+  }
+}
