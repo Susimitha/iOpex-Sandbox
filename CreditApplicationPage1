@@ -1,0 +1,150 @@
+<apex:page id="CreditApplicationPage1" sidebar="false" docType="html-5.0" showHeader="false"  cache="true"  controller="CreditApplicationPortal">
+
+
+<style>
+    .bPageBlock .pbBody .dataCol {
+        border:0px;
+    }
+    .bPageBlock .pbBody .labelCol {
+        border:0px;
+    }
+    
+    .commandButton {
+      color: white !important;
+      background: #0096FF !important;
+      width: 150px;
+      float: right;
+    }
+</style>
+ <script>
+        // Function to save values in local storage
+        function saveValues() {
+            var inputValue = document.getElementById('{!$Component.form.inputField}').value;
+            localStorage.setItem('savedValue', inputValue);
+        }
+
+        // Function to retrieve values from local storage
+        function retrieveValues() {
+            var savedValue = localStorage.getItem('savedValue');
+            if (savedValue) {
+                document.getElementById('{!$Component.pg1.legalBusinessName}').value = savedValue;
+            }
+        }
+    </script>
+<script>
+    function callSave() {
+      var r = confirm("Your Record has successfully Saved");
+      if (r == true) {
+        callSav();
+      }
+    }
+  </script>
+<apex:form id="pg1">
+<apex:image id="SamsungLogo" value="{!$Resource.SamsungLogo}" alt="Samsung logo with address" width="300px"/><br/><br/>
+<apex:pageBlock id="CAPage1PB1" title="Credit Application" ><br/>
+
+<apex:pageMessage summary="Please complete the entire document." severity="warning" strength="2" />
+<apex:pageMessages /><br/>
+
+<apex:pageBlockSection id="row1" title="General Information" columns="2">
+    <apex:input value="{!legalBusinessName}" label="* Legal Business Name" id="legalBusinessName" required="true"/>
+    <apex:input type="date" value="{!dateEstablished}" label="Date Established" /> 
+    <apex:inputText value="{!phone}" label="* Phone" required="true"/>  
+    <apex:inputText value="{!submittersEmail}" label="* Submitter's Email" required="true"/>
+</apex:pageBlockSection>
+
+<apex:pageBlockSection id="row2" columns="2">
+    <apex:inputText value="{!dba}" label="DBA"/>
+    <apex:inputText value="{!website}" label="Website"/>
+    <apex:inputText value="{!physicalAddress}" label="* Physical Address" required="true"/>
+    <apex:inputText value="{!city}" label="* City" required="true"/>
+    <apex:inputText value="{!state}" label="* State" required="true"/>
+    <apex:inputText value="{!zip}" label="* Zip" required="true"/>
+</apex:pageBlockSection>
+<apex:pageBlockSection id="row3" columns="2">
+    <apex:inputText value="{!BillingAddress}" label="* Billing Address" required="true"/>   
+    <apex:inputText value="{!baCity}" label="* City"  required="true"/>
+    <apex:inputText value="{!baState}" label="* State" required="true"/>
+    <apex:inputText value="{!baZip}" label="* Zip" required="true"/>
+</apex:pageBlockSection>
+
+<apex:pageBlockSection title="Names of Principles of Firm" id="section2" columns="2">
+    <apex:inputText value="{!president}" label="President"/>
+    <apex:inputText value="{!treasurer}" label="Treasurer"/>
+    <apex:inputText value="{!vicePresident}" label="Vice President"/>
+    <apex:inputText value="{!controller}" label="* Controller" required="true"/>
+    <!-- <apex:selectCheckboxes value="{!corporation}" label="Corporation"/> -->
+    <apex:inputCheckbox value="{!corporation}" label="* Corporation" required="true"/>
+    <apex:inputCheckbox value="{!limitedPartnership}" label="Limited Partnership"/>
+    <apex:inputCheckbox value="{!generalPartnership}" label="General Partnership"/>
+    <apex:inputCheckbox value="{!soleOwnership}" label="Sole Ownership"/>
+    <apex:inputCheckbox value="{!subsidiaryOf}" label="Subsidiary of"/>
+    <apex:inputCheckbox value="{!divisionOf}" label="Division of"/>
+    <apex:inputText value="{!parentCompany}" label="* Parent Company" required="true"/>
+    
+    <apex:selectList value="{!debtSelectedValue}" label="* Does Parent Company Guarantee Debts?" multiselect="false" size="1" required="true">
+        <img src="/s.gif" alt="Help" class="helpIcon" title="If yes, please furnish details"/>&nbsp;&nbsp;
+        <apex:selectOption itemValue="Yes" itemlabel="Yes"/>
+        <apex:selectOption itemValue="No" itemlabel="No"/>        
+    </apex:selectList>
+   
+    <apex:inputText value="{!pcAddress}" label="Address"/>
+    <apex:inputText value="{!pcCity}" label="City" />
+    <apex:inputText value="{!pcState}" label="State" />
+    <apex:inputText value="{!pcZip}" label="Zip" />
+</apex:pageBlockSection>
+
+<apex:pageBlockSection title="General Information" id="row5" columns="2" >
+    <apex:inputText value="{!typeOfBusiness}" label="* Type of Business" required="true"/>
+    <apex:inputText value="{!noOfEmp}" label="Number of Employees"/>
+    <apex:inputText value="{!emailElectronicSubmission}" label="* Email Address for Electronic Submission" required="true"/>
+    <apex:inputText value="{!apContactName}" label="* AP Contact Name" required="true"/>
+    <apex:inputText value="{!apEmail}" label="* AP Contact Email" required="true"/>
+    <apex:inputText value="{!apPhone}" label="* AP Contact Phone Number" required="true" />
+    <apex:inputText value="{!creditLineDesired}" label="Credit Line Desired" />
+    <apex:inputText value="{!purchasingAgent}" label="Purchasing Agent" />
+    <apex:selectList value="{!merchForResaleValue}" label="* Is Merchandise for Resale?" multiselect="false" size="1" required="true">
+        <apex:selectOption itemValue="Yes" itemlabel="Yes"/>
+        <apex:selectOption itemValue="No" itemlabel="No"/>
+    </apex:selectList>
+</apex:pageBlockSection>
+
+<apex:pageBlockSection id="section3"  title="Bank References" columns="3">
+    <apex:inputText value="{!br1Name}" label="Name"/>
+    <apex:inputText value="{!br1Phone}" label="Phone"/>
+    <apex:inputText value="{!br1Fax}" label="Fax"/>
+    <apex:inputText value="{!br1Address}" label="Address"/>
+    <apex:inputText value="{!br1City}" label="City"/>
+    <apex:inputText value="{!br1State}" label="State"/>
+    <apex:inputText value="{!br1Zip}" label="Zip"/>
+</apex:pageBlockSection>
+<br/>
+<apex:pageBlockSection id="row4" columns="3">
+    <apex:inputText value="{!br2Name}" label="Name"/>
+    <apex:inputText value="{!br2Phone}" label="Phone"/>
+    <apex:inputText value="{!br2Fax}" label="Fax"/>
+    <apex:inputText value="{!br2Address}" label="Address"/>
+    <apex:inputText value="{!br2City}" label="City"/>
+    <apex:inputText value="{!br2State}" label="State"/>
+    <apex:inputText value="{!br2Zip}" label="Zip"/>
+</apex:pageBlockSection>  
+<br/>
+<apex:pageBlockSection id="row6" columns="3">
+    <apex:inputText value="{!br3Name}" label="Name"/>
+    <apex:inputText value="{!br3Phone}" label="Phone"/>
+    <apex:inputText value="{!br3Fax}" label="Fax"/>
+    <apex:inputText value="{!br3Address}" label="Address"/>
+    <apex:inputText value="{!br3City}" label="City"/>
+    <apex:inputText value="{!br3State}" label="State"/>
+    <apex:inputText value="{!br3Zip}" label="Zip"/>
+</apex:pageBlockSection>
+
+<apex:pageblockButtons location="bottom">
+    
+    <!-- <apex:commandButton value="Save as Draft" action="{!save1}" onclick="saveValues()"/>  -->
+    <apex:commandButton value="Save & Continue" action="{!save}" styleClass="commandButton"/> <!-- save and continue -->
+</apex:pageblockButtons>
+</apex:pageBlock>
+</apex:form>
+ 
+</apex:page>
