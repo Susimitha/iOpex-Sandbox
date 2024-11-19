@@ -1,0 +1,64 @@
+public class RMARejectedEmailNotification {
+    @InvocableMethod(label='SendRMARejectedEmail' description='Sends Email when an RMA is rejected')
+  public static void SendRMARejectedEmail(List<ID> rmaid) {
+     RMA_Master__c rmaM = new RMA_Master__c();
+          rmaM = [SELECT Id,Name,Account_Email_Address__c, Related_Supplier_Account__c,Notification_Email_1__c, Notification_Email_2__c, Requestor_Email__c,Shipper_Contact_Email__c,Samsung_Sales_Ops_Email__c, Tracking_Number__c,Sales_Account__r.Email__c,Requestor_Ref_1__c,Requestor_Ref_2__c FROM RMA_Master__c WHERE Id = :rmaid[0]];
+     
+          
+          //---File Attachment
+          Messaging.EmailFileAttachment[] fileAttachments = new Messaging.EmailFileAttachment[]{};
+         
+        List<id> ContentDocumentids = new List<id>();
+        Id rmaMasterId = rmaid[0];
+         for(contentDocumentLink CDLink : [SELECT LinkedEntityid, ContentDocumentid FROM contentDocumentLink WHERE LinkedEntityid = :rmaMasterId])
+			{
+			   ContentDocumentids.add(CDLink.ContentDocumentid);  
+			}
+			for ( ContentVersion cversion : [SELECT title, 
+													PathOnClient, FileType,FileExtension,
+													versiondata 
+											  FROM contentversion 
+											  WHERE ContentDocumentId IN :ContentDocumentids  
+											   AND RMA_stage__c = 'RMA Reject'])
+			 {
+			  blob WOCFbody = cversion.versiondata;
+			  system.debug('body : '+WOCFbody+'-----------'+cversion.title);
+			  Messaging.Emailfileattachment efa = new Messaging.Emailfileattachment();
+			  efa.setFileName(cversion.title+'.'+cversion.FileExtension);
+
+         
+			  efa.setBody(WOCFbody);
+			  fileAttachments.add(efa); 
+			 } 
+          //----File Attachment
+          RMA_Portal_Variable__mdt oweAddress = RMA_Portal_Variable__mdt.getInstance('OrgWideEmailAddress');
+          OrgWideEmailAddress[] owea = [select Id from OrgWideEmailAddress where Address = :oweAddress.Value__c];
+          Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+           String[] toAddresses = new String[] {rmaM.Requestor_Email__c}; 
+          
+           String[] ccAddresses = new String[] {rmaM.Requestor_Email__c};
+               
+                if(rmaM.Sales_Account__r.Email__c != null){
+                    ccAddresses.add(rmaM.Sales_Account__r.Email__c);
+                }
+                if(rmaM.Account_Email_Address__c != null){
+                    ccAddresses.add(rmaM.Account_Email_Address__c);
+                }
+                 if(rmaM.Related_Supplier_Account__c != null){
+                    ccAddresses.add(rmaM.Related_Supplier_Account__c);
+                }
+            mail.setToAddresses(toAddresses);
+            mail.setCcAddresses(ccAddresses);
+            mail.setOrgWideEmailAddressId(owea.get(0).Id);
+            mail.setSubject('Rejected :'+ rmaM.Name +' '+rmaM.Requestor_Ref_1__c+' '+rmaM.Requestor_Ref_2__c);
+            mail.setPlainTextBody('Hi ('+ toAddresses+')'+'\n'+
+'SSI has rejected your RMA request.'+'\n'+
+'Please contact your SSI Sales Ops / RMA Issuer for clarification.'+'\n'+
+'SSI Sales Operations / RMA Issuer');
+           
+            mail.setFileAttachments(fileAttachments);
+            Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+     // }
+  }
+
+}
