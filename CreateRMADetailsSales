@@ -1,0 +1,919 @@
+<!--HTML-->
+<template>
+    
+    <div class = "slds-p-around_small">
+    <div class = "slds-card">
+        
+        <div class="slds-card__header slds-grid">
+          <header class="slds-media slds-media_center slds-has-flexi-truncate">
+            <div class="slds-media__figure">
+                
+                <lightning-icon icon-name="standard:budget_category_value" alternative-text="WorkFlow Number" title="Workflow"
+                  size="small"></lightning-icon>
+
+
+              </div>
+              
+              <div class="slds-media__body">
+                <h2 class="slds-card__header-title">
+                  <span>{wfNumber}</span>
+                </h2>
+              </div>
+              <div class="slds-no-flex">
+                <lightning-layout style="column-gap:20px;align-items: center;">
+                    <lightning-layout-item class="">
+                        
+                        <lightning-button  label="Download File to Update RMA DO #" onclick={download}></lightning-button>
+                    </lightning-layout-item>
+                    <lightning-layout-item class="">
+                        
+
+                        <lightning-input type="file" name="fileUploader" accept={acceptedFormats}
+                                         onchange={uploadXLSXFile}>
+                        </lightning-input>
+                
+                    </lightning-layout-item>
+                </lightning-layout> 
+              
+              </div>
+          </header>
+        </div>
+        
+            <table class=“slds-table” style="margin-top:20px">
+                <tr>
+                    
+                    <th>RMA DO #</th>
+                    <th>Name</th>
+                    <th>PO Number</th>
+                    <th>Invoice Number</th>
+                    <th>Customer Part #</th>
+                    <th>Samsung Part #</th>
+                    <th>Serial #</th>
+                    <th>Quantity</th>
+                    <th>Reason for Return</th>
+                    <th>Failure Location</th>
+                    <th>Parts ready to be shipped (Y/N)</th>
+                    <th>Credit (Y/N)</th>
+                    <th>FA(Y/N) Can take upto 4 weeks to receive</th>
+                    <th>Return to San Jose (Y/N)</th>
+                    <th>Destination</th>
+                    <th>DSK Address</th>
+                    <th>DSK CS Engineer</th>
+                    <th>DSK Email</th>
+                    <th>DSK Phone</th>
+                    
+                    
+
+                </tr>
+                <template iterator:it={rma}>
+                    <tr key={it.value.Name}>
+                        <td>
+                            <lightning-input class = "slds-p-around_xxx-small" type="text" label="RMA DO #"
+                                value={it.value.RMA_DO__c} data-record-id={it.index}
+                                onchange={handleChange} variant="label-hidden" maxlength="200" message-when-too-long="Your entry must be only 100 characters."
+                            required=true >
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input class = "slds-p-around_xxx-small" type="text" label="Name" value={it.value.Name}
+                                data-record-id={it.index} onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input class = "slds-p-around_xxx-small" type="text" label="PO Number" value={it.value.PO_Number__c}
+                                data-record-id={it.index} onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        
+                        <td>
+                            <lightning-input class = "slds-p-around_xxx-small" type="text" label="Invoice Number" value={it.value.Invoice_Number__c}
+                                data-record-id={it.index} onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td><lightning-input class = "slds-p-around_xxx-small" type="text" label="Customer Part Number"
+                                value={it.value.Customer_Part_Number__c} data-record-id={it.index}
+                                onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input class = "slds-p-around_xxx-small" type="text" label="Samsung Part Number"
+                                value={it.value.Samsung_Part_Number__c} data-record-id={it.index}
+                                onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input type="text" label="Serial #"
+                                value={it.value.Serial_Number__c} data-record-id={it.index} disabled = "true"
+                                onchange={handleChange} variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        
+                        <td><lightning-input class = "slds-p-around_xxx-small" type="Number" label="Quantity" value={it.value.Quantity__c}
+                                data-record-id={it.index} onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input class = "slds-p-around_xxx-small" type="text" label="Reason For Return"
+                                value={it.value.Reason_For_Return__c} data-record-id={it.index}
+                                onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input class = "slds-p-around_xxx-small" type="text" label="Failure Location"
+                                value={it.value.Failure_Location__c} data-record-id={it.index}
+                                onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input type="checkbox" label="Parts ready to be shipped (Y/N)"
+                                value={it.value.Parts_Ready_to_be_Shipped__c} checked={it.value.Parts_Ready_to_be_Shipped__c} data-record-id={it.index}
+                                onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input type="checkbox" label="Credit (Y/N)"
+                                value={it.value.Credit__c} checked = {it.value.Credit__c} data-record-id={it.index}
+                                onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input type="checkbox" label="FA(Y/N) Can take upto 4 weeks to receive"
+                                value={it.value.FA_4_weeks__c} checked={it.value.FA_4_weeks__c} data-record-id={it.index}
+                                onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input type="checkbox" label="Return to San Jose (Y/N)"
+                                value={it.value.Return_to_San_Jose_CA__c} checked={it.value.Return_to_San_Jose_CA__c} data-record-id={it.index}
+                                onchange={handleChange} disabled = "true" variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input type="text" label="Destination"
+                                value={it.value.Destination__c} data-record-id={it.index}
+                                onchange={handleChange} variant="label-hidden" maxlength="255" message-when-too-long="Your entry must be only 255 characters." required="true">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input type="text" label="DSK Address"
+                                value={it.value.DSK_Address__c} data-record-id={it.index}
+                                onchange={handleChange} variant="label-hidden" maxlength="255" message-when-too-long="Your entry must be only 255 characters.">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input type="text" label="DSK CS Engineer"
+                                value={it.value.DSK_CS_Engineer__c} data-record-id={it.index}
+                                onchange={handleChange} variant="label-hidden" maxlength="255" message-when-too-long="Your entry must be only 255 characters.">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input type="text" label="DSK Email"
+                                value={it.value.DSK_Email__c} data-record-id={it.index}
+                                onchange={handleChange} variant="label-hidden">
+                            </lightning-input>
+                        </td>
+                        <td>
+                            <lightning-input type="text" label="DSK Phone"
+                                value={it.value.DSK_Phone__c} data-record-id={it.index}
+                                onchange={handleChange} variant="label-hidden">
+                            </lightning-input>
+                        </td>
+
+                        
+                    </tr>
+                </template>
+
+            
+        </table>
+    
+        <footer class="slds-card__footer">
+            <div class="slds-float_left">
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col">
+                        <lightning-input type="checkbox" label="Show Unit Price"
+                        checked={showUnitPrice}
+                        onchange={handleUnitPriceChange}>
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col">
+                        <lightning-input type="checkbox" label="Show RMA SO #"
+                        checked={showRMASO} 
+                        onchange={handleRMASOChange}>
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col">
+                        <lightning-input type="checkbox" label="Show End Customer"
+                        checked={showEndCustomer} 
+                        onchange={handleEndCustomerChange}>
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col">
+                        <lightning-input type="checkbox" label="Show All 3 Fields"
+                             checked={showAllThree} 
+                             onchange={handleAllThreeChange}>
+                        </lightning-input>
+                    </div>
+                  </div>
+            </div>
+            <lightning-button class = "slds-p-around_small" variant="brand" label="Save Records" onclick={saveRMA}></lightning-button>
+            <lightning-button class = "reject" variant="brand" label="Reject RMA" onclick={rejectRMA}></lightning-button>
+            
+        </footer>
+     
+
+
+    </div>
+</div>
+<!--Loading Spinner-->
+<template if:true={isLoading}>
+    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+</template>
+
+    <!-- Custom Toast notifications -->
+    <c-toast-notification></c-toast-notification>
+
+    <!--Reject Modal-->
+    <template if:true={showModal}>
+        <c-rma-modal message = "Are you sure you want to reject the RMA request?"
+                     onclosemodal = {closeModal}
+                     onokmodal    = {handleReject}></c-rma-modal>
+    </template>
+</template>
+<!--HTML End-->
+//--------------------------------------------------------------------------------------------JS ----------------------
+import { LightningElement, wire, api } from 'lwc';
+import {   NavigationMixin } from 'lightning/navigation';
+//import getRMADetailsSalesfromCSV from '@salesforce/apex/FileUploadController.getRMADetailsSalesfromCSV';
+
+import updateRMADetails from '@salesforce/apex/RMAController.updateRMADetails';
+import getRMAForReview from '@salesforce/apex/RMAController.getRMAForReview';
+//import strUserId from '@salesforce/user/Id';
+import WF_NUMBER_FIELD from '@salesforce/schema/RMA_Master__c.Name';
+import { loadStyle } from 'lightning/platformResourceLoader';
+import RMAPortalCSS from '@salesforce/resourceUrl/RMAPortalCSS';
+import {getRecord, getFieldValue } from 'lightning/uiRecordApi';
+//import { updateRecord } from 'lightning/uiRecordApi';
+//import getBaseUrl from '@salesforce/apex/DEUtility.getBaseUrl';
+import cancelRejectRMA from '@salesforce/apex/RMAController.cancelRejectRMA';
+
+import { loadScript } from 'lightning/platformResourceLoader';
+import workbook from '@salesforce/resourceUrl/writeExcel';
+import excelFileReader from '@salesforce/resourceUrl/ExcelReaderPlugin';
+
+//import ID_FIELD from "@salesforce/schema/RMA_Master__c.Id";
+//import STATUS_FIELD from "@salesforce/schema/RMA_Master__c.Status__c";
+
+let XLS = {};
+
+export default class CreateRMADetailsSales extends NavigationMixin(LightningElement) {
+
+    @api rmamasterid;
+    boxDetails;
+
+    rma;
+    boxLogistics;
+
+    fileuploadSubmit = false;
+    multirecordSubmit = false;
+    uploadedFiles = [];
+
+    firstRecord;
+
+    wfNumber;
+
+    //basePathDownload;
+
+    prfName;
+    //userId = strUserId;
+
+    showLogisticsSummary = false;
+    showModal = false;
+
+    error;
+
+    isLibraryLoaded = false;
+
+    schemaObj;
+
+    isLoading = false;
+
+    showUnitPrice = false;
+    showRMASO = false;
+    showEndCustomer = false;
+    showAllThree = false;
+    filesUploaded=[];
+
+    // Accepted format for uploading Uploading RMA DO #
+    get acceptedFormats() {
+        return ['.xlsx'];
+    }
+
+   /* @wire(getBaseUrl,{sitename : 'RMA_Portal'}) 
+    baseurl(result){
+        this.basePathDownload = result.data;
+    };*/
+
+    
+
+    renderedCallback() {
+        Promise.all([ loadStyle(this, RMAPortalCSS) ]).then(() => {
+            console.log('Files loaded');}) 
+            .catch(error => { console.log(error.body.message);
+           });
+
+           if (this.isLibraryLoaded) return;
+        this.isLibraryLoaded = true;
+        loadScript(this, workbook )
+            .then(async (data) => {
+                console.log("success------>>>", data);
+            })
+            .catch(error => {
+                console.log("failure-------->>>>", error);
+            });
+
+            loadScript(this, excelFileReader )
+            .then(async (data) => {
+                XLS = XLSX;
+                console.log("success------>>>", data);
+            })
+            .catch(error => {
+                console.log("failure-------->>>>", error);
+            });
+    
+
+           
+    }  
+
+
+
+
+
+    async download() {
+        let _self = this;
+
+        var schemaObj = [
+            // Column #1
+            {
+                column: 'Id',
+                type: String,
+                wrap: 'true',
+                value: rma => rma.Id
+            },
+            {
+                column: 'RMA_DO__c',
+                type: String,
+                wrap: 'true',
+                value: rma => rma.RMA_DO__c
+            },
+            {
+                column: 'Name',
+                type: String,
+                wrap: 'true',
+                value: rma => rma.Name
+            },
+            {
+                column: 'PO_Number__c',
+                type: String,
+                value: rma => rma.PO_Number__c
+            },
+            {
+                column: 'Invoice_Number__c',
+                type: String,
+                value: rma => rma.Invoice_Number__c
+            },
+            {
+                column: 'Customer_Part_Number__c',
+                type: String,
+                wrap: 'true',
+                value: rma => rma.Customer_Part_Number__c
+            },
+            {
+                column: 'Samsung_Part_Number__c',
+                type: String,
+                wrap: 'true',
+                value: rma => rma.Samsung_Part_Number__c
+            },
+            {
+                column: 'Serial_Number__c',
+                type: String,
+                value: rma => rma.Serial_Number__c
+            },
+            {
+                column: 'Quantity__c',
+                type: Number,
+                wrap: 'true',
+                value: rma => rma.Quantity__c
+            },
+            {
+                column: 'Reason_For_Return__c',
+                type: String,
+                wrap: 'true',
+                value: rma => rma.Reason_For_Return__c
+            },
+            {
+                column: 'Failure_Location__c',
+                type: String,
+                wrap: 'true',
+                value: rma => rma.Failure_Location__c
+            },
+            {
+                column: 'Parts_Ready_to_be_Shipped__c',
+                type: Boolean,
+                wrap: 'true',
+                value: rma => rma.Parts_Ready_to_be_Shipped__c
+            },
+            {
+                column: 'Credit__c',
+                type: Boolean,
+                wrap: 'true',
+                value: rma => rma.Credit__c
+            },
+
+            {
+                column: 'FA_4_weeks__c',
+                type: Boolean,
+                wrap: 'true',
+                value: rma => rma.FA_4_weeks__c
+            },
+            {
+                column: 'Return_to_San_Jose_CA__c',
+                type: Boolean,
+                wrap: 'true',
+                value: rma => rma.Return_to_San_Jose_CA__c
+            },
+            {
+                column: 'Destination__c',
+                type: String,
+                wrap: 'true',
+                value: rma => rma.Destination__c
+            },
+            {
+                column: 'DSK_Address__c',
+                type: String,
+                wrap: 'true',
+                value: rma => rma.DSK_Address__c
+            },
+            {
+                column: 'DSK_CS_Engineer__c',
+                type: String,
+                wrap: 'true',
+                value: rma => rma.DSK_CS_Engineer__c
+            },
+            {
+                column: 'DSK_Email__c',
+                type: String,
+                wrap: 'true',
+                value: rma => rma.DSK_Email__c
+            },
+            {
+                column: 'DSK_Phone__c',
+                type: Number,
+                wrap: 'true',
+                value: rma => rma.DSK_Phone__c
+            }
+
+            
+        ]
+        // When passing `objects` and `schema`.
+        await writeXlsxFile(_self.rma, {
+            schema: schemaObj,
+            fileName: 'ToUploadRMA.xlsx'
+        })
+    }
+
+@wire(getRecord, {
+    recordId: '$rmamasterid',
+    fields: [WF_NUMBER_FIELD]
+}) wireWfNumber({error,data}) {
+    if (error) {
+       this.error = error ; 
+    } else if (data) {
+        this.wfNumber =data.fields.Name.value; 
+    }
+}
+
+@wire(getRMAForReview,{rmamasterid:'$rmamasterid'}) 
+getRMAForReview({data, error}){
+    this.rma=[];
+    if(data){
+        console.log('>> data');
+        let rmaDetails = data;
+        for(let i=0; i<rmaDetails.length; i++){
+            console.log('>>foreach record' + rmaDetails[i].RMA_Master__c)
+            let newEntry = {
+                'Id'  : rmaDetails[i].Id,
+                'RMA_DO__c' : rmaDetails[i].RMA_DO__c,
+                'Name' : rmaDetails[i].Name,
+                'PO_Number__c' : rmaDetails[i].PO_Number__c,
+                'Invoice_Number__c' : rmaDetails[i].Invoice_Number__c,
+                'Customer_Part_Number__c' : rmaDetails[i].Customer_Part_Number__c,
+                'Samsung_Part_Number__c' : rmaDetails[i].Samsung_Part_Number__c,
+                'Serial_Number__c' : rmaDetails[i].Serial_Number__c,
+                'Quantity__c' : rmaDetails[i].Quantity__c,
+                'Reason_For_Return__c' : rmaDetails[i].Reason_For_Return__c,
+                'Failure_Location__c' : rmaDetails[i].Failure_Location__c,
+                'Parts_Ready_to_be_Shipped__c' : rmaDetails[i].Parts_Ready_to_be_Shipped__c,
+                'Credit__c' : rmaDetails[i].Credit__c,
+                'FA_4_weeks__c' : rmaDetails[i].FA_4_weeks__c,
+                'Return_to_San_Jose_CA__c' : rmaDetails[i].Return_to_San_Jose_CA__c,
+                'Destination__c' : rmaDetails[i].Destination__c,
+                'DSK_Address__c' : rmaDetails[i].DSK_Address__c,
+                'DSK_CS_Engineer__c' : rmaDetails[i].DSK_CS_Engineer__c,
+                'DSK_Email__c' : rmaDetails[i].DSK_Email__c,
+                'DSK_Phone__c' : rmaDetails[i].DSK_Phone__c
+                
+            };
+           
+
+                if ( this.rma ) {
+
+                    this.rma = [ ...this.rma, newEntry ];
+        
+                } else {
+        
+                    this.rma = [ newEntry ];
+        
+                }
+              
+           
+
+        } 
+        //this.rma = data;
+        }
+        
+    else if(error){
+        console.log(error);
+    }
+}
+
+
+handleChange( event ) {
+    let value = event.target.value;
+    let label = event.target.label;
+    let name;
+    let recs =  this.rma;
+    let strIndex = event.target.dataset.recordId;
+    clearTimeout(this.timeoutId);
+    this.timeoutId = setTimeout(()=>{
+       
+    
+        switch( label ) {
+    
+           case 'Name':
+                name = 'Name';
+                break;
+    
+                case 'PO Number':
+                    name = 'PO_Number__c';
+                    break;
+    
+                case 'Customer Part Number':
+                    name = 'Customer_Part_Number__c';
+                    break;
+    
+                case 'Samsung Part Number':
+                    name = 'Samsung_Part_Number__c';
+                    
+                    break;
+    
+                case 'Quantity':
+                    name = 'Quantity__c';
+                    break;
+                
+                    case 'Serial #':
+                    name = 'Serial_Number__c';
+                    break;
+    
+                    case 'Invoice Number':
+                    name = 'Invoice_Number__c';
+                    break;
+    
+                    case 'Reason For Return':
+                    name = 'Reason_For_Return__c';
+                    break;
+    
+                    case 'Failure Location':
+                    name = 'Failure_Location__c';
+                    break;
+    
+                    case 'Parts ready to be shipped (Y/N)':
+                    name = 'Parts_Ready_to_be_Shipped__c';
+                    break;
+    
+                    case 'Credit (Y/N)':
+                    name = 'Credit__c';
+                    break;
+    
+                    case 'FA(Y/N) Can take upto 4 weeks to receive':
+                    name = 'FA_4_weeks__c';
+                    break;
+    
+                    case 'Return to San Jose (Y/N)':
+                    name = 'Return_to_San_Jose_CA__c';
+                    break;
+    
+                    case 'RMA DO #':
+                    name = 'RMA_DO__c';
+                    break;
+    
+                    case 'Destination':
+                    name = 'Destination__c';
+                    break;
+    
+                    case 'DSK Address':
+                    name = 'DSK_Address__c';
+                    break;
+    
+                    case 'DSK CS Engineer':
+                    name = 'DSK_CS_Engineer__c';
+                    break;
+    
+                    case 'DSK Email':
+                    name = 'DSK_Email__c';
+                    break;
+    
+                    case 'DSK Phone':
+                    name = 'DSK_Phone__c';
+                    break;
+            
+        }
+    
+        
+            //let strIndex = event.target.dataset.recordId;
+            console.log('rma name'+name)
+            let rec = recs[ strIndex ];
+            rec[ name ] = value;
+            console.log('rma name'+rec)
+            console.log('rma name'+JSON.stringify(rec))
+            recs[ strIndex ] = rec;
+            
+            this.rma = JSON.parse( JSON.stringify( this.rma ) );
+            console.log('this.rma'+this.rma)
+        }, 500);
+    
+
+        
+}
+
+// Handle Checkbox changes. These are used in Shipping Instructions page to show / hide the corresponding fields
+
+handleUnitPriceChange(event){
+    this.showUnitPrice = event.target.checked;
+}
+handleRMASOChange(event){
+    this.showRMASO = event.target.checked;
+}
+handleEndCustomerChange(event){
+    this.showEndCustomer = event.target.checked;
+}
+handleAllThreeChange(event){
+    this.showAllThree = event.target.checked;
+}
+
+
+// Update RMA Details with the RMA DO # entered by the Sales team
+saveRMA(event){
+    this.isLoading = true;
+    console.log('RMA Data'+JSON.stringify(this.rma))
+    const allValid = [...this.template.querySelectorAll('lightning-input')]
+    .reduce((validSoFar, inputCmp) => {
+                inputCmp.reportValidity();
+                return validSoFar && inputCmp.checkValidity();
+    }, true);
+    if (allValid) {
+        console.log('RMA Data all valid')
+    updateRMADetails( { rmaList : this.rma, masterId : this.rmamasterid, showUnitPrice : this.showUnitPrice, showRMASO : this.showRMASO, showEndCustomer : this.showEndCustomer, showAllThree : this.showAllThree} )
+    .then( result => {
+        
+        if ( result === 'Successful' ) {
+            this.isLoading = false;
+
+            this.template.querySelector('c-toast-notification').handleToastNotification('RMA Details','RMA Details created successfully','success',2000,'dismissible');
+              
+            setTimeout(()=>{this.dispatchEvent(new CustomEvent('refreshevent')); 
+                  
+        }, 3000);
+                    
+        } else {
+            this.isLoading = false;
+            this.template.querySelector('c-toast-notification').handleToastNotification('RMA Details','Some error occured. Please reach out to your Salesforce Admin for help!','error',2000,'dismissible');
+        }
+
+    } );}
+    else{
+        this.isLoading = false;
+        console.log('RMA Data all valid else')
+    }
+}
+
+// Show Reject Modal
+rejectRMA(event){
+
+    this.showModal = true;
+    
+}
+
+// handle event on from child LWC
+closeModal(event){
+    this.showModal = false;
+}
+
+// Update the status of RMA Master record to 'Rejected by Sales', also creating the files attached
+handleReject(event){
+    
+    
+    /*const fields = {};
+
+            fields[ID_FIELD.fieldApiName] = this.rmamasterid;
+            fields[STATUS_FIELD.fieldApiName] = 'Rejected by Sales';
+
+            const recordInput = {
+                fields: fields
+              };
+
+              updateRecord(recordInput).then((record) => {
+
+                this.template.querySelector('c-toast-notification').handleToastNotification('Reject RMA Request','RMA Request Rejected','success',2000,'dismissible');
+                this.dispatchEvent(new CustomEvent('refreshevent'));
+              });*/
+              const filesUploaded = event.detail.filesUploaded;
+              
+              cancelRejectRMA({masterId : this.rmamasterid, cancelReject : 'Reject',filesToInsert : filesUploaded})
+                  .then( result => {
+                      
+                      if ( result === 'Successful' ) {
+              
+                        this.template.querySelector('c-toast-notification').handleToastNotification('Reject RMA Request','RMA Request Rejected','success',2000,'dismissible');
+                        this.dispatchEvent(new CustomEvent('refreshevent')); 
+                              
+                      } else {
+              
+                          this.template.querySelector('c-toast-notification').handleToastNotification('Reject RMA Request','Some error occured. Please reach out to your Salesforce Admin for help!','error',2000,'dismissible');
+              
+                      }
+                    
+                  } );   
+                  this.showModal = false;   
+
+}
+
+
+/*uploadFileHandler( event ) {
+    
+   
+
+        getRMADetailsSalesfromCSV( { contentDocumentId : event.detail.files[0].documentId, masterId : this.rmamasterid } )
+        .then( result => {
+            this.rma = result;
+           
+        })
+        .catch( error => {
+            
+            this.error = error;
+            console.log('error ===> '+JSON.stringify( error ));
+            this.template.querySelector('c-toast-notification').handleToastNotification('File Upload Error','An Error Occurred while uploading the file','error',2000,'dismissible');
+        } )
+
+    
+    
+}*/
+
+
+// Upload Excel file to populate the RMA DO # and Destination fields in this.rma
+
+uploadXLSXFile(event){
+        const strUploadedFile = event.detail.files;
+        if (strUploadedFile.length && strUploadedFile != ''){
+
+          this.strUploadFileName = strUploadedFile[0].name;
+          this.handleProcessExcelFile(strUploadedFile[0]);
+
+         
+    
+        }
+}
+
+handleProcessExcelFile(file) {
+    
+    let objFileReader = new FileReader();
+    objFileReader.onload = (event) => {
+        
+      let objFiledata = event.target.result;
+      
+      let objFileWorkbook = XLS.read(objFiledata, {
+        type: 'binary'
+      });
+      
+      var sheet = objFileWorkbook.SheetNames;
+
+      
+
+      this.objExcelToJSON = XLS.utils.sheet_to_row_object_array(
+        //objFileWorkbook.Sheets['Sheet1']
+        objFileWorkbook.Sheets[sheet[0]]
+        
+      );
+
+      //Verify if the file content is not blank
+
+      if (this.objExcelToJSON.length === 0) {
+        this.strUploadFileName = '';
+        this.template.querySelector('c-toast-notification').handleToastNotification('Error','Kindly upload the file with data','error',3000,'dismissible');
+        
+
+      }
+
+      if (this.objExcelToJSON.length > 0) {
+        
+        this.rma = JSON.parse(JSON.stringify(this.objExcelToJSON));
+
+      }
+
+    };
+
+    objFileReader.onerror = function (error) {
+
+        this.template.querySelector('c-toast-notification').handleToastNotification('Error','Error while reading the file','error',3000,'dismissible');
+
+    };
+
+    objFileReader.readAsBinaryString(file);
+
+  }
+
+
+/*
+downloadCSVFile(event) {  
+    event.preventDefault();
+   // let columnHeader = ['Id','RMA_DO__c','Name','PO_Number__c','Invoice_Number__c',	'Customer_Part_Number__c','Samsung_Part_Number__c','Serial_Number__c','Quantity__c','Reason_For_Return__c','Failure_Location__c','Parts_Ready_to_be_Shipped__c','Credit__c','FA_4_weeks__c','Return_to_San_Jose_CA__c','Destination__c','DSK_Address__c','DSK_CS_Engineer__c','DSK_Email__c','DSK_Phone__c'];
+   const XLSX = window.XLSX;
+
+    let xlsData = this.rma;
+
+    let xlsHeader = Object.keys(this.rma[0]);
+
+    console.log(xlsHeader);
+
+    let ws_name = 'Sheet1';
+
+    let createXLSLFormatObj = Array(this.rma.length).fill([]);
+
+    //let xlsRowsKeys = [];
+
+    
+
+      xlsHeader.forEach((item, index) => createXLSLFormatObj[index] = [item])
+
+   
+
+      xlsData.forEach((item, selectedRowIndex)=> {
+
+          let xlsRowKey = Object.keys(item[0]);
+
+          item.forEach((value, index) => {
+
+              var innerRowData = [];
+
+              xlsRowKey.forEach(item=>{
+
+                  innerRowData.push(value[item]);
+
+              })
+
+              createXLSLFormatObj[selectedRowIndex].push(innerRowData);
+
+          })
+
+      });
+
+    
+
+    var wb = XLSX.utils.book_new();
+
+    
+
+    var ws = Array(createXLSLFormatObj.length).fill([]);
+
+    for (let i = 0; i < ws.length; i++) {
+
+      
+
+      let data = XLSX.utils.aoa_to_sheet(createXLSLFormatObj[i]);
+
+      ws[i] = [...ws[i], data];
+
+      
+
+      XLSX.utils.book_append_sheet(wb, ws[i][0], 'Sheet1');
+
+    }
+
+   
+
+    XLSX.writeFile(wb, 'ToUploadRMA.xlsx');
+
+}*/
+
+
+}
+//--------------------------------------------------------------------------------------------JS END-----------------------
