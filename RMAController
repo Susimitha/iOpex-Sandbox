@@ -1,0 +1,977 @@
+public class RMAController {
+
+    @AuraEnabled(cacheable=true)
+    public static List<RMA_Master__c> getRMA(String wf, String status, Date fromDate, Date toDate, String rmaDO, String trackingNumber, String trackingStatus, String requestorRef1, String requestorRef2 ) {
+
+        RMA_Portal_Variable__mdt cancelledStatus   = RMA_Portal_Variable__mdt.getInstance('Status_Cancelled');
+        
+        String query = 'SELECT Id, Name, Status__c, CreatedDate, Tracking_Number__c, Notes__c, Tracking_Status__c,Requestor_Ref_1__c,Requestor_Ref_2__c,Requestor_Email__c,Samsung_Sales_Ops_Email__c  FROM RMA_Master__c WHERE Status__c NOT IN (\''+cancelledStatus.Value__c +'\') AND ';
+       if (!String.isBlank(wf)) {
+            query += 'Name LIKE \'%' + wf + '%\' AND ';
+        }
+        if (!String.isBlank(status)) {
+            query += 'Status__c = \'' + status + '\' AND ';
+        }
+        if (fromDate != null) {
+            query += 'DAY_ONLY(createdDate) >= :fromDate AND ';
+        }
+        if (toDate != null) {
+            query += 'DAY_ONLY(createdDate) <= :toDate AND ';
+        }
+        if(trackingNumber != null){
+            query += 'Tracking_Number__c = \'' + trackingNumber + '\' AND ';
+            
+            
+        }
+        if(trackingStatus != null){
+            query += 'Tracking_Status__c = \'' + trackingStatus + '\' AND ';
+            
+        }
+        if(rmaDO != null){
+            query += 'Id IN (SELECT RMA_Master__c from RMA_Detail__c where RMA_DO__c = :rmaDO) AND ';
+        }
+        if (!String.isBlank(requestorRef1)) {
+              //query += 'Requestor_Ref_1__c = \'' + requestorRef1 + '\' AND ';
+               query += 'Requestor_Ref_1__c LIKE \'%' + requestorRef1 + '%\' AND ';
+        }
+        if (!String.isBlank(requestorRef2)) {
+              // query += 'Requestor_Ref_2__c = \'' + requestorRef2 + '\' AND ';
+               query += 'Requestor_Ref_2__c LIKE \'%' + requestorRef2 + '%\' AND ';
+        }
+        query += 'Id != null ORDER BY createdDate DESC'; 
+        //system.debug('Query '+ query);
+        return Database.query(query);
+    }
+    
+    
+@AuraEnabled(cacheable=true)
+public static List<Account> getAccountsRelatedToContact() {
+    User currentUser = [SELECT ContactId FROM User WHERE Id = :UserInfo.getUserId() LIMIT 1];
+    System.debug('Current User ContactId: ' + currentUser.ContactId);
+
+    if (currentUser.ContactId != null) {
+        List<AccountContactRelation> accContactRelations = [
+            SELECT Account.Id, Account.Name ,Account.Email__c
+            FROM AccountContactRelation 
+            WHERE ContactId  = :currentUser.ContactId WITH SYSTEM_MODE
+
+        ];
+        
+        System.debug('AccountContactRelation size: ' + accContactRelations.size());
+        System.debug('AccountContactRelation list: ' + accContactRelations);
+        List<Account> accounts = new List<Account>();
+
+        for (AccountContactRelation relation : accContactRelations) {
+            if (relation.Account != null) {
+                accounts.add(relation.Account);
+            }
+        }
+        System.debug('Number of Accounts fetched: ' + accounts.size());
+        System.debug('Fetched Accounts: ' + accounts);
+
+        return accounts;
+    }
+    return new List<Account>();
+}
+
+
+
+/**
+ * Creates RMA_Detail__c records for the given RMA_Master__c Id. Creates and links the related files to the RMA_Master__c
+ * 
+ * @param rmaList RMA Detail records to be inserted
+ * @param masterId RMA Master Id 
+user * @param uploadedFile XLSX file used to create the RMA_Detail__c records during RMA request submission
+ * @param filesToInsert Related files attached during RMA request submission
+ * @return a string 'Successful' if successful
+ * @throws AuraHandledException If an error occurs while creating the records.
+ */
+    @AuraEnabled
+    
+        public static String insertDetails( List < RMA_Detail__c > rmaList, String masterId,Object uploadedFile, List<Object> filesToInsert ) {
+        ContentVersion contentVersionObj = new  ContentVersion();
+        
+        if ( uploadedFile != null ) {
+            
+           
+
+           FileInfo fileData  = (FileInfo)JSON.deserialize(JSON.serialize(uploadedFile), FileInfo.class);
+                
+                ContentVersion cv = createContentVersion(fileData.VersionData, fileData.Title, null);
+                ContentDocumentLink cdl = createContentLink(cv.Id,masterId);
+            
+        }
+
+        for( Integer i = 0 ; i < filesToInsert.size() ; i++){
+           
+            FileInfo fileData  = (FileInfo)JSON.deserialize(JSON.serialize(filesToInsert[i]), FileInfo.class);
+            
+            
+            ContentVersion cv = createContentVersion(fileData.VersionData, fileData.Title,'RMA Creation');
+            ContentDocumentLink cdl = createContentLink(cv.Id,masterId);
+        }
+
+        List < RMA_Detail__c > insertRMAList = new List < RMA_Detail__c >();
+        for(RMA_Detail__c rma : rmaList){
+             rma.RMA_Master__c = masterId;
+             rma.Name = String.valueOf(rma.PO_Number__c)+'-'+String.valueOf(rma.Invoice_Number__c);
+             rma.PO_Number__c = String.valueOf(rma.PO_Number__c);
+             rma.Date_Code__c = String.valueOf(rma.Date_Code__c);
+             rma.Serial_Number__c = String.valueOf(rma.Serial_Number__c);
+             rma.Invoice_Number__c = String.valueOf(rma.Invoice_Number__c);
+             rma.Customer_Part_Number__c = String.valueOf(rma.Customer_Part_Number__c);
+             rma.Samsung_Part_Number__c = String.valueOf(rma.Samsung_Part_Number__c);
+             //--------------------Convert newly added fields 
+             rma.COO__c =String.valueOf(rma.COO__c);
+             rma.Remarks1__c=String.valueOf(rma.Remarks1__c);
+             rma.Remarks__c=String.valueOf(rma.Remarks__c);
+             rma.Reason_For_Return__c= String.valueOf(rma.Reason_For_Return__c);
+             rma.Failure_Location__c =String.valueOf(rma.Failure_Location__c);
+             insertRMAList.add(rma);
+        }
+        
+        try {
+           
+           
+            insert insertRMAList;
+            Map<String, Object> params = new Map<String, Object>();
+            params.put('rmaid',masterId);
+            params.put('emailtype','RMACreation');
+            Flow.Interview.EmailNotificationAutoLaunched alflow = new Flow.Interview.EmailNotificationAutoLaunched(params);
+            alflow.start();
+
+
+            return 'Successful';
+            
+        } catch ( Exception e ) {
+            
+            throw new AuraHandledException( e.getMessage() );
+            
+        }
+        
+    }
+
+    /**
+     * Gets the RMA Master records that are in STatus 'New' for RMA review and validation by sales 
+     * @return List<RMA_Master__c> that are in Status New
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<RMA_Master__c> getRMAWfNumbers() {
+        
+        List<RMA_Master__c> rmaList= new List<RMA_Master__c>();
+        rmaList = [SELECT Id, Name FROM RMA_Master__c WHERE Status__c = 'New' ORDER BY Id];
+        
+        return rmaList;
+    }
+
+    /**
+    * Gets RMA_Detail__c records for the given RMA_Master__c Id.
+    * @param rmamasterid RMA Master Id 
+    * @return List<RMA_Detail__c> for the given rmamasterid
+    */
+    @AuraEnabled(cacheable=true)
+    public static List<RMA_Detail__c> getRMAForReview(String rmamasterid) {
+        // Construct a dynamic SOQL query based on the provided search inputs
+        
+        List<RMA_Detail__c> pendingRMADO = new List<RMA_Detail__c>();
+        pendingRMADO = [SELECT Id, Name,RMA_DO__c, RMA_Master__c, PO_Number__c,Invoice_Number__c,Customer_Part_Number__c,
+        Samsung_Part_Number__c, Quantity__c,Reason_For_Return__c, Failure_Location__c, Parts_Ready_to_be_Shipped__c,Credit__c,
+        FA_4_weeks__c,Return_to_San_Jose_CA__c,Serial_Number__c, Destination__c, DSK_Address__c,DSK_CS_Engineer__c,DSK_Email__c,DSK_Phone__c FROM RMA_Detail__c WHERE RMA_Master__c = :rmamasterid];
+        
+        return pendingRMADO;
+    }
+
+
+    /**
+    * Updates RMA_Detail__c records, Updates RMA_Master__c Status,Show_Unit_Price__c,Show_End_Customer__c,RMA_SO__c,All_3_fields__c
+    * @param rmamasterid RMA Master Id 
+    * @return a string 'Successful'
+    * @throws AuraHandledException If an error occurs while updating the records.
+    */
+    @AuraEnabled
+    public static String updateRMADetails( List < RMA_Detail__c > rmaList, Id masterId, Boolean showUnitPrice, Boolean showRMASO, Boolean showEndCustomer, Boolean showAllThree) {
+        system.debug(rmaList);
+        List<RMA_Master__c> masterRMA = new List<RMA_Master__c>();
+        List<RMA_Detail__c> rmaDList = new List<RMA_Detail__c>();
+        RMA_Portal_Variable__mdt salesStatus      = RMA_Portal_Variable__mdt.getInstance('Status_Pending_Shipping_Instruction');
+        masterRMA = [SELECT Id, Status__c FROM RMA_Master__c WHERE Id = :masterId];
+        masterRMA[0].Status__c = salesStatus.Value__c;
+        //For Shipping Instruction
+        masterRMA[0].Show_Unit_Price__c = showUnitPrice;
+        masterRMA[0].Show_End_Customer__c = showEndCustomer;
+        masterRMA[0].RMA_SO__c = showRMASO;
+        masterRMA[0].All_3_fields__c = showAllThree;
+
+        for(RMA_Detail__c rd : rmaList){
+            RMA_Detail__c rdc = new RMA_Detail__c(Id = rd.Id,
+                                                  RMA_DO__c = String.valueOf(rd.RMA_DO__c),
+                                                  Destination__c = rd.Destination__c,
+                                                  DSK_Address__c = rd.DSK_Address__c,
+                                                  DSK_CS_Engineer__c = rd.DSK_CS_Engineer__c,
+                                                  DSK_Email__c = rd.DSK_Email__c,
+                                                  DSK_Phone__c = String.valueOf(rd.DSK_Phone__c));
+            
+            rmaDList.add(rdc);                       
+
+        }
+        
+        try {
+           
+            update rmaDList;
+            update masterRMA;
+            return 'Successful';
+            
+        } catch ( Exception e ) {
+            
+            throw new AuraHandledException( e.getMessage() );
+            
+        }
+        
+    }
+
+    /**
+    * Updates the RMA_MAster__c status to either Cancelled or Rejected based on the input string. 
+    * @param masterId RMA Master Id 
+    * @param cancelReject String that says if this RMA Master record should be cancelled or rejected
+    * @param filesToInsert List of files attached by Sales while rejecting the RMA Request
+    * @return a string 'Successful'
+    * @throws AuraHandledException If an error occurs while updating the records.
+    */
+    @AuraEnabled
+    public static String cancelRejectRMA( Id masterId, String cancelReject,List<Object> filesToInsert ) {
+         
+        List<RMA_Master__c> masterRMA = new List<RMA_Master__c>();
+        masterRMA = [SELECT Id, Status__c FROM RMA_Master__c WHERE Id = :masterId];
+        String status;
+        if(cancelReject == 'Cancel'){
+            RMA_Portal_Variable__mdt cancelStatus      = RMA_Portal_Variable__mdt.getInstance('Status_Cancelled');
+            status = cancelStatus.Value__c;
+        }else if(cancelReject == 'Reject'){
+            RMA_Portal_Variable__mdt rejectStatus      = RMA_Portal_Variable__mdt.getInstance('Status_Rejected');
+            status = rejectStatus.Value__c;
+            for( Integer i = 0 ; i < filesToInsert.size() ; i++){
+           
+                FileInfo fileData  = (FileInfo)JSON.deserialize(JSON.serialize(filesToInsert[i]), FileInfo.class);
+                
+                
+                ContentVersion cv = createContentVersion(fileData.VersionData, fileData.Title,'RMA Reject');
+                ContentDocumentLink cdl = createContentLink(cv.Id,masterId);
+            }
+        }
+        masterRMA[0].Status__c = status;
+                
+        try {
+            
+            update masterRMA;
+            
+            Map<String, Object> params = new Map<String, Object>();
+            params.put('rmaid',masterId);
+            params.put('emailtype',cancelReject);
+            Flow.Interview.EmailNotificationAutoLaunched alflow = new Flow.Interview.EmailNotificationAutoLaunched(params);
+            alflow.start();
+
+            return 'Successful';
+            
+        } catch ( Exception e ) {
+            throw new AuraHandledException( e.getMessage() );
+            
+            
+        }
+        
+    }
+
+    /**
+    * Gets RMA_Master__c records based on the current profile of the user
+    * @return List<RMA_Master__c> based on the Status and current profile
+    */
+    @AuraEnabled(cacheable=true)   
+    public static List<RMA_Master__c> getBoxWfNumbers() {
+        
+        Id profileId= userinfo.getProfileId();
+        String profileName=[Select Id,Name from Profile where Id=:profileId].Name;
+      
+        List<RMA_Master__c> rmaList = new List<RMA_Master__c>();
+
+        RMA_Portal_Variable__mdt customerProfile  = RMA_Portal_Variable__mdt.getInstance('RMA_Profile_Customer');
+        RMA_Portal_Variable__mdt salesProfile     = RMA_Portal_Variable__mdt.getInstance('RMA_Profile_Sales');
+        RMA_Portal_Variable__mdt logisticsProfile = RMA_Portal_Variable__mdt.getInstance('RMA_Profile_Logistics');
+        RMA_Portal_Variable__mdt customerStatus   = RMA_Portal_Variable__mdt.getInstance('Status_Pending_Packing_Information');
+        RMA_Portal_Variable__mdt salesStatus      = RMA_Portal_Variable__mdt.getInstance('Status_Pending_Shipping_Instruction');
+        RMA_Portal_Variable__mdt logisticsStatus  = RMA_Portal_Variable__mdt.getInstance('Status_Pending_Logistics_Review');
+     
+
+        if (profileName == customerProfile.Value__c){
+            rmaList
+     = [SELECT Id, Name FROM RMA_Master__c WHERE Status__c = :customerStatus.Value__c ORDER BY Id];
+           }else if(profileName == salesProfile.Value__c){
+            rmaList
+     = [SELECT Id, Name FROM RMA_Master__c WHERE Status__c = :salesStatus.Value__c ORDER BY Id];
+           } 
+           else if(profileName == logisticsProfile.Value__c){
+            rmaList
+     = [SELECT Id, Name FROM RMA_Master__c WHERE Status__c = :logisticsStatus.Value__c ORDER BY Id];
+    }
+
+
+        return rmaList;
+    }
+
+    /**
+    * Gets NERP Fields from RMA_Detail__c for the given RMA Master Id
+    * @param rmamasterid RMA_Master__c Id
+    * @return List<RMA_Detail__c> 
+    */
+     @AuraEnabled(cacheable=true)
+    public static List<RMA_Detail__c> getRMANerp(String rmamasterid) {
+        List<RMA_Detail__c> detailList = new List<RMA_Detail__c>();
+        detailList = [SELECT RMA_DO__c,NERP_Customer_PO_Number__c,NERP_Ref_Billing_Number__c,NERP_RMA_Quantity__c,NERP_Samsung_Part_Number__c,NERP_Sold_To_Name__c,NERP_Customer_Part_Number__c, Destination__c, Unit_Price__c, End_Customer__c, RMA_SO__c FROM RMA_Detail__c WHERE RMA_Master__c = :rmamasterid];
+        return detailList;
+    }
+
+    /**
+    * Updates the RMA_MAster__c status to the given Status value. 
+    * @param masterId RMA Master Id 
+    * @param status String mentions the status to be updated
+    * @param filesUploaded List of files attached 
+    * @return a string 'Successful'
+    * @throws AuraHandledException If an error occurs while updating the records.
+    */
+    @AuraEnabled
+    public static String updateMasterStatus( Id masterId, String status, List<Object> filesUploaded ) {
+         
+        List<RMA_Master__c> masterRMA = new List<RMA_Master__c>();
+        masterRMA = [SELECT Id, Status__c FROM RMA_Master__c WHERE Id = :masterId];
+        masterRMA[0].Status__c = status;
+        masterRMA[0].SI_Date__c = Date.today();
+        
+        try {
+            
+            update masterRMA;
+            for( Integer i = 0 ; i < filesUploaded.size() ; i++){
+                
+                FileInfo fileData  = (FileInfo)JSON.deserialize(JSON.serialize(filesUploaded[i]), FileInfo.class);
+                
+                ContentVersion cv = createContentVersion(fileData.VersionData, fileData.Title, 'Shipping Instructions');
+                
+                ContentDocumentLink cdl = createContentLink(cv.Id, masterId);
+            }
+            
+            Map<String, Object> params = new Map<String, Object>();
+            params.put('rmaid',masterId);
+            params.put('emailtype','ShippingInstruction');
+            Flow.Interview.EmailNotificationAutoLaunched alflow = new Flow.Interview.EmailNotificationAutoLaunched(params);
+            alflow.start();
+
+            return 'Successful';
+            
+        } catch ( Exception e ) {
+            throw new AuraHandledException( e.getMessage() );
+        }
+        
+    }
+
+    /**
+    * Updates RMA_Detail__c records
+    * @param nerpSales RMA Master__c record with the Email fields
+    * @return a string 'Successful'
+    * @throws AuraHandledException If an error occurs while updating the records.
+    */
+    @AuraEnabled
+    public static String updateRMAMaster( RMA_MAster__c  nerpSales) {
+        if(nerpSales != null){
+           try {
+            update nerpSales;
+            return 'Successful';
+            
+        } catch ( Exception e ) {
+            throw new AuraHandledException( e.getMessage() );
+        }
+        }
+        return 'No RMA MAster';
+    }
+
+    
+    @AuraEnabled(cacheable=true)
+        public static List<PendingBoxDetails> getPendingBoxDetails(String rmamasterid) {
+        
+        Id profileId= userinfo.getProfileId();
+        String profileName=[Select Id,Name from Profile where Id=:profileId].Name;
+       
+       /* List<Box_Detail__c> pendingBoxList = new List<Box_Detail__c>();
+        if (profileName == 'Customer Community User - Customer'){
+            List<RMA_Detail__c> rmadetails = new List<RMA_Detail__c>();
+            rmadetails = [SELECT Id, RMA_DO__c, RMA_Master__c FROM RMA_Detail__c WHERE RMA_Master__c = :rmamasterid];
+            for (RMA_Detail__c detail : rmadetails){
+                Box_Detail__c box = new Box_Detail__c(RMA_Master__c = detail.RMA_Master__c,
+                RMA_DO__c = detail.RMA_DO__c,
+                Shipper_Address__c = null,
+                Shipper_Company_Name__c = null,
+                Est_No_of_Boxes__c = null,
+                Box_Dimension__c = null,
+                Quantity__c = null,
+                Est_Weight__c = null,
+                Id = null);
+                pendingBoxList.add(box);
+            }
+        }  else if( profileName == 'Customer Community User - Logistics'){
+           pendingBoxList = [SELECT Id, RMA_Master__c,RMA_DO__c,Shipper_Address__c,Shipper_Company_Name__c,Est_No_of_Boxes__c,Box_Dimension__c,Quantity__c,Est_Weight__c FROM Box_Detail__c WHERE RMA_Master__c = :rmamasterid];
+        }*/
+
+        List<PendingBoxDetails> pendingBoxList = new List<PendingBoxDetails>();
+         
+        if (profileName == 'Customer Community User - Customer'){
+            List<RMA_Detail__c> rmadetails = new List<RMA_Detail__c>();
+            rmadetails = [SELECT Id, RMA_DO__c, RMA_Master__c, NERP_Samsung_Part_Number__c, NERP_RMA_Quantity__c, NERP_RMA_DO_Amount__c, Destination__c FROM RMA_Detail__c WHERE RMA_Master__c = :rmamasterid];
+            for (RMA_Detail__c detail : rmadetails){
+                PendingBoxDetails box = new PendingBoxDetails();
+                box.RMA_Master = detail.RMA_Master__c;
+                box.RMA_DO = detail.RMA_DO__c;
+                box.NERP_Samsung_Part_Number = detail.NERP_Samsung_Part_Number__c;
+                box.NERP_RMA_Quantity = detail.NERP_RMA_Quantity__c;
+                box.Destination = detail.Destination__c;
+                pendingBoxList.add(box);
+            }
+        }  else if( profileName == 'Customer Community User - Logistics'){
+            Map<String,RMA_Detail__c> detailMap = new Map<String,RMA_Detail__c>();
+            List<RMA_Detail__c> rmadetails = new List<RMA_Detail__c>();
+            rmadetails = [SELECT Id, RMA_DO__c, RMA_Master__c, NERP_Samsung_Part_Number__c, NERP_RMA_Quantity__c, NERP_RMA_DO_Amount__c, Destination__c FROM RMA_Detail__c WHERE RMA_Master__c = :rmamasterid];
+            for (RMA_Detail__c detail : rmadetails){
+                detailMap.put(detail.RMA_DO__c,detail);
+            }
+            List<Box_Detail__c> boxList = new List<Box_Detail__c>();
+            boxList = [SELECT Id, RMA_Master__c,RMA_DO__c,Shipper_Address__c,Shipper_Company_Name__c,Est_No_of_Boxes__c,Box_Dimension__c,Quantity__c,Est_Weight__c,COO__c FROM Box_Detail__c WHERE RMA_Master__c = :rmamasterid];
+            for (Box_Detail__c boxDetail : boxList){
+                PendingBoxDetails box = new PendingBoxDetails();
+                box.Id = boxDetail.Id;
+                box.RMA_DO = boxDetail.RMA_DO__c;
+                box.RMA_Master = boxDetail.RMA_MAster__c;
+                box.COO = boxDetail.COO__c;
+                box.Shipper_Address = boxDetail.Shipper_Address__c;
+                box.Shipper_Company_Name = boxDetail.Shipper_Company_Name__c;
+                box.Est_No_of_Boxes = boxDetail.Est_No_of_Boxes__c;
+                box.Box_Dimension = boxDetail.Box_Dimension__c;
+                box.Quantity = boxDetail.Quantity__c;
+                box.Est_Weight = boxDetail.Est_Weight__c;
+                box.NERP_RMA_Quantity = detailMap.get(boxDetail.RMA_DO__c).NERP_RMA_Quantity__c;
+                box.NERP_Samsung_Part_Number = detailMap.get(boxDetail.RMA_DO__c).NERP_Samsung_Part_Number__c;
+                box.NERP_RMA_DO_Amount = detailMap.get(boxDetail.RMA_DO__c).NERP_RMA_DO_Amount__c;
+                box.Destination = detailMap.get(boxDetail.RMA_DO__c).Destination__c;
+                pendingBoxList.add(box);
+            }
+           // pendingBoxList = [SELECT Id, RMA_Master__c,RMA_DO__c,Shipper_Address__c,Shipper_Company_Name__c,Est_No_of_Boxes__c,Box_Dimension__c,Quantity__c,Est_Weight__c FROM Box_Detail__c WHERE RMA_Master__c = :rmamasterid];
+         }
+        
+        return pendingBoxList;
+    }
+
+    public class PendingBoxDetails{
+        @AuraEnabled
+        public String Id;
+        @AuraEnabled
+        public String RMA_Master;
+        @AuraEnabled
+        public String RMA_DO;
+        @AuraEnabled
+        public String COO;
+        @AuraEnabled
+        public String Shipper_Address;
+        @AuraEnabled
+        public String Shipper_Company_Name;
+        @AuraEnabled
+        public Decimal Est_No_of_Boxes;
+        @AuraEnabled
+        public String Box_Dimension;
+        @AuraEnabled
+        public Decimal Quantity;
+        @AuraEnabled
+        public Decimal Est_Weight;
+        @AuraEnabled
+        public String NERP_Samsung_Part_Number;
+        @AuraEnabled
+        public Decimal NERP_RMA_Quantity;
+        @AuraEnabled
+        public Decimal NERP_RMA_DO_Amount;
+        @AuraEnabled
+        public String Destination;
+        
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<packingListConsolidated> getPackingListConsolidated(List<Id> rmaMasterList){
+       List<RMA_Master__c> rmaList = new List<RMA_Master__c>();
+       List<packingListConsolidated> plList = new List<packingListConsolidated>();
+       rmaList = [SELECT Id, Name FROM RMA_Master__c WHERE Id IN :rmaMasterList];
+       for (RMA_MAster__c rma : rmaList){
+        packingListConsolidated pl = new packingListConsolidated();
+        pl.Id = rma.Id;
+        pl.name = rma.Name;
+        pl.rmaDetailsConsolidated = getRMADetailsforDownload(rma.Id);
+        plList.add(pl);
+       }
+
+       return plList;
+
+    }
+
+
+
+    public class packingListConsolidated{
+            @AuraEnabled
+            public String id;
+            @AuraEnabled
+            public String name;
+            @AuraEnabled
+            public RmaDetailsDownload rmaDetailsConsolidated;
+        }
+
+    @AuraEnabled(cacheable=true)
+    public static RmaDetailsDownload getRMADetailsforDownload(String rmamasterid){
+
+        RmaDetailsDownload detailDownload = new RmaDetailsDownload();
+        List<RMA_Detail__c> rmaConsolidatedList = new List<RMA_Detail__c>();
+        List<RMA_Detail__c> rmaDetailsList = new List<RMA_Detail__c>();
+        Set<String> rmaDOSet = new Set<String>();
+        List<RMA_Detail__c> rmaD = new List<RMA_Detail__c>();
+          rmaD = [SELECT Id,RMA_DO__c,NERP_Sold_To_Name__c, NERP_Customer_PO_Number__c, NERP_Ref_Billing_Number__c,NERP_Samsung_Part_Number__c,NERP_RMA_Quantity__c, NERP_Customer_Part_Number__c,Name,PO_Number__c,Invoice_Number__c,Customer_Part_Number__c,Samsung_Part_Number__c,Serial_Number__c,Quantity__c,Reason_For_Return__c,Failure_Location__c,Parts_Ready_to_be_Shipped__c,Credit__c,FA_4_weeks__c,Return_to_San_Jose_CA__c, Destination__c, DSK_CS_Engineer__c, DSK_Address__c, DSK_Email__c, DSK_Phone__c FROM RMA_Detail__c WHERE RMA_Master__c = :rmamasterid];
+      for(RMA_Detail__c detail : rmaD){
+          if(!rmaDOSet.contains(detail.RMA_DO__c)){
+           /* RMADetailConsolidated rc = new RMADetailConsolidated();
+          rc.RMA_DO = detail.RMA_DO__c;
+          rc.NERP_Sold_To_Name = detail.NERP_Sold_To_Name__c;
+          rc.NERP_Customer_PO_Number = detail.NERP_Customer_PO_Number__c;
+          rc.NERP_Reference_Billing_Number = detail.NERP_Ref_Billing_Number__c;
+          rc.NERP_Samsung_Part_Number  = detail.NERP_Samsung_Part_Number__c;
+          rc.NERP_RMA_Quantity = detail.NERP_RMA_Quantity__c; 
+          rc.NERP_Customer_Part_Number = detail.NERP_Customer_Part_Number__c;*/
+
+            rmaConsolidatedList.add(detail);
+            rmaDOSet.add(detail.RMA_DO__c);
+          }
+
+         /* RMADetail rd = new RMADetail();
+          rd.RMA_DO = detail.RMA_DO__c;
+          rd.Name = detail.Name;
+          rd.PO_Number = detail.PO_Number__c;
+          rd.Invoice_Number = detail.Invoice_Number__c;
+          rd.Customer_Part_Number = detail.Customer_Part_Number__c;
+          rd.Samsung_Part_Number = detail.Samsung_Part_Number__c;
+          rd.Serial_Number = detail.Serial_Number__c;
+          rd.Quantity = detail.Quantity__c;
+          rd.Reason_For_Return = detail.Reason_For_Return__c;
+          rd.Failure_Location = detail.Failure_Location__c;
+          rd.Parts_Ready_To_Be_Shipped = detail.Parts_Ready_to_be_Shipped__c;
+          rd.Credit = detail.Credit__c;          
+          rd.FA_Can_Take_Upto_4Weeks = detail.FA_4_weeks__c;
+          rd.Return_To_SanJose_CA = detail.Return_to_San_Jose_CA__c;*/
+             
+          rmaDetailsList.add(detail);
+      }
+
+        detailDownload.rmaDetails = rmaDetailsList;
+        detailDownload.rmaDetailsConsolidated = rmaConsolidatedList;
+        return detailDownload;
+
+    }
+
+    public class RmaDetailsDownload{
+        @AuraEnabled
+        public List<RMA_Detail__c> rmaDetails;
+        @AuraEnabled
+        public List<RMA_Detail__c> rmaDetailsConsolidated;
+    }
+
+   
+
+    @AuraEnabled(cacheable=true)
+      public static List<RMA_Master__c> getRMALogisticsBoxWf() {
+        List<RMA_Master__c> rmaList = new List<RMA_Master__c>();
+        rmaList = [SELECT Id,Name, Requestor_Email__c,Shipper_Contact_Email__c,Shipper_Contact_Name__c FROM RMA_Master__c where Status__c = 'Packing Information created; Pending Logistics Review' and PackingList_Batch__c = null ORDER BY Id];
+        
+        
+        return rmaList;
+      }
+
+      
+
+
+    @AuraEnabled(cacheable=true)
+      public static List<consolidatedPL> getConsolidatedBatches() {
+
+        Set<Id> rmaIdList = new Set<Id>();
+        Set<Id> cdIdResult = new Set<Id>();
+        Set<Id> rmaList = new Set<Id>();
+
+        List<consolidatedPL> plList = new List<consolidatedPL>();
+
+       /* List<ContentVersion> cvList = new List<ContentVersion>();
+        cvList = [SELECT ContentDocumentId FROM ContentVersion where RMA_Stage__c = 'Packing List'];
+        for(ContentVersion cv : cvList){
+            cdIdList.add(cv.ContentDocumentId);
+        }*/
+
+       /* List<RMA_Master__c> rma1List = new List<RMA_Master__c>();
+        rma1List = [SELECT Id FROM RMA_Master__c where Status__c = 'Packing Information created; Pending Logistics Review'];
+        for(RMA_Master__c rma : rma1List){
+            rmaIdList.add(rma.Id);
+        }
+        
+        AggregateResult[] groupedResults = [SELECT contentDocumentId from ContentDocumentLink WHERE LinkedEntityId IN :rmaIdList GROUP BY contentDocumentId HAVING count(LinkedEntityId) > 1];
+        for (AggregateResult ar : groupedResults) {
+           // Id cd = (ar.get('contentDocumentId'));
+            cdIdResult.add((Id)ar.get('contentDocumentId'));
+        }
+        List<ContentDocument> cDocList = new List<ContentDocument>();
+        cDocList = [SELECT Id, Title, (SELECT LinkedEntityId from ContentDocumentLinks) FROM ContentDocument WHERE Id IN :cdIdResult];
+
+        for (ContentDocument cd : cDocList){
+            consolidatedPL pl = new consolidatedPL();
+            pl.cdId = cd.Id;
+            pl.filename = cd.Title;
+            List<Id> rmaId2List = new List<Id>();
+           
+            for (ContentDocumentLink cDocLink : cd.ContentDocumentLinks){
+                rmaId2List.add(cDocLink.LinkedEntityId);
+            }
+           // pl.masterIdList = rmaId2List;
+            pl.plConsolidated = getPackingListConsolidated(rmaId2List);
+            
+            plList.add(pl);
+        }*/
+
+        Map<String, List<RMA_Master__c>> rmaMap = new Map<String, List<RMA_Master__c>>();
+        List<RMA_Master__c> rma1List = new List<RMA_Master__c>();
+        rma1List = [SELECT Id, Name, PackingList_Batch__c,Requestor_Email__c,Shipper_Contact_Email__c,Shipper_Contact_Name__c FROM RMA_Master__c WHERE Status__c = 'Packing Information created; Pending Logistics Review' AND PackingList_Batch__c != null];
+        for(RMA_Master__c rma : rma1List){
+            if(rmaMap.containsKey(rma.PackingList_Batch__c)){
+                rmaMap.get(rma.PackingList_Batch__c).add(rma);
+            }else {
+                rmaMap.put(rma.PackingList_Batch__c,new List<RMA_Master__c>{rma});
+        }
+        system.debug(rmaMap);
+
+        }
+
+        for(String batchname : rmaMap.keyset()){
+            consolidatedPL pl = new consolidatedPL();
+            pl.batchName = batchname;
+            pl.rmaList = rmaMap.get(batchname);
+            plList.add(pl);
+        }
+
+
+        return plList;
+      }
+
+   /*public class consolidatedPL{
+        @AuraEnabled
+        //public List<Id> masterIdList;
+        public List<packingListConsolidated> plConsolidated;
+        
+        @AuraEnabled
+        public String filename;
+        @AuraEnabled
+        public String cdId;
+    }   */
+
+    public class consolidatedPL{
+        @AuraEnabled
+        public String batchName;
+        
+        @AuraEnabled
+        public List<RMA_Master__c> rmaList;
+    } 
+
+
+ 
+
+    
+
+  /*  @AuraEnabled(cacheable=true)
+    public static List<AggregateResult> getRMAWfNumbers() {
+        
+        AggregateResult[] groupedResults
+  = [SELECT RMA_Master__c FROM RMA_Detail__c WHERE RMA_Master__r.Status__c = 'New' GROUP BY RMA_Master__c ORDER BY RMA_Master__c];
+        
+        return groupedResults;
+    }*/
+    
+    
+
+    
+
+    
+    
+
+    @AuraEnabled
+    public static String insertBoxDetails( List < Box_Detail__c > boxList, Id masterId, Boolean needrpi, List<Object> filesUploaded) {
+        
+        List<RMA_Master__c> masterRMA = new List<RMA_Master__c>();
+        Id profileId= userinfo.getProfileId();
+        String profileName=[Select Id,Name from Profile where Id=:profileId].Name;
+        masterRMA = [SELECT Id, Status__c,PackingList_Date__c FROM RMA_Master__c WHERE Id = :masterId];
+        RMA_Portal_Variable__mdt logisticsStatus  = RMA_Portal_Variable__mdt.getInstance('Status_Pending_Logistics_Review');
+        masterRMA[0].Status__c = logisticsStatus.Value__c;
+        masterRMA[0].PackingList_Date__c = Date.today();
+
+        
+        
+        try {
+            
+            insert boxList;
+            update masterRMA;
+
+            for( Integer i = 0 ; i < filesUploaded.size() ; i++){
+                system.debug('>> for');
+                FileInfo fileData  = (FileInfo)JSON.deserialize(JSON.serialize(filesUploaded[i]), FileInfo.class);
+                system.debug('>> after fileData');
+                
+                ContentVersion cv = createContentVersion(fileData.VersionData, fileData.Title, 'Packing List');
+                
+                ContentDocumentLink cdl = createContentLink(cv.Id, masterId);
+            }
+
+            return 'Successful';
+            
+        } catch ( Exception e ) {
+            
+            throw new AuraHandledException( e.getMessage() );
+            
+        }
+        
+    }
+
+   
+
+    @AuraEnabled
+    public static String updatePackingInfo( RMA_MAster__c  packinginfo, List<Object> filesUploaded) {
+        RMA_Portal_Variable__mdt logisticsStatus  = RMA_Portal_Variable__mdt.getInstance('Status_Logistics_Reviewed');
+        if(packinginfo != null){
+           try {
+            packinginfo.Status__c = logisticsStatus.Value__c;
+            //Added for Tracking Status
+            packinginfo.Tracking_Status__c = 'Tracked';
+            packinginfo.Tracked_Date__c = Date.today();
+            update packinginfo;
+
+            for( Integer i = 0 ; i < filesUploaded.size() ; i++){
+                system.debug('>> for');
+                FileInfo fileData  = (FileInfo)JSON.deserialize(JSON.serialize(filesUploaded[i]), FileInfo.class);
+                system.debug('>> after fileData');
+                
+                ContentVersion cv = createContentVersion(fileData.VersionData, fileData.Title, 'Shipping Label');
+                
+                ContentDocumentLink cdl = createContentLink(cv.Id, packinginfo.Id);
+            }
+
+            Map<String, Object> params = new Map<String, Object>();
+            params.put('rmaid',packinginfo.Id);
+            params.put('emailtype','LogisticsReviewed');
+            Flow.Interview.EmailNotificationAutoLaunched alflow = new Flow.Interview.EmailNotificationAutoLaunched(params);
+            alflow.start();
+
+            /*
+
+            if((packinginfo.Need_RPI__c == true) && (packinginfo.RPI_Number__c == null )){
+            Map<String, Object> params1 = new Map<String, Object>();
+            params1.put('rmaid',packinginfo.Id);
+            params1.put('emailtype','RPIRequired');
+            Flow.Interview.EmailNotificationAutoLaunched alflow1 = new Flow.Interview.EmailNotificationAutoLaunched(params1);
+            alflow1.start();
+            }*/
+
+            return 'Successful';
+            
+        } catch ( Exception e ) {
+            
+            throw new AuraHandledException( e.getMessage() );
+            
+        }
+        }
+        return 'No Packing Info';
+    }
+
+    
+
+    @AuraEnabled
+    
+        public static String consolidatedPackinglist( List<Id> masterIdList,List<Object> filesToInsert, String fileType, String email1, String email2, String email3 ) {
+        ContentVersion contentVersionObj = new  ContentVersion();
+        List<RMA_Master__c> listUpdate = new List<RMA_Master__c>();
+        RMA_Portal_Variable__mdt logisticsStatus  = RMA_Portal_Variable__mdt.getInstance('Status_Pending_Logistics_Review');
+                        
+        for( Integer i = 0 ; i < filesToInsert.size() ; i++){
+            FileInfo fileData  = (FileInfo)JSON.deserialize(JSON.serialize(filesToInsert[i]), FileInfo.class);
+            ContentVersion cv = createContentVersion(fileData.VersionData, fileData.Title,fileType);
+          
+          for (Integer j=0 ; j < masterIdList.size() ; j++){
+            ContentDocumentLink cdl = createContentLink(cv.Id,masterIdList[j]);
+            
+          }
+        }
+        
+        List<RMA_Master__c> rmaList = new List<RMA_Master__c>();
+        rmaList = [SELECT Id, Name, PackingList_Batch__c, Status__c,Box_Notification_Email_1__c,Box_Notification_Email_2__c,Box_Notification_Email_3__c   
+                      FROM RMA_Master__c WHERE Id IN :masterIdList];
+    
+
+        string batchname='';
+        String batchname1 = '';
+       for(Integer i=0 ; i < rmaList.size() ; i++){
+        if(i < =2){
+            batchname1 += (rmaList[i].Name == null ? '':rmaList[i].Name )+',';
+        }
+        
+       }
+            batchname=batchname1.removeEnd(',');
+       
+       for(RMA_Master__c rma :  rmaList){
+            rma.Status__c = logisticsStatus.Value__c;
+            rma.Box_Notification_Email_1__c = email1;
+            rma.Box_Notification_Email_2__c = email2;
+            rma.Box_Notification_Email_3__c = email3;
+            rma.PackingList_Batch__c = batchname;
+            rma.PackingList_Date__c = Date.today();
+            listUpdate.add(rma);
+        }
+
+       /* for (Integer i=0 ; i < masterIdList.size() ; i++){
+            
+            RMA_Master__c rma = new RMA_Master__c();
+            rma.Id = masterIdList[i];
+            rma.Status__c = logisticsStatus.Value__c;
+            rma.Box_Notification_Email_1__c = email1;
+            rma.Box_Notification_Email_2__c = email2;
+            rma.Box_Notification_Email_3__c = email3;
+            rma.PackingList_Date__c = Date.today();
+            listUpdate.add(rma);
+
+          }*/
+          try{
+            update listUpdate;
+          }catch(Exception e){
+            return e.getMessage();
+          }
+
+
+        return 'Successful';
+        
+        
+    }
+
+    @AuraEnabled
+    
+    public static String saveConsolidatedLogisticsInfo( List<RMA_Master__c> masterList,List<Object> filesToInsert, String shipperCountry, Integer noOfBoxes, String boxDimension, Decimal quantity, Decimal weight, String trackingNumber, Decimal economyCost, Decimal priorityCost, Boolean needrpi, String rpiNumber) {
+        ContentVersion contentVersionObj = new  ContentVersion();
+        List<RMA_Master__c> listUpdate = new List<RMA_Master__c>();
+        List<Id> masterIdList = new List<Id>();
+        RMA_Portal_Variable__mdt logisticsStatus  = RMA_Portal_Variable__mdt.getInstance('Status_Logistics_Reviewed');
+                        
+        for( Integer i = 0 ; i < filesToInsert.size() ; i++){
+            FileInfo fileData  = (FileInfo)JSON.deserialize(JSON.serialize(filesToInsert[i]), FileInfo.class);
+            ContentVersion cv = createContentVersion(fileData.VersionData, fileData.Title,'Shipping Label');
+          
+          for (Integer j=0 ; j < masterList.size() ; j++){
+            ContentDocumentLink cdl = createContentLink(cv.Id,masterList[j].Id);
+            
+          }
+        }
+
+        for(RMA_Master__c rma : masterList){
+            masterIdList.add(rma.Id);
+            rma.Status__c = logisticsStatus.Value__c;
+            rma.Shipper_Country__c = shipperCountry;
+            rma.Est_No_of_Boxes__c = noOfBoxes;
+            rma.Box_Dimension__c = boxDimension;
+            rma.Quantity__c = quantity;
+            rma.Weight__c = weight;
+            rma.Tracking_Number__c = trackingNumber;
+            rma.Economy_Cost__c = economyCost;
+            rma.Priority_Cost__c = priorityCost;
+            rma.Need_RPI__c = needrpi;
+            rma.RPI_Number__c = rpiNumber;
+            rma.Tracking_Status__c = 'Tracked';
+            rma.Tracked_Date__c = Date.today();
+            
+            listUpdate.add(rma);
+        }
+
+      /*  for (Integer i=0 ; i < masterIdList.size() ; i++){
+            
+            RMA_Master__c rma = new RMA_Master__c();
+            rma.Id = masterIdList[i];
+            rma.Status__c = logisticsStatus.Value__c;
+            rma.Shipper_Country__c = shipperCountry;
+            rma.Est_No_of_Boxes__c = noOfBoxes;
+            rma.Box_Dimension__c = boxDimension;
+            rma.Quantity__c = quantity;
+            rma.Weight__c = weight;
+            rma.Tracking_Number__c = trackingNumber;
+            rma.Economy_Cost__c = economyCost;
+            rma.Priority_Cost__c = priorityCost;
+            rma.Need_RPI__c = needrpi;
+            rma.RPI_Number__c = rpiNumber;
+            
+            listUpdate.add(rma);
+
+          }*/
+          try{
+            update listUpdate;
+
+          }catch(Exception e){
+            return e.getMessage();
+          }
+          Map<String, Object> params = new Map<String, Object>();
+          params.put('varrmaids',masterIdList);//varrmaids
+
+          params.put('emailtype','SendConsolidatedBatchEmail');
+          Flow.Interview.EmailNotificationAutoLaunched alflow = new Flow.Interview.EmailNotificationAutoLaunched(params);
+          alflow.start();
+
+        return 'Successful';
+
+    }
+    
+
+
+    private static ContentVersion createContentVersion(Blob versionData, String filename, String wfNumber) {
+        ContentVersion cv = new ContentVersion();
+        cv.VersionData = versionData;
+        cv.Title = filename;
+        cv.PathOnClient = filename;
+        cv.RMA_Stage__c = wfNumber;
+        try {
+          insert cv;
+          return cv;
+        } catch(DMLException e) {
+          System.debug(e);
+          return null;
+        }
+      }
+
+      public class FileInfo {
+        public String Title;
+        public Blob VersionData;
+    }
+
+
+    private static ContentDocumentLink createContentLink(String contentVersionId, String recordId) {
+        if (contentVersionId == null || recordId == null) { return null; }
+    ContentDocumentLink cdl = new ContentDocumentLink();
+    cdl.ContentDocumentId = [
+    SELECT ContentDocumentId 
+    FROM ContentVersion 
+    WHERE Id =: contentVersionId
+    ].ContentDocumentId;
+    cdl.LinkedEntityId = recordId;
+    // ShareType is either 'V', 'C', or 'I'
+    // V = Viewer, C = Collaborator, I = Inferred
+    cdl.ShareType = 'V';
+    try {
+    insert cdl;
+    return cdl;
+    } catch(DMLException e) {
+    System.debug(e);
+    return null;
+    }
+    }
+}
