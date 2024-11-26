@@ -1,0 +1,127 @@
+public class RMASIReminderEmailNotification {
+  @InvocableMethod(label='SendShippingInstructionReminderEmail' description='Sends Email when a Shipping Instruction is created and has not been moved to further Status')
+  public static void SendShippingInstructionReminderEmail(List<ID> rmaid) {
+      RMA_Master__c rmaM = new RMA_Master__c();
+      Set<String> rmaDOSet = new Set<String>();
+      rmaM = [SELECT Id,Name, Account_Email_Address__c,Related_Supplier_Account__c,Notification_Email_1__c, Notification_Email_2__c, Requestor_Email__c,Shipper_Contact_Email__c,Samsung_Sales_Ops_Email__c,Sales_Account__r.Email__c,All_3_fields__c,RMA_SO__c,Show_End_Customer__c,Show_Unit_Price__c FROM RMA_Master__c WHERE Id = :rmaid[0]];
+      String generatedCSVFile ='';
+      String csvData = 'RMA DO #,NERP Sold to Name,NERP Customer PO Number,NERP Reference Billing Number,NERP Samsung Part Number,NERP RMA Quantity,NERP Customer Part Number';
+      if(rmaM.All_3_fields__c || rmaM.Show_Unit_Price__c){
+                  csvData = csvData+','+'Unit Price';
+              }
+              if(rmaM.All_3_fields__c || rmaM.Show_End_Customer__c){
+                  csvData = csvData+','+'End Customer';
+              }
+              if(rmaM.All_3_fields__c || rmaM.RMA_SO__c){
+                  csvData = csvData+','+'RMA SO #';
+              }
+      generatedCSVFile = generatedCSVFile+csvData+'\n';
+          String generatedDetailsCSVFile ='';
+      String combinedCSVFile = ''; // combined file declaration
+      String csvDataDetails = 'Id,RMA DO #,Name,PO Number,Invoice Number,Customer Part Number,Samsung Part Number,Serial Number,Quantity,Reason For Return,Failure Location,Parts Ready To Be Shipped,Credit,FA Can take upto 4 weeks to receive,Return to San Jose CA, Destination, DSK CS Engineer, DSK Address, DSK Phone, DSK Email';
+      generatedDetailsCSVFile = generatedDetailsCSVFile+csvDataDetails+'\n';
+     
+          
+          //Messaging.reserveSingleEmailCapacity(2);
+          List<RMA_Detail__c> rmaD = new List<RMA_Detail__c>();
+          rmaD = [SELECT Id,RMA_DO__c,NERP_Sold_To_Name__c, NERP_Customer_PO_Number__c, NERP_Ref_Billing_Number__c,NERP_Samsung_Part_Number__c,NERP_RMA_Quantity__c, NERP_Customer_Part_Number__c,Name,PO_Number__c,Invoice_Number__c,Customer_Part_Number__c,Samsung_Part_Number__c,Serial_Number__c,Quantity__c,Reason_For_Return__c,Failure_Location__c,Parts_Ready_to_be_Shipped__c,Credit__c,FA_4_weeks__c,Return_to_San_Jose_CA__c,End_Customer__c,RMA_SO__c,Unit_Price__c,Destination__c, DSK_CS_Engineer__c, DSK_Address__c, DSK_Phone__c, DSK_Email__c FROM RMA_Detail__c WHERE RMA_Master__c = :rmaid[0]];
+      for(RMA_Detail__c detail : rmaD){
+          if(!rmaDOSet.contains(detail.RMA_DO__c)){
+              csvData = '';
+              csvData = detail.RMA_DO__c+','+((detail.NERP_Sold_To_Name__c != null)?(detail.NERP_Sold_To_Name__c.replace(',','') ):detail.NERP_Sold_To_Name__c)+','+detail.NERP_Customer_PO_Number__c+','+detail.NERP_Ref_Billing_Number__c+','+detail.NERP_Samsung_Part_Number__c+','+detail.NERP_RMA_Quantity__c+','+detail.NERP_Customer_Part_Number__c;
+              if(rmaM.All_3_fields__c || rmaM.Show_Unit_Price__c){
+                  csvData = csvData+','+detail.Unit_Price__c;
+              }
+              if(rmaM.All_3_fields__c || rmaM.Show_End_Customer__c){
+                  csvData = csvData+','+detail.End_Customer__c;
+              }
+              if(rmaM.All_3_fields__c || rmaM.RMA_SO__c){
+                  csvData = csvData+','+detail.RMA_SO__c;
+              }
+              generatedCSVFile = generatedCSVFile+csvData+'\n'; 
+              rmaDOSet.add(detail.RMA_DO__c);
+          }
+              csvDataDetails = '';
+              csvDataDetails = detail.Id+','+detail.RMA_DO__c+','+detail.Name+','+detail.PO_Number__c+','+detail.Invoice_Number__c+','+detail.Customer_Part_Number__c+','+detail.Samsung_Part_Number__c+','+detail.Serial_Number__c+','+detail.Quantity__c+','+((detail.Reason_For_Return__c != null)?(detail.Reason_For_Return__c.replace(',','') ):detail.Reason_For_Return__c)+','+detail.Failure_Location__c+','+detail.Parts_Ready_to_be_Shipped__c+','+detail.Credit__c+','+detail.FA_4_weeks__c+','+detail.Return_to_San_Jose_CA__c+','+detail.Destination__c+','+detail.DSK_CS_Engineer__c+','+((detail.DSK_Address__c != null)?(detail.DSK_Address__c.replace(',','') ):detail.DSK_Address__c)+','+detail.DSK_Phone__c+','+detail.DSK_Email__c;
+              generatedDetailsCSVFile = generatedDetailsCSVFile+csvDataDetails+'\n'; 
+          
+      }
+      combinedCSVFile = generatedCSVFile+'\n\n\n\n\n\n'+generatedDetailsCSVFile;  //combine 2 files into single file
+          Messaging.EmailFileAttachment csvAttachment = new Messaging.EmailFileAttachment();
+        Blob csvBlob = blob.valueOf(combinedCSVFile);     
+        csvAttachment.setFileName('ShippingInstructions.csv');
+        csvAttachment.setBody(csvBlob);
+        /*Messaging.EmailFileAttachment csvAttachmentDetails = new Messaging.EmailFileAttachment();
+        Blob csvBlobDetails = blob.valueOf(generatedDetailsCSVFile);     
+        csvAttachmentDetails.setFileName('RMADetails.csv');
+        csvAttachmentDetails.setBody(csvBlobDetails);*/
+      Messaging.EmailFileAttachment[] fileAttachments = new Messaging.EmailFileAttachment[]{};
+          fileAttachments.add(csvAttachment);
+         // fileAttachments.add(csvAttachmentDetails);
+        List<id> ContentDocumentids = new List<id>();
+        Id rmaMasterId = rmaid[0];
+         for(contentDocumentLink CDLink : [SELECT LinkedEntityid, ContentDocumentid FROM contentDocumentLink WHERE LinkedEntityid = :rmaMasterId])
+			{
+			   ContentDocumentids.add(CDLink.ContentDocumentid);  
+			}
+			for ( ContentVersion cversion : [SELECT title, 
+													PathOnClient, FileType,
+													versiondata ,FileExtension
+											  FROM contentversion 
+											  WHERE ContentDocumentId IN :ContentDocumentids  
+											   AND RMA_stage__c = 'Shipping Instructions'])
+			 {
+			  blob WOCFbody = cversion.versiondata;
+			  system.debug('body : '+WOCFbody+'-----------'+cversion.title);
+			  Messaging.Emailfileattachment efa = new Messaging.Emailfileattachment();
+			  efa.setFileName(cversion.title+'.'+cversion.FileExtension);
+			  efa.setBody(WOCFbody);
+			  fileAttachments.add(efa); 
+			 }   
+          RMA_Portal_Variable__mdt oweAddress = RMA_Portal_Variable__mdt.getInstance('OrgWideEmailAddress');
+          OrgWideEmailAddress[] owea = [select Id from OrgWideEmailAddress where Address = :oweAddress.Value__c];
+          Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+          User currUser = [SELECT contactId from User where Id = :UserInfo.getUserId() ];
+      if(currUser.contactId == null){
+          User anyRMAUser = [SELECT contactId FROM User WHERE Profile.Name = 'Customer Community User - Customer' LIMIT 1 ];
+          mail.setTargetObjectId(anyRMAUser.contactId);
+      }else{
+          mail.setTargetObjectId(currUser.contactId); 
+      }
+          
+          mail.setTreatTargetObjectAsRecipient(false);
+          mail.setSaveAsActivity(false);
+         EmailTemplate emailTemplate = [Select Id,Subject,Description,HtmlValue,DeveloperName,Body from EmailTemplate where name = 'RMA Shipping Instructions Reminder'];
+         mail.setTemplateID(emailTemplate.Id); 
+         mail.setWhatId(rmaMasterId);
+            String[] toAddresses = new String[] {rmaM.Requestor_Email__c,rmaM.Shipper_Contact_Email__c}; 
+            String[] ccAddresses = new String[] {rmaM.Samsung_Sales_Ops_Email__c };
+                if(rmaM.Notification_Email_1__c != null)  {
+                    ccAddresses.add(rmaM.Notification_Email_1__c);
+                }  
+                if(rmaM.Notification_Email_2__c != null)  {
+                    ccAddresses.add(rmaM.Notification_Email_2__c);
+                }
+                if(rmaM.Sales_Account__r.Email__c != null){
+                    ccAddresses.add(rmaM.Sales_Account__r.Email__c);
+                }
+                if(rmaM.Account_Email_Address__c != null){
+                    ccAddresses.add(rmaM.Account_Email_Address__c);
+                }
+                    if(rmaM.Related_Supplier_Account__c != null){
+                    ccAddresses.add(rmaM.Related_Supplier_Account__c);
+                }
+                RMA_Portal_Variable__mdt ccAddress = RMA_Portal_Variable__mdt.getInstance('CC_Email_Address');
+                ccAddresses.add(ccAddress.Value__c);
+            mail.setToAddresses(toAddresses);
+            mail.setCcAddresses(ccAddresses);
+            
+            mail.setOrgWideEmailAddressId(owea.get(0).Id);
+            //mail.setSubject('New RMA Shipping Instruction Created :'+ rmaM.Name );
+            //mail.setPlainTextBody('Dear '+ toAddresses + '\n' +'Attached is the new RMA request that has been submitted for your review and handling.Kindly log in to the portal to see the details and for your action.');
+           
+            mail.setFileAttachments(fileAttachments);
+            Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+     // }
+  }
+}
