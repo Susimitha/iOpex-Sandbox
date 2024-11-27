@@ -1,7 +1,7 @@
 public class RMAController {
 
     @AuraEnabled(cacheable=true)
-    public static List<RMA_Master__c> getRMA(String wf, String status, Date fromDate, Date toDate, String rmaDO, String trackingNumber, String trackingStatus, String requestorRef1, String requestorRef2 ) {
+    public static List<RMA_Master__c> getRMA(String wf, String status, Date fromDate, Date toDate, String rmaDO, String trackingNumber, String trackingStatus, String requestorRef1, String requestorRef2,string samsungSalesOps ) {
 
         RMA_Portal_Variable__mdt cancelledStatus   = RMA_Portal_Variable__mdt.getInstance('Status_Cancelled');
         
@@ -38,8 +38,11 @@ public class RMAController {
               // query += 'Requestor_Ref_2__c = \'' + requestorRef2 + '\' AND ';
                query += 'Requestor_Ref_2__c LIKE \'%' + requestorRef2 + '%\' AND ';
         }
+       if (!String.isBlank(samsungSalesOps)) {
+            query += 'Samsung_Sales_Ops_Email__c = \'' + samsungSalesOps + '\' AND ';
+        }
         query += 'Id != null ORDER BY createdDate DESC'; 
-        //system.debug('Query '+ query);
+        system.debug('Query '+ query);
         return Database.query(query);
     }
     
