@@ -1,0 +1,1966 @@
+<template>
+    <!--Form Actions-->
+    <lightning-button class = "slds-p-around_small" variant="brand" label="Approve" onclick={handleapprove}></lightning-button>
+    <lightning-button class = "slds-p-around_small" variant="brand" label="Reject VR" onclick={handlereject}></lightning-button>
+    <!-- <lightning-button class = "slds-p-around_small" variant="brand" label="Validate" disable={disableValidate} onclick={handleValidate} ></lightning-button> -->
+    <lightning-button  class = "slds-p-around_small" variant="brand" label="Export" onclick={downloadCSVFile}></lightning-button>
+    <lightning-button class = "slds-p-around_small" variant="brand" label="Save Vendor Code" onclick={handleSaveChanges}></lightning-button>
+    <!--Form Actions-->
+    <!--Filter Section-->
+    
+    <div class="head">
+        <h1>Submission Date</h1>
+    </div>
+        <div class="filter-search">
+        <!-- <div class="slds-col slds-size_1-of-4 slds-p-around_medium">
+            <lightning-input type="datetime" name="Submission Date" onchange={handleFilterChange} label="Submission Date"
+              ></lightning-input>
+            </div> -->
+            
+              <div class="slds-col slds-size_1-of-4 slds-p-around_medium">
+                <lightning-input type="date" name="fromDate" onchange={handlefromDateChange} label="From "
+                  value={fromDate}></lightning-input>
+              </div>
+              
+              <div class="slds-col slds-size_1-of-4 slds-p-around_medium">
+                <lightning-input type="date" name="toDate" onchange={handletoDateChange} label="To "
+                  value={toDate}></lightning-input>
+              </div>
+          
+        <!-- <div class="slds-col slds-size_1-of-2 slds-p-around_medium">
+                    
+            <lightning-combobox
+            label="Registration Type"
+            options={Registration_Type__c_FIELDValue}
+            onchange={handleFilterChange}>
+        </lightning-combobox>
+        </div>
+        <div class="slds-col slds-size_1-of-2 slds-p-around_medium">
+                    
+            <lightning-combobox
+            label="Vendor Type"
+            options={Vendor_Type__c_FIELDValue}
+            onchange={handleFilterChange}>
+        </lightning-combobox>
+        </div> -->
+        <div class="slds-col slds-size_2-of-4 slds-p-around_medium">
+                    
+            <lightning-combobox
+            label="Status"
+            options={Status_Display_for_all_others__c_FIELDValue}
+            onchange={handleStatusChange}>
+        </lightning-combobox>
+        </div>
+        <!-- <div class="slds-col slds-size_1-of-2 slds-p-around_medium">
+                    
+            <lightning-combobox
+            label="VR Vendor Status Display"
+            options={VR_Vendor_Status_Display__c_FIELDValue}
+            onchange={handleFilterChange}>
+        </lightning-combobox>
+        </div>
+        <div class="slds-col slds-size_1-of-2 slds-p-around_medium">
+            <lightning-input name="Vendor Name" value="" label="Vendor Name" onchange={handleFilterChange}> </lightning-input>
+        </div> -->
+      </div>
+    <!--Filter Section END-->
+    <template if:true={vr}>
+    
+        <div class="slds-grid">
+        <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout">
+            <thead>
+                <tr>
+                    <th scope="col">
+                        <lightning-input type="checkbox" onchange={handleSelectAll}></lightning-input>
+                    </th>
+                    <th scope="col">Id#</th>
+                    <th scope="col">Submission Date</th>
+                    <th scope="col">Vendor Name</th>
+                    <!--th scope="col">VR Number</th-->
+                    <th scope="col">Vendor Type</th>
+                    <th scope="col">Registration Type</th>
+                    <th scope="col">Processing Days</th>
+                    <th scope="col">Date Last Modified</th>
+                    <th scope="col">VR Vendor Status Display</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Vendor Code</th>
+    
+                    <th scope="col">Accounting Validation</th>
+    
+                    
+                </tr>
+            </thead>
+            <tbody>
+                <template for:each={vr} for:item="row">
+                    <tr key={row.Id}>
+                        <td>
+                            <lightning-input type="checkbox" data-id={row.Id} disabled={row.disableAction} checked={row.isSelected} onchange={handleRowSelection}></lightning-input>
+                        </td>
+                        <td>{row.Name}</td>
+                        <td>{row.formattedCreatedDate}</td>
+                        <td> <a href={row.nameUrl} target="_blank">{row.Name_on_the_Invoice__c}</a></td>
+                        <td>{row.Vendor_Type__c }</td>
+                        <td>{row.Registration_Type__c}</td>
+                        <td>{row.ProcessingDay__c}</td>
+                        <td>{row.formattedModifiedDate}</td>
+                        <td>{row.VR_Vendor_Status_Display__c}</td>
+                        <td>{row.Status_Display_for_all_others__c}</td>
+                        <td><lightning-input 
+                            type="text" 
+                            value={row.VendorCode__c} 
+                            data-id={row.Id} 
+                            onchange={handleVendorCodeChange}
+                            disabled={row.disableVendorCode}>
+                        </lightning-input></td>
+                        <td>{row.Validate_Status__c}</td>
+                      <!--  <td><lightning-input 
+                            type="text" 
+                            value={row.Validate__c} 
+                            data-id={row.Id} 
+                            disabled={row.disableValidate}
+                            required={row.isvalidaterequired}>
+                        </lightning-input></td>-->
+                        <td> 
+                            <lightning-button  label="Validate" name="Validate" data-id={row.Id} disabled={row.disableValidate} 
+                            onclick={handleValidate}></lightning-button>
+                            
+                        </td>
+                       <td>
+
+                        <lightning-input 
+                        type="file" 
+                       class="uploadfile"
+                        data-id={row.Id} 
+                        disabled={row.disableuploadfile}
+                        onchange={handleFileChange} 
+                        multiple
+                        >
+                    </lightning-input>
+                    <!-- Show uploaded files (if any) -->
+                    <template if:true={row.uploadedFiles}>
+                        <div class="slds-pill_container slds-m-top_small">
+                            <template for:each={row.uploadedFiles} for:item="file" for:index="index">
+                                <div key={file.fileId} class="slds-pill">
+                                    <span class="slds-pill__label">{file.fileName}</span>
+                                    <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" data-id={file.fileId} data-rowid={row.Id} onclick={removeFile}>
+                                        <lightning-icon icon-name="utility:close" alternative-text="Remove" size="small"></lightning-icon>
+                                        <span class="slds-assistive-text">Remove</span>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                       </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+    </template>
+    <!-- Modal Dialog -->
+    <div if:true={showModal} class="modal">
+        <div class="modal-content">
+            <h2>Confirm File Upload</h2>
+            <p>Are you sure you want to upload the following file?</p>
+            <p><strong>File Name: </strong>{selectedFileName}</p>
+
+            <lightning-button label="Confirm" onclick={confirmUpload}></lightning-button>
+            <lightning-button label="Cancel" onclick={cancelUpload}></lightning-button>
+        </div>
+    </div>
+    <!--Modal Reject-->
+    <div if:true={rejectModal} class="modal">
+        <div class="modal-content">
+            <h2>Confirm Application Rejection</h2>
+            <p>Are you sure you want to Reject the Selected Applications?</p>
+           
+            <lightning-input type="text" label="Rejection Reason" onchange={handlereasonChange}></lightning-input>
+            <lightning-button label="Reject VR" variant="brand" onclick={handleapprove}></lightning-button>
+            <lightning-button label="Cancel"  onclick={cancelreject}></lightning-button>
+        </div>
+    </div>
+    <!--Modal Reject End-->
+    
+    <!-- Conditional rendering of the popup (modal) -->
+    <!--<template if:true={isModalOpen}-->
+        <!--section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open custom-modal"-->
+            <!--div class="slds-modal__container"-->
+                <!--Modal/Popup Header-->
+             <!--header class="slds-modal__header custom-header">
+                    <lightning-button-icon icon-name="utility:close" alternative-text="Close" class="slds-modal__close" onclick={handleClosePopup}></lightning-button-icon>
+                    <h2 class="slds-text-heading_medium custom-header-text">Pass/Fail Selection</h2>
+                </header-->
+    
+                <!-- Modal/Popup Body -->
+               <!--div class="slds-modal__content slds-p-around_medium">
+                    <lightning-radio-group 
+                        label="Select an option"
+                        options={options}
+                        value={selectedOption}
+                        onchange={handleRadioChange}
+                        class="custom-radio-group">
+                    </lightning-radio-group>
+                </div-->
+    
+                <!-- Modal/Popup Footer -->
+                <!--footer class="slds-modal__footer custom-footer">
+                    <lightning-button variant="neutral" label="Cancel" class="custom-button" onclick={handleClosePopup}></lightning-button>
+                    <lightning-button variant="brand" label="Submit" class="custom-button" onclick={handleSubmit}></lightning-button>
+                </footer-->
+            <!--/div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template-->
+    
+    
+    
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open custom-modal">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header custom-header">
+                    <lightning-button-icon icon-name="utility:close" alternative-text="Close" class="slds-modal__close" onclick={handleClosePopup}></lightning-button-icon>
+                    <h2 class="slds-text-heading_medium custom-header-text">Pass/Fail Selection</h2>
+    
+                </header>
+                 <!-- Modal/Popup Body -->
+              <div class="slds-modal__content slds-p-around_medium">
+                <table class="slds-table custom-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>TIN Check</th>
+                            <th>GIACT</th>
+                            <th>Verbal Confirmation</th>
+                            <th>Penny Test</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Pass</td>
+                            <td><lightning-input type="radio" name="TIN_Check_Status__c" value="Pass" checked={isTinPass} onchange={handleRadioChange} ></lightning-input></td>
+                            <td><lightning-input type="radio" name="GIACT_Status__c" value="Pass" checked={isGiactPass} onchange={handleRadioChange}></lightning-input></td>
+                            <td><lightning-input type="radio" name="Verbal_Confirmation_Status__c" value="Pass" checked={isVerbalPass} onchange={handleRadioChange}></lightning-input></td>
+                            <td><lightning-input type="radio" name="Penny_Test_Status__c"  value="Pass" checked={isPennyPass} onchange={handleRadioChange}></lightning-input></td>
+                        </tr>
+                        <tr>
+                            <td>Fail</td>
+                            <td><lightning-input type="radio" name="TIN_Check_Status__c" value="Fail" checked={isTinFail} onchange={handleRadioChange}></lightning-input></td>
+                    <td><lightning-input type="radio" name="GIACT_Status__c" value="Fail" checked={isGiactFail} onchange={handleRadioChange}></lightning-input></td>
+                    <td><lightning-input type="radio" name="Verbal_Confirmation_Status__c" value="Fail" checked={isVerbalFail} onchange={handleRadioChange}></lightning-input></td>
+                    <td><lightning-input type="radio" name="Penny_Test_Status__c" value="Fail" checked={isPennyFail} onchange={handleRadioChange}></lightning-input></td>
+                </tr>
+                        <tr>
+                            <td>N/A</td>
+                            <td><lightning-input type="radio" name="TIN_Check_Status__c" value="N/A" checked={isTinNA} onchange={handleRadioChange}></lightning-input></td>
+                             <td><lightning-input type="radio" name="GIACT_Status__c" value="N/A" checked={isGiactNA} onchange={handleRadioChange}></lightning-input></td>
+                            <td><lightning-input type="radio" name="Verbal_Confirmation_Status__c" value="N/A" checked={isVerbalNA} onchange={handleRadioChange}></lightning-input></td>
+                             <td><lightning-input type="radio" name="Penny_Test_Status__c" value="N/A" checked={isPennyNA} onchange={handleRadioChange}></lightning-input></td>
+                          </tr>
+                        
+                           <td>Timestamp</td>
+                            <td>
+                             {tinTimStamp} 
+                            </td>
+                            <td>
+                            {giactTimStamp} 
+                            </td>
+                            <td>
+                             {verbalTimStamp} 
+                            </td>
+                            <td>
+                            {pennyTimStamp} 
+                            </td>
+                        <tr>
+    
+                        </tr>
+                        <!--<tr>
+                            <td>Modified Timestamp</td>
+                            <td>
+                             {tinmodifiedTimStamp} 
+                            </td>
+                            <td>
+                            {giactmodifiedTimStamp} 
+                            </td>
+                            <td>
+                             {verbalmodifiedTimStamp} 
+                            </td>
+                            <td>
+                            {pennymodifiedTimStamp} 
+                            </td>
+                        </tr>-->
+                    </tbody>
+                </table>
+                </div>
+                 <!-- Modal/Popup Footer -->
+                 <footer class="slds-modal__footer custom-footer">
+                    <div class="button-group">
+                    <lightning-button variant="brand" label="Save" onclick={handleSavewithEmail}></lightning-button>
+                    <lightning-button variant="brand" label="Validate" onclick={handleValidateResult}></lightning-button>
+                    <lightning-button variant="neutral" label="Cancel" onclick={handleClosePopup}></lightning-button>
+                  </div>
+                 </footer>
+                 </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    
+    
+<!--Modal Popup for Email send-->
+<template if:true={isEmailModelOpen}>
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open custom-modal">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header custom-header">
+                <lightning-button-icon icon-name="utility:close" alternative-text="Close" class="slds-modal__close" onclick={handleClosePopup}></lightning-button-icon>
+                <h2 class="slds-text-heading_medium custom-header-text">Updated Item</h2>
+
+            </header>
+             <!-- Modal/Popup Body -->
+          <div class="slds-modal__content slds-p-around_medium">
+            <table class="slds-table custom-table">
+                
+                <tbody>
+                  
+                    <tr> 
+                    <td>
+                        <div class="slds-col slds-size_4-of-4 slds-p-around_medium">
+                            <lightning-input type="text" name="Updated_Item__c" onchange={handleEmailChange} label="Updated Item"
+                              value={Updated_Item__c}></lightning-input>
+                            <lightning-input type="text" name="Name_of_personal_confirmed__c" onchange={handleEmailChange} label="Name of personal confirmed"
+                              value={Name_of_personal_confirmed__c}></lightning-input>
+                            <lightning-input type="date" name="Date_confirmed_via_call__c" onchange={handleEmailChange} label="Date confirmed via call"
+                              value={Date_confirmed_via_call__c}></lightning-input>
+                              <lightning-input class="slds-p-vertical_small" type="tel" 
+                              name="Phone_used_in_confirmation__c" value={Phone_used_in_confirmation__c} label="Phone # used in confirmation" 
+                              onchange={handleEmailChange} pattern="[0-9]*" 
+                              message-when-pattern-mismatch="Phone Number Allow only digits"  
+                             >
+                            </lightning-input>
+
+                          </div>
+                       </td>
+
+                    </tr>
+                    
+                </tbody>
+            </table>
+            </div>
+             <!-- Modal/Popup Footer -->
+             <footer class="slds-modal__footer custom-footer">
+                <div class="button-group">
+                <lightning-button variant="brand" label="Send" onclick={handleSendEmailAction}></lightning-button>
+                
+                <lightning-button variant="neutral" label="Cancel" onclick={handleCloseEmail}></lightning-button>
+              </div>
+             </footer>
+             </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!--Modal Popup for Email send end-->
+
+
+    <template if:false={vr}>
+        No Information found.
+    </template> 
+    
+    <c-toast-notification></c-toast-notification>
+    </template>
+------------------------------------------------------------------------------------------------------------------
+JS
+
+import { LightningElement,wire,track,api } from 'lwc';
+import VENDORREGISTRATION_OBJECT from '@salesforce/schema/Vendor_Registration__c'; // Replace with your object API name
+import { getObjectInfo, getPicklistValues,getPicklistValuesByRecordType } from 'lightning/uiObjectInfoApi';
+import { refreshApex } from '@salesforce/apex';
+import PROFILE_NAME_FIELD from '@salesforce/schema/User.Profile.Name';
+import strUserId from '@salesforce/user/Id';
+import getBaseUrl from '@salesforce/apex/DEUtility.getBaseUrl';
+import {getRecord} from 'lightning/uiRecordApi';
+import getVendorRegistrationRecords from '@salesforce/apex/VendorRegistrationController.getVendorRegistrationRecords';
+import handleactions from '@salesforce/apex/VendorRegistrationController.handleactions';
+import handleVendorcodeactions from '@salesforce/apex/VendorRegistrationController.handleVendorcodeactions';
+import handleValidateaction from '@salesforce/apex/VendorRegistrationController.handleValidateaction';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import handleValidateAction from '@salesforce/apex/VendorRegistrationController.handleValidateResult';
+//import saveCheckboxValues from '@salesforce/apex/VendorRegistrationController.saveSelectionProcess';
+//import getCategoryData from '@salesforce/apex/VendorRegistrationController.getCategoryData';
+import uploadFilehome from '@salesforce/apex/VendorRegistrationController.uploadFilehome';
+import saveVendorRegistration from '@salesforce/apex/VendorRegistrationController.saveVendorRegistration';
+
+export default class HomeVendorRegistration extends LightningElement {
+   
+    @api recordId;  // Record ID to fetch the category data
+    @track fileContents = {
+        file: null
+    };
+    get fileTitle() {
+        return this.fileContents.file ? this.fileContents.file.Title : 'No Title';
+    }
+    statusMapping = {
+        'Pending Employee Consent': 'Pending Accounting Review',
+        'Pending Accounting Review': 'Pending Tax Review',
+        'Pending Tax Review': 'Pending Purchasing Review',
+        'Pending Purchasing Review': 'Accounting Verification',
+        'Accounting Verification': 'Accounting Registration',
+        'Accounting Registration': 'Approved'
+    };
+    vrstatusMapping = {
+        'Pending Accounting Review': 'Under Review',
+        'Pending Tax Review': 'Under Review',
+        'Pending Purchasing Review': 'Verification in progress',
+        'Accounting Verification': 'Registration in progress',
+        'Accounting Registration': 'Complete',
+
+    };
+   
+    @track vr = []; // To store the processed result with disable actions
+    vrResult; // to store Result 
+    prfName;  // to store the logged in User profile name
+    basePathDownload; // to store site base path
+    @track vendorCodeUpdates = []; // List to store record changes
+   // approverecordId=[];
+    //status;
+    actionName;
+    isProfileLoaded=false;
+   // @track selectedRows = [];  // Array to store selected rows
+    //model popup
+    @track isModalOpen=false;
+//----------Get User Profile ---------------------------------
+@track myrecordId;
+@track selectedOption = ''; // To store selected radio button value
+@track validateFormValues={};
+@track validateEmailFormValues={};
+    // Options for radio buttons
+    get options() {
+        return [
+            { label: 'Pass', value: 'pass' },
+            { label: 'Fail', value: 'fail' }
+        ];
+    }
+    @track showModal = false; // Tracks whether the modal is shown
+    @track selectedFile = null; // Holds the file selected for upload
+    @track selectedFileName = ''; // File name to display in modal
+    fileUploadRecordId = ''; // Store the record ID (assumed from previous logic)
+    /*@track testResults = {
+        TIN_Check_Status__c: '',
+        TIN_Check_Timestamp__c: '',
+        GIACT_Status__c: '',
+        GIACT_Timestamp__c: '',
+        Verbal_Confirmation_Status__c: '',
+        Verbal_Confirmation_Timestamp__c: '',
+        Penny_Test_Status__c: '',
+        Penny_Test_Timestamp__c: '',
+        Validate_Status__c: ''
+    };*/
+    fromDate = null;
+    toDate = null;
+    status='';
+    rejectedReason='';
+    @track categoryValues = {
+        tin: '',
+        penny: '',
+        verbal: '',
+        giact: '',
+        tinTimStamp:'',
+        giactTimStamp:'',
+        verbalTimStamp:'',
+        pennyTimStamp:'',
+        giactmodifiedTimStamp:'',
+        pennymodifiedTimStamp:'',
+        verbalmodifiedTimStamp:'',
+        tinmodifiedTimStamp:''
+
+    };
+    categoryResult;
+    @track categoryTimestamps = {
+        tin: null,
+        penny: null,
+        verbal: null,
+        giact: null
+    };
+
+    // Boolean properties to handle the selected state
+    isTinPass = false;
+    isTinFail = false;
+    isTinNA = false;
+    isPennyPass = false;
+    isPennyFail = false;
+    isPennyNA = false;
+    isVerbalPass = false;
+    isVerbalFail = false;
+    isVerbalNA = false;
+    isGiactPass = false;
+    isGiactFail = false;
+    isGiactNA = false;
+    rejectModal=false;
+    isEmailModelOpen=false;
+    isEmailSent=false;
+    defaultRecordTypeId;
+  @track filterValidateRecord=[];
+@track filters={}
+// Picklist Values
+Registration_Type__c_FIELDValue=[];
+Vendor_Type__c_FIELDValue=[];
+Status_Display_for_all_others__c_FIELDValue=[];
+VR_Vendor_Status_Display__c_FIELDValue=[];   
+Are_you_located_within_US__c_FIELDValue=[];
+
+
+@wire(getObjectInfo, { objectApiName: VENDORREGISTRATION_OBJECT })
+objectInfo;
+@wire(getRecord, {
+    recordId: strUserId,
+    fields: [PROFILE_NAME_FIELD]
+}) wireuser({error,data}) {
+    if (error) {
+       this.error = error ; 
+    } else if (data) {
+        this.prfName =data.fields.Profile.value.fields.Name.value; 
+        console.log('profile name '+ this.prfName);
+        this.isProfileLoaded = true; // Set flag to true when profile data is loaded
+        // Call the function to process VR data if it has been fetched already
+        if (this.vrData) {
+            this.processVRData(this.vrData);
+        }
+        
+
+    }
+}
+@wire(getObjectInfo, { objectApiName: VENDORREGISTRATION_OBJECT })
+        results({ error, data }) {
+          if (data) {
+             const recordTypeInfos = data.recordTypeInfos;
+              console.log('recordTypeinfo'+recordTypeInfos);
+              console.log('recordTypeinfo stringyfy'+JSON.stringify(recordTypeInfos));
+              this.defaultRecordTypeId = Object.keys(recordTypeInfos).find(
+                      rtId => recordTypeInfos[rtId].defaultRecordTypeMapping
+                  );
+                console.log('this.defaultRecordTypeId'+this.defaultRecordTypeId)  
+                
+// Iterate and store label and value pairs without the master record
+this.Are_you_located_within_US__c_FIELDValue = Object.keys(recordTypeInfos)
+    .filter(key => !recordTypeInfos[key].master)
+    .map(key => ({
+        label: recordTypeInfos[key].name,
+        value: recordTypeInfos[key].recordTypeId
+    }));
+
+console.log(this.Are_you_located_within_US__c_FIELDValue);
+// Iterate and store end
+
+             
+            
+          } else if (error) {
+            this.error = error;
+            
+          }
+          
+        }
+@wire(getPicklistValuesByRecordType, { objectApiName: VENDORREGISTRATION_OBJECT, recordTypeId: '$defaultRecordTypeId' })
+wiredPicklistValues({ error, data }) {
+    if (data) {
+       console.log('data'+data)
+       console.log('data'+JSON.stringify(data));
+        // Get picklist values for this fields 'Status__c' and 'Tracking_Status__c'
+  //  this.Are_you_located_within_US__c_FIELDValue = data.picklistFieldValues.Are_you_located_within_US__c.values;
+  this.Registration_Type__c_FIELDValue = data.picklistFieldValues.Registration_Type__c.values;
+    // this.Vendor_Type__c_FIELDValue = data.picklistFieldValues.Vendor_Type__c.values;
+     this.Status_Display_for_all_others__c_FIELDValue = data.picklistFieldValues.Status_Display_for_all_others__c.values;
+     this.VR_Vendor_Status_Display__c_FIELDValue = data.picklistFieldValues.VR_Vendor_Status_Display__c.values;
+   // this.Are_you_located_within_US__c_FIELD.unshift({"label":'ALL',"value":''}); // Add All to the status picklist
+   // this.Preferred_Payment_Method__c_FIELD.unshift({"label":'ALL',"value":''});// Add All to the status picklist
+    
+    } else if (error) {
+        // Handle error
+        console.log('error')
+        console.log(error);
+    }
+    else{
+        console.log('n');
+    }
+}
+//------------------Get User Profile End-----------------------------
+   // Wire method with dynamic filters
+   @wire(getVendorRegistrationRecords, { status:'$status',fromDate:'$fromDate',toDate:'$toDate' }) 
+    vrResult(result){
+        console.log('inside vrresult'+this.filters)
+        this.vrResult = result;
+        const { data, error } = result;
+        
+        if (result.data) {
+           
+
+            console.log('VR data retrieved: ', data);
+        // Store VR data
+        this.vrData = data;
+        
+        // Check if profile is loaded before processing VR data
+        if (this.isProfileLoaded) {
+            this.processVRData(this.vrData);
+        }
+    }
+        else if (error) {
+            console.log(error);
+        }
+
+    }
+
+// ------------------Get Vendor Registration Records End-----------------------------
+
+// ------------------Process VR Data Function-----------------------------
+processVRData(data) {
+
+            let nameUrl;
+            let isSelected=false;
+           console.log('this.prfName'+this.prfName )
+           if(this.prfName != undefined) {
+            this.vr = data.map(row => { 
+                nameUrl = 'https://samsung2022--portal.sandbox.my.site.com/vendorregistration'+`/s/vendor-registration/${row.Id}`;
+                let disableAction=true;
+                let disableVendorCode=true;
+                let disableValidate=true;
+                let isvalidaterequired=false; 
+                let disableuploadfile=true;
+               console.log('Status'+row.Status_Display_for_all_others__c)
+               console.log('TIN_Check_Status__c'+row.TIN_Check_Status__c+
+                'GIACT_Status__c'+row.GIACT_Status__c+'Verbal_Confirmation_Status__c'+row.Verbal_Confirmation_Status__c+'Penny_Test_Status__c'+row.Penny_Test_Status__c);
+                console.log('TIN_Check_Timestamp__c'+row.TIN_Check_Timestamp__c+'GIACT_Timestamp__c'+row.GIACT_Timestamp__c+'Verbal_Confirmation_Timestamp__c'+row.Verbal_Confirmation_Timestamp__c+'Penny_Test_Timestamp__c'+row.Penny_Test_Timestamp__c)
+                
+                if( this.prfName==='Customer Community User - VR Accounting')
+                {
+                    
+                    console.log('inside system'+row.Status_Display_for_all_others__c)
+                if(row.Status_Display_for_all_others__c === 'Accounting Verification')
+                     {
+                        console.log('inside system 1'+row.Status_Display_for_all_others__c)
+                        if(!row.isAccountingVerificationUploadFile__c 
+                       ){
+                            disableuploadfile=false;
+                        }
+                       
+                        disableAction=false;
+                        //disableValidate=false; 22.10.2024
+                        if(row.VendorCode__c ===undefined)
+                            {
+                               console.log('disableVendorCod1233434334343'+disableVendorCode)
+                               disableVendorCode=false;
+                            }
+                            if(row.IsValid__c ===false)
+                                {
+                                   console.log('disableVendorCod1233434334343'+disableVendorCode)
+                                   disableValidate=false;
+                                }
+                               /* if(row.Status_Display_for_all_others__c === 'Accounting Verification' && row.Validate__c ===undefined){
+                                    isvalidaterequired=true;
+                                    disableValidate = false;
+                                    console.log('Account verify')
+                                    console.log('disableValidate'+disableValidate)
+                                    console.log('disableValidate'+disableValidate)
+                                }*/
+                       console.log(' action------>.......'+row.Status_Display_for_all_others__c) 
+                      /*  if(row.Status_Display_for_all_others__c === 'Pending Accounting Review'){
+                            disableAction=false;
+                            console.log('disableAction'+disableAction)
+                        }
+                        if(row.Status_Display_for_all_others__c === 'Accounting Registration'){
+                            disableAction=false;
+                            console.log('disableVendorCode'+disableVendorCode)
+                        }
+                         if(row.Status_Display_for_all_others__c === 'Accounting Verification' && row.Validate__c !='Pass'){
+                            disableValidate=true;
+                            console.log('disableValidate'+disableValidate)
+                        }
+                     
+                     console.log('vercode----------------------------------->'+row.VendorCode__c)
+                     if(row.VendorCode__c !=undefined && row.Status_Display_for_all_others__c != 'Accounting Registration')
+                     {
+                        console.log('disableVendorCod1233434334343'+disableVendorCode)
+                        disableVendorCode=true;
+                     }
+                     if(row.VendorCode__c ===undefined)
+                        {
+                           console.log('disableVendorCod1233434334343'+disableVendorCode)
+                           disableAction=true;
+                        }*/
+                        console.log('Test Disable action'+disableAction+'Name_on_the_Invoice__c'+row.Name_on_the_Invoice__c+'status'+row.Status_Display_for_all_others__c)
+                     }
+                     else if(row.Status_Display_for_all_others__c === 'Pending Accounting Review' || row.Status_Display_for_all_others__c === 'Accounting Registration'){
+                        
+                        console.log('disableuploadfile inside acc'+disableuploadfile);
+                        disableAction=false;
+                        if(row.VendorCode__c ===undefined)
+                            {
+                               console.log('disableVendorCod1233434334343'+disableVendorCode)
+                               disableVendorCode=false;
+                            }
+                        if((row.Status_Display_for_all_others__c === 'Pending Accounting Review' && !row.isAccountingUploadFile__c )||
+                        row.Status_Display_for_all_others__c === 'Accounting Registration' && !row.isAccountingRegistrationUploadFile_c 
+                       ){
+                            disableuploadfile=false;
+                        }
+                        
+                    }
+                   
+                }
+                
+             else if(this.prfName==='Customer Community User - VR Purchasing' && row.Status_Display_for_all_others__c === 'Pending Purchasing Review')
+             {
+                console.log('inside vrpurchasing')
+                disableAction=false;
+                if(!row.isPurchasingUploadFile__c 
+                ){
+                     disableuploadfile=false;
+                 }
+              
+                
+             }
+             else if(this.prfName==='Customer Community User - VR Tax' && row.Status_Display_for_all_others__c === 'Pending Tax Review')
+                {
+                    console.log('inside vrtax')
+                    disableAction=false;
+                    if(!row.isTaxUploadFile__c 
+                    ){
+                         disableuploadfile=false;
+                     }
+                   
+                  
+                }
+             else{
+                console.log('else inside not match with profiles')
+                disableAction=true;
+             }
+             
+               console.log('disable action'+disableAction+'disableValidation'+disableValidate+'disableVendorCode'+disableVendorCode)   
+               let formattedCreatedDate=this.handleformatedate(row.CreatedDate);
+               let formattedModifiedDate=this.handleformatedate(row.LastModifiedDate);
+
+                return {...row ,formattedModifiedDate,formattedCreatedDate, nameUrl ,disableAction,disableValidate,disableVendorCode,disableuploadfile,isvalidaterequired,isSelected: isSelected} 
+            })
+            console.log('vrlist'+JSON.stringify(this.vr))
+            this.error = null;
+         }
+         } 
+
+        
+    
+    //------------------To get Base Path
+    @wire(getBaseUrl,{sitename : 'VendorRegistrationPortal'}) 
+    baseurl(result){
+        this.basePathDownload = result.data;
+        
+    }
+    renderedCallback(){
+        return refreshApex(this.vrResult);
+    }
+  /* old code
+   handleformatedate(date){
+    let formattedDate;
+    if (date) {
+        const dateObj = new Date(date);
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        formattedDate = dateObj.toLocaleDateString('en-US', options);
+    
+        // Check if the formatted date is correct
+        console.log('Formatted Date:', formattedDate);
+    
+      //  row.LastModifiedDate = formattedDate;
+      return formattedDate;
+    } else {
+        console.error('Invalid LastModifiedDate:', date);
+        return date;
+      
+    }
+   }*/
+    handleformatedate(date) {
+        let formattedDate;
+        if (date) {
+            // Create a new Date object in UTC using Date.UTC
+            const dateObj = new Date(Date.UTC(
+                parseInt(date.substring(0, 4)),        // Year
+                parseInt(date.substring(5, 7)) - 1,    // Month (0-indexed in JS Date)
+                parseInt(date.substring(8, 10))        // Day
+            ));
+            
+            // Use toLocaleDateString to format as desired
+            formattedDate = dateObj.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric'
+            });
+        
+            console.log('Formatted Date:', formattedDate); // Expected "9/10/2024"
+            return formattedDate;
+        } else {
+            console.error('Invalid date:', date);
+            return date;
+        }
+    }
+    
+    handleapprove(event){
+        const actionname=event.target.label;
+        //-------------Call the 
+        this.handlegetapprovedrecords(actionname);
+        console.log('Inside handleapprove')
+        console.log('App size'+this.updatedRecords.length)
+        if(this.updatedRecords.length > 0){
+
+     
+            console.log('All selected records are valid.');
+        
+       
+
+        console.log('approved records'+ JSON.stringify( this.updatedRecords )+'actionname'+actionname)
+       // handleactions({approvedrecords :  this.approverecordId, action : this.actionName ,status: this.status})
+       handleactions({approvedrecords :  this.updatedRecords})
+        .then( result => {
+        
+            console.log( 'Result ' + JSON.stringify( result ) );
+            
+    
+            if ( result === 'sucess' ) {
+             if(actionname=='Approve'){
+              this.template.querySelector('c-toast-notification').handleToastNotification('VR Records Approved','VR Records Approved','success',2000,'dismissible');
+             }
+             else if(actionname=='Reject VR'){
+                this.template.querySelector('c-toast-notification').handleToastNotification('Application is Rejected','Application is Rejected','success',2000,'dismissible');  
+             }
+              refreshApex(this.vrResult);        
+            } 
+           
+            else {
+    
+                this.template.querySelector('c-toast-notification').handleToastNotification('VR Records Approved','Some error occured. Please reach out to your Salesforce Admin for help!','error',2000,'dismissible');
+    
+            }
+          
+        } );  
+    
+
+    }
+    else{
+        this.template.querySelector('c-toast-notification').handleToastNotification('No record Selected','No Record Selected ','error',2000,'dismissible');
+    } 
+    }
+    saveDraftValues(event){
+        console.log('Inside save draft values')
+    }
+    handleRowSelection(event) {
+        // Capture selected rows
+       
+        // this.selectedRows =  event.target.checked;
+        // console.log('Selected Rows: ',  this.selectedRows);
+        //  // Populate approvedrecordIds with selected row IDs
+        //  this.selectedRows.forEach(row => {
+        //     this.approverecordId.push(row.Id);
+        // });
+        const recordId = event.target.dataset.id; // Get the Id from the data-id attribute
+        const isSelected = event.target.checked; // Get the checked status of the checkbox
+     // Update the specific row in the array
+    this.vr = this.vr.map(row => {
+        // Check if the row exists and matches the recordId
+        if (row && row.Id === recordId) {
+            // Update the isSelected property for this row
+            return { ...row, isSelected: isSelected };
+        }
+        // Return the row unchanged if it doesn't match
+        return row;
+    });
+   // this.handlegetapprovedrecords();
+    // Optional: Log the updated array to check the result
+    console.log('Updated vr array:', JSON.stringify(this.vr));
+    }
+    handleSelectAll(event){
+        const isSelected = event.target.checked;
+      // Filter out records that are not disabled
+    const filteredRows = this.vr.filter(row => !row.disableAction);
+
+    // Update the `isSelected` property for the filtered rows
+    const updatedRows = filteredRows.map(row => {
+        // Push the ID of the updated record to the approverecordId list
+       
+        // Return the updated row with isSelected set to true
+        return { ...row, isSelected: isSelected };
+    });
+
+
+    // Create a new array where the old records are replaced with updated records
+    this.vr = this.vr.map(row => {
+        const updatedRow = updatedRows.find(updated => updated.Id === row.Id);
+        return updatedRow ? updatedRow : row; // Replace with updated row if exists, otherwise keep original
+    });
+
+    // Optional: Log the updated array to check the result
+    console.log('Updated vr array:', JSON.stringify(this.vr));  
+   // this.handlegetapprovedrecords();
+    }
+handlegetapprovedrecords(actionname){
+    // Define your approvedRecordIds array
+    //let approverecordId = [];
+console.log('Inside handlegetapprove')
+// Filter the vr array to get records where isSelected is true
+const selectedRows = this.vr.filter(row => row.isSelected);
+// Step 2: Update their status
+
+if(actionname=='Reject VR'){
+    this.rejectModal=false;
+    this.updatedRecords = selectedRows.map(row => {
+        const updatedStatus = 'rejected';
+        const vrStatusDisplay='rejected'
+        return {
+            ...row,
+            Status_Display_for_all_others__c: updatedStatus || row.Status_Display_for_all_others__c,
+            VR_Vendor_Status_Display__c:vrStatusDisplay || row.	VR_Vendor_Status_Display__c,
+            Reason_for_Rejection__c:this.rejectedReason
+            
+        };
+    });
+}
+/*-----------Before status change
+else if(actionname=='Approve'){
+    this.updatedRecords = selectedRows.map(row => {
+        const updatedStatus = this.statusMapping[row.Status_Display_for_all_others__c];
+        const vrStatusDisplay = (updatedStatus == 'Approved') ? 'Approved' : 'Under Review';
+
+        return {
+            ...row,
+            Status_Display_for_all_others__c: updatedStatus || row.Status_Display_for_all_others__c, 
+            VR_Vendor_Status_Display__c:vrStatusDisplay || row.VR_Vendor_Status_Display__c
+           
+        };
+    });
+}*/
+else if(actionname=='Approve'){
+    this.updatedRecords = selectedRows.map(row => {
+        const updatedStatus = this.statusMapping[row.Status_Display_for_all_others__c];
+        const vrStatusDisplay = this.vrstatusMapping[row.Status_Display_for_all_others__c];
+
+        return {
+            ...row,
+            Status_Display_for_all_others__c: updatedStatus || row.Status_Display_for_all_others__c, 
+            VR_Vendor_Status_Display__c:vrStatusDisplay || row.VR_Vendor_Status_Display__c
+           
+        };
+    });
+}
+
+
+
+
+/*
+// Extract the IDs of the selected records and store them in approvedRecordIds
+approverecordId = selectedRows.map(row => row.Id);
+
+// Optionally update the instance variable if needed
+this.approverecordId = approverecordId;*/
+
+// Log the result for verification
+console.log('Approved Record IDs:', JSON.stringify(this.updatedRecords));
+}
+/*handleVendorCodeChange(event){
+    const recordId = event.target.dataset.id;
+    const newVendorCode = event.target.value;
+
+    // Update the vendor code in the corresponding row
+    handleVendorcodeactions({updaterecord : recordId , vendorCode : newVendorCode})
+    
+    .then( result => {
+        
+        console.log( 'Result ' + JSON.stringify( result ) );
+        
+
+        if ( result === 'sucess' ) {
+
+          this.template.querySelector('c-toast-notification').handleToastNotification('VR Records Approved','VR Records Aprroved','success',2000,'dismissible');
+          refreshApex(this.vrResult);        
+        } else {
+
+            this.template.querySelector('c-toast-notification').handleToastNotification('VR Records Approved','Some error occured. Please reach out to your Salesforce Admin for help!','error',2000,'dismissible');
+
+        }
+})
+    
+}*/
+handleVendorCodeChange(event){
+    const recordId = event.target.dataset.id;  // Retrieve the record Id from the data attribute
+    const newVendorCode = event.target.value;  // Get the new vendor code from the input field
+
+    // Check if the recordId already exists in the array
+    const existingRecordIndex = this.vendorCodeUpdates.findIndex(change => change.recordId === recordId);
+
+    if (existingRecordIndex !== -1) {
+        // Update the vendor code if the record already exists in the array
+        this.vendorCodeUpdates[existingRecordIndex].vendorCode = newVendorCode;
+    } else {
+        // Add a new entry if the record does not exist in the array
+        this.vendorCodeUpdates.push({ recordId, vendorCode: newVendorCode });
+    }
+
+    console.log('Vendor Code Updates:', JSON.stringify(this.vendorCodeUpdates));
+}
+handleSaveChanges() {
+    if (this.vendorCodeUpdates.length > 0) {
+        // Call Apex method to update records
+        handleVendorcodeactions({ vendorUpdates: this.vendorCodeUpdates })
+            .then(result => {
+                console.log('Result:', JSON.stringify(result));
+
+                if (result === 'success') {
+                    this.template.querySelector('c-toast-notification')
+                        .handleToastNotification('Success', 'Vendor Codes Updated Successfully', 'success', 2000, 'dismissible');
+
+                    refreshApex(this.vrResult);
+                } else {
+                    this.template.querySelector('c-toast-notification')
+                        .handleToastNotification('Error', 'Some error occurred. Please contact your Salesforce Admin for help!', 'error', 2000, 'dismissible');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.template.querySelector('c-toast-notification')
+                    .handleToastNotification('Error', 'An unexpected error occurred. Please try again later.', 'error', 2000, 'dismissible');
+            });
+    } else {
+        this.template.querySelector('c-toast-notification')
+            .handleToastNotification('Info', 'No changes detected.', 'info', 2000, 'dismissible');
+    }
+}
+handleValidate(event){
+    this.myrecordId = event.target.dataset.id;
+    console.log('You selected Pass'+this.myrecordId);
+    this.isModalOpen = true;
+    //this.resetCategoryValues();
+    this.filterValidateRecord=[];
+    this.filterValidateRecord = this.vr.filter(row => row.Id === this.myrecordId);
+    console.log('filterValidateRecord'+JSON.stringify(this.filterValidateRecord));
+    this.resetCategoryValues();
+    this.validateFormValues={};
+this.updateRadioSelection(this.filterValidateRecord);
+   // this.fetchData();
+  //  console.log('fetch data is '+JSON.stringify(this.fetchData()));
+   }
+
+// Fetch data for the specific record
+/*
+fetchData() {
+    console.log('fetch data');
+    // Fetch data from Salesforce when the modal opens
+    getCategoryData({ recordId: this.myrecordId })
+    .then(result => {
+        console.log('result is '+result)
+        this.categoryResult=result;
+         // Update category values with fetched data
+        // this.categoryValues = { ...result };
+       // console.log('this.categoryValues is '+ JSON.stringify(this.categoryValues))
+        
+       this.categoryValues = { 
+        tin: result.tin, 
+        penny: result.penny, 
+        verbal: result.verbal, 
+        giact: result.giact 
+    };
+ console.log('this.categoryValues is '+ JSON.stringify(this.categoryValues))
+
+    this.categoryTimestamps = { 
+        tin: result.tinTimestamp,
+        giact: result.giactTimestamp,
+        verbal: result.verbalTimestamp, 
+        penny: result.pennyTimestamp
+
+         
+    };
+
+console.log(' this.categoryTimestamps  is '+ JSON.stringify( this.categoryTimestamps ))
+
+       this.updateRadioSelection();
+    })
+    .catch(error => {
+        this.showToast('Error', error.body.message, 'error');
+    });
+}
+*/
+
+
+// Close the modal
+handleClosePopup() {
+    this.isModalOpen = false;
+    this.selectedOption = ''; // Reset the radio selection when closing
+    //this.categoryValues = '';
+}
+
+// Handle radio button change
+/*handleRadioChange(event) {
+    this.selectedOption = event.detail.value;   
+}*/
+
+// Function to format the timestamp
+/*formatTimestamp(isoString) {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}*/
+formatTimestamp(timestamp) {
+    if (!timestamp) return null;  // Handle null or undefined input
+
+    // Create a Date object from the ISO string (assumes UTC)
+    const date = new Date(timestamp);
+
+    // Format to YYYY-MM-DD HH:mm:ss in local time
+    const formattedDate = date.getFullYear() + "-" +
+        String(date.getMonth() + 1).padStart(2, '0') + "-" +
+        String(date.getDate()).padStart(2, '0') + " " +
+        String(date.getHours()).padStart(2, '0') + ":" +
+        String(date.getMinutes()).padStart(2, '0') + ":" +
+        String(date.getSeconds()).padStart(2, '0');
+
+    return formattedDate;
+}
+
+
+resetCategoryValues() {
+    console.log('reset category vallues');
+    // Reset radio button selections for each category
+    this.isTinPass = false;
+    this.isTinFail = false;
+    this.isTinNA = false;
+    this.isPennyPass = false;
+    this.isPennyFail = false;
+    this.isPennyNA = false;
+    this.isVerbalPass = false;
+    this.isVerbalFail = false;
+    this.isVerbalNA = false;
+    this.isGiactPass = false;
+    this.isGiactFail = false;
+    this.isGiactNA = false;
+    this.isEmailSent=false;
+    this.tinTimStamp = '';
+    this.giactTimStamp =  '';
+    this.verbalTimStamp='';
+    this.pennyTimStamp='';
+   this.giactmodifiedTimStamp='';
+   this.tinmodifiedTimStamp='';
+    this.pennymodifiedTimStamp='';
+     this.verbalmodifiedTimStamp=''
+
+
+    /*// Reset the values in the categoryValues object
+    this.categoryValues = {
+        tin: '',
+        penny: '',
+        verbal: '',
+        giact: '',
+        tinTimStamp: '',
+        giactTimStamp: '',
+        verbalTimStamp:'',
+        pennyTimStamp:''
+    };*/
+}
+
+ // Update the radio button states based on the fetched category values
+ updateRadioSelection(vrRecord) {
+    console.log('update radio selection'+JSON.stringify(vrRecord));
+    console.log('update radio selection'+JSON.stringify(this.filterValidateRecord));
+    this.isEmailSent=vrRecord[0].Email_sent__c;
+   
+if(vrRecord[0].TIN_Check_Status__c){
+    this.isTinPass = vrRecord[0].TIN_Check_Status__c === 'Pass';
+    this.isTinFail = vrRecord[0].TIN_Check_Status__c === 'Fail';
+    this.isTinNA = vrRecord[0].TIN_Check_Status__c === 'N/A';
+console.log(vrRecord[0].TIN_Check_Status__c+'this.isTinPass'+this.isTinPass)
+}
+  if(vrRecord[0].GIACT_Status__c){
+    this.isGiactPass =  vrRecord[0].GIACT_Status__c=== 'Pass';
+    this.isGiactFail =  vrRecord[0].GIACT_Status__c === 'Fail';
+    this.isGiactNA = vrRecord[0].GIACT_Status__c === 'N/A';
+    console.log(vrRecord[0].GIACT_Status__c+'this.isGiactNA'+this.isGiactNA)
+  }
+  if(vrRecord[0].Penny_Test_Status__c){
+    this.isPennyPass = vrRecord[0].Penny_Test_Status__c=== 'Pass';
+    this.isPennyFail =vrRecord[0].Penny_Test_Status__c === 'Fail';
+    this.isPennyNA =  vrRecord[0].Penny_Test_Status__c === 'N/A';
+    console.log(vrRecord[0].Penny_Test_Status__c+'this.isPennyPass'+this.isPennyPass)
+  }
+  if(vrRecord[0].Verbal_Confirmation_Status__c){
+    this.isVerbalPass =  vrRecord[0].Verbal_Confirmation_Status__c=== 'Pass';
+    this.isVerbalFail =  vrRecord[0].Verbal_Confirmation_Status__c=== 'Fail';
+    this.isVerbalNA =  vrRecord[0].Verbal_Confirmation_Status__c === 'N/A';
+    console.log(vrRecord[0].Verbal_Confirmation_Status__c+'this.isVerbalPass'+this.isVerbalPass)
+  }
+   
+   // working code
+   this.tinTimStamp=vrRecord[0].TIN_Check_Timestamp__c;
+    this.giactTimStamp=vrRecord[0].GIACT_Timestamp__c;
+    this.verbalTimStamp=vrRecord[0].Verbal_Confirmation_Timestamp__c;
+    this.pennyTimStamp=vrRecord[0].Penny_Test_Timestamp__c;
+    this.giactmodifiedTimStamp=this.formatTimestamp(vrRecord[0].GIACT_Modified_Timestamp__c);
+/*
+   // Assign values if they are not undefined or null; otherwise, set to null
+this.tinTimStamp = vrRecord[0].TIN_Check_Timestamp__c != null ? this.formatTimestamp(vrRecord[0].TIN_Check_Timestamp__c)
+    : null;
+this.giactTimStamp = vrRecord[0].GIACT_Timestamp__c != null ? this.formatTimestamp(vrRecord[0].GIACT_Timestamp__c) 
+: null;
+this.verbalTimStamp = vrRecord[0].Verbal_Confirmation_Timestamp__c != null ? this.formatTimestamp(vrRecord[0].Verbal_Confirmation_Timestamp__c)
+: null;
+this.pennyTimStamp = vrRecord[0].Penny_Test_Timestamp__c != null ? this.formatTimestamp(vrRecord[0].Penny_Test_Timestamp__c)
+: null;
+
+// Format the GIACT Modified Timestamp if present; otherwise, set to null
+this.giactmodifiedTimStamp = vrRecord[0].GIACT_Modified_Timestamp__c != null 
+    ? this.formatTimestamp(vrRecord[0].GIACT_Modified_Timestamp__c) 
+    : null;
+    this.tinmodifiedTimStamp = vrRecord[0].TIN_Check_Modified_Timestamp__c != null 
+    ? this.formatTimestamp(vrRecord[0].TIN_Check_Modified_Timestamp__c) 
+    : null;
+    this.pennymodifiedTimStamp = vrRecord[0].Penny_Test_Modified_Timestamp__c != null 
+    ? this.formatTimestamp(vrRecord[0].Penny_Test_Modified_Timestamp__c) 
+    : null;
+    this.verbalmodifiedTimStamp = vrRecord[0].Verbal_Confirmation_Modified_Timestamp__c != null 
+    ? this.formatTimestamp(vrRecord[0].Verbal_Confirmation_Modified_Timestamp__c) 
+    : null;
+*/
+
+    /*this.template.querySelectorAll('input[type="radio"]').forEach(radio => {
+        if (radio.name === 'tin') {
+            radio.checked = radio.value === this.categoryValues.tin;
+        } else if (radio.name === 'penny') {
+            radio.checked = radio.value === this.categoryValues.penny;
+        } else if (radio.name === 'verbal') {
+            radio.checked = radio.value === this.categoryValues.verbal;
+        } else if (radio.name === 'giact') {
+            radio.checked = radio.value === this.categoryValues.giact;
+        }
+    });*/
+}
+
+
+handleRadioChange(event) {
+    console.log('hanldec change');
+    const category = event.target.name;
+    const value = event.target.value;
+    //console.log('category '+this.vrRecord[0].category);
+    console.log('category '+category);
+    console.log('value'+value);
+    const currentTime = new Date().toISOString(); // Capture current timestamp
+    //const currentTime = new Date(); // Capture current timestamp
+    console.log('current time '+currentTime)
+// Format the current timestamp to 'YYYY-MM-DD HH:mm:ss'
+const formattedTime = this.formatTimestamp(currentTime);
+console.log('formatted time '+formattedTime);
+
+this.validateFormValues[category] = value;   
+console.log('this.validateformvalue'+JSON.stringify(this.validateFormValues));
+    // Update the category values and manage selected states
+    //this.categoryValues[category] = value;
+    // Update the categoryValues object with the selected value
+    this.categoryValues = {
+        ...this.categoryValues,
+        [category]: value
+    };
+    console.log('categoryValues'+this.categoryValues);
+    console.log('this.categoryValues[category]'+this.categoryValues[category]);
+
+    // Reset and set only the selected value for the category
+    if (category === 'TIN_Check_Status__c') {
+        console.log('category'+category);
+        this.isTinPass = value === 'Pass';
+        this.isTinFail = value === 'Fail';
+        this.isTinNA = value === 'N/A';
+       
+        console.log('outside tintime'+this.tinTimStamp)
+      /*  const categorymodifiedtimestamp='TIN_Check_Modified_Timestamp__c'
+            this.validateFormValues[categorymodifiedtimestamp] = currentTime; */
+        if(!this.tinTimStamp && this.tinTimStamp==undefined){
+            console.log('inside tintime'+this.tinTimStamp)
+            this.tinTimStamp=formattedTime;
+            const categorytimestamp='TIN_Check_Timestamp__c'
+            this.validateFormValues[categorytimestamp] = currentTime;   
+        }
+    }  
+    else if (category === 'GIACT_Status__c') {
+        this.isGiactPass = value === 'Pass';
+        this.isGiactFail = value === 'Fail';
+        this.isGiactNA = value === 'N/A';
+       /* const categorymodifiedtimestamp='GIACT_Modified_Timestamp__c'
+            this.validateFormValues[categorymodifiedtimestamp] = formattedTime; */
+        if(!this.giactTimStamp){
+            console.log('inside tintime'+this.giactTimStamp)
+            this.giactTimStamp=formattedTime;
+            const categorytimestamp='GIACT_Timestamp__c'
+            this.validateFormValues[categorytimestamp] = formattedTime;   
+        }
+
+    }
+    else if (category === 'Verbal_Confirmation_Status__c') {
+        this.isVerbalPass = value === 'Pass';
+        this.isVerbalFail = value === 'Fail';
+        this.isVerbalNA = value === 'N/A';
+       /* const categorymodifiedtimestamp='Verbal_Confirmation_Modified_Timestamp__c'
+            this.validateFormValues[categorymodifiedtimestamp] = formattedTime; */
+        if(!this.verbalTimStamp){
+            console.log('inside tintime'+this.tinTverbalTimStampimStamp)
+            this.verbalTimStamp=formattedTime;
+            const categorytimestamp='Verbal_Confirmation_Timestamp__c'
+            this.validateFormValues[categorytimestamp] = formattedTime;   
+        }
+    } 
+    else if (category === 'Penny_Test_Status__c') {
+        console.log('category'+category);
+        this.isPennyPass = value === 'Pass';
+        this.isPennyFail = value === 'Fail';
+        this.isPennyNA = value === 'N/A';
+      /*  const categorymodifiedtimestamp='Penny_Test_Modified_Timestamp__c'
+            this.validateFormValues[categorymodifiedtimestamp] = formattedTime; */
+        if(!this.pennyTimStamp){
+            console.log('inside tintime'+this.pennyTimStamp)
+            this.pennyTimStamp=formattedTime;
+            const categorytimestamp='Penny_Test_Timestamp__c'
+            this.validateFormValues[categorytimestamp] = formattedTime;   
+        }
+    }
+
+    // Set the timestamp for the category if it's the first time selection
+   /* if (!this.categoryTimestamps[category]) {
+        this.categoryTimestamps[category] = formattedTime;
+        console.log('formatted time is'+formattedTime)
+        console.log('formatted time is '+ this.categoryTimestamps[category])
+    }*/
+      
+    
+  
+   
+}
+
+
+//Handle Check
+/*handleCheck(event){
+    const field = event.target.dataset.id;
+    const type = event.target.dataset.type; // Pass, Fail, or N/A
+    console.log('Checked:', field, type);
+    const isChecked = event.target.checked;
+    console.log('isChceked '+isChecked);
+    const currentTime = new Date().toISOString(); // Capture current timestamp
+// Format the current timestamp to 'YYYY-MM-DD HH:mm:ss'
+const formattedTime = this.formatTimestamp(currentTime);
+console.log('formatted time '+formattedTime);
+
+// Initialize the default value
+//let value;
+/* Set the value based on the checked option
+if (type === 'Pass') {
+    value = event.target.checked ? 'Pass' : ''; // Pass if checked, N/A if unchecked
+    console.log('pass value:', value);
+} else if (type === 'Fail') {
+    value = event.target.checked ? 'Fail' : ''; // Fail if checked, N/A if unchecked
+    console.log('fail value:', value);
+} else if (type === 'N/A') {
+    value = event.target.checked ? 'N/A' : ''; // N/A if checked, empty string if unchecked
+    console.log('N/A value:', value);
+}*/
+
+/*if (isChecked) {
+    console.log('123 isChecked'+isChecked);
+    
+    const value = type === 'Pass' ? 'Pass' : type === 'Fail' ? 'Fail' : 'N/A';
+    console.log('123 value'+value);
+    console.log('123 type'+type);
+    console.log('Before assignment:', this.testResults);
+
+   /* // Update status and timestamp dynamically
+    this.testResults[`${field}_Status__c`] = value;
+    this.testResults[`${field}_Timestamp__c`] = formattedTime;*/
+   
+    // Spread operator to clone the testResults object and assign new values
+/*this.testResults = {
+    ...this.testResults,
+    [`${field}_Status__c`]: value,
+    [`${field}_Timestamp__c`]: formattedTime
+};
+
+console.log('123 test results '+this.testResults[`${field}_Status__c`]);
+console.log('123 test results '+this.testResults[`${field}_Timestamp__c`]);
+
+}
+
+
+
+// Update the corresponding field and timestamp
+
+    console.log('ischecked'+isChecked);
+    console.log('field'+field);
+if (field === 'tinCheck') {
+    console.log('field 123 '+field);
+    console.log('type is '+type);
+    console.log('value 1 is '+value);
+    console.log('formatted time is '+formattedTime)
+    console.log('test result is '+JSON.stringify(this.testResults))
+    console.log('this.testResults.TIN_Check_Status__c:', this.testResults.TIN_Check_Status__c);
+      
+    this.testResults.TIN_Check_Status__c = this.testResults[`${field}_Status__c`];
+    console.log('Updated TIN_Check_Status__c:', testResults.TIN_Check_Status__c);
+
+        this.testResults.TIN_Check_Timestamp__c = this.testResults[`${field}_Timestamp__c`];
+        console.log('Updated TIN_Check_Status__c:', testResults.TIN_Check_Status__c);
+
+        console.log('this.testResults 1:', this.testResults);
+} 
+
+else if (field === 'giactCheck') {
+    this.testResults.GIACT_Status__c = type;
+    this.testResults.GIACT_Timestamp__c = formattedTime;
+    console.log('this.testResults 2:', this.testResults);
+} else if (field === 'verbalCheck') {
+    this.testResults.Verbal_Confirmation_Status__c = type;
+    this.testResults.Verbal_Confirmation_Timestamp__c = formattedTime;
+    console.log('this.testResults 3:', this.testResults);
+} else if (field === 'pennyCheck') {
+    this.testResults.Penny_Test_Status__c = type;
+    this.testResults.Penny_Test_Timestamp__c = formattedTime;
+    console.log('this.testResults 4:', this.testResults);
+}
+}
+
+
+}
+*/
+
+
+
+// Store the checkbox states in the component
+// Store the checkbox states in the component
+/*updateCheckboxStates() {
+    console.log('updateCheckboxStates');
+    this.tinCheckPassChecked = this.testResults.TIN_Check_Status__c === 'Pass';
+    console.log('tin pass check '+this.tinCheckPassChecked);
+    this.tinCheckFailChecked = this.testResults.TIN_Check_Status__c === 'Fail' ;
+    console.log('tin fail check '+this.tinCheckFailChecked);
+    this.tinCheckNaChecked = this.testResults.TIN_Check_Status__c === 'N/A';
+    console.log('tin na check '+this.tinCheckNaChecked);
+    this.giactPassChecked = this.testResults.GIACT_Status__c === 'Pass';
+    console.log('giact pass check '+this.giactPassChecked);
+
+    this.giactFailChecked = this.testResults.GIACT_Status__c === 'Fail';
+    console.log('giact fail check '+this.giactFailChecked);
+
+    this.giactNaChecked = this.testResults.GIACT_Status__c === 'N/A';
+    console.log('giact na check '+this.giactNaChecked);
+
+    this.verbalCheckPassChecked = this.testResults.Verbal_Confirmation_Status__c === 'Pass';
+    console.log('ver pass check '+this.verbalCheckPassChecked);
+
+    this.verbalCheckFailChecked = this.testResults.Verbal_Confirmation_Status__c === 'Fail';
+    console.log('ver fail check '+this.verbalCheckFailChecked);
+
+    this.verbalCheckNaChecked = this.testResults.Verbal_Confirmation_Status__c === 'N/A';
+    console.log('ver na check '+this.verbalCheckNaChecked);
+
+    this.pennyCheckPassChecked = this.testResults.Penny_Test_Status__c === 'Pass';
+    console.log('p pass check '+this.pennyCheckPassChecked);
+
+    this.pennyCheckFailChecked = this.testResults.Penny_Test_Status__c === 'Fail';
+    console.log('p fail check '+this.pennyCheckFailChecked);
+
+    
+    this.pennyCheckNaChecked = this.testResults.Penny_Test_Status__c === 'N/A';
+    console.log('p NA check '+this.pennyCheckNaChecked);
+
+    console.log('test results is'+this.testResults);
+}*/
+
+
+
+/// Save button logic (store selections temporarily)
+handleSave() {
+    console.log('handle save');
+    
+   /* // Save the current checkbox states to testResults
+    this.testResults.TIN_Check_Status__c = this.tinCheckPassChecked ? 'Pass' : this.tinCheckFailChecked ? 'Fail' : 'N/A';
+    this.testResults.GIACT_Status__c = this.giactPassChecked ? 'Pass' : this.giactFailChecked ? 'Fail' : 'N/A';
+    this.testResults.Verbal_Confirmation_Status__c = this.verbalCheckPassChecked ? 'Pass' : this.verbalCheckFailChecked ? 'Fail' : 'N/A';
+    this.testResults.Penny_Test_Status__c = this.pennyCheckPassChecked ? 'Pass' : this.pennyCheckFailChecked ? 'Fail' : 'N/A';
+    console.log('this.testResults '+this.testResults);*/
+    this.validateFormValues['Id']=this.myrecordId;
+    console.log('handle save'+JSON.stringify(this.validateFormValues))
+        // saveCheckboxValues({ recordId: this.myrecordId, categoryData: {
+        //     tin: this.filterValidateRecord[0].TIN_Check_Status__c,
+        //     penny: this.categoryValues.penny,
+        //     verbal: this.categoryValues.verbal,
+        //     giact: this.categoryValues.giact,
+        //     tinTimestamp: this.categoryTimestamps.tin,
+        //     pennyTimestamp: this.categoryTimestamps.penny,
+        //     verbalTimestamp: this.categoryTimestamps.verbal,
+        //     giactTimestamp: this.categoryTimestamps.giact
+        // }}) try {
+                // Save vendor registration (this now returns a Promise)
+                const result = saveVendorRegistration({
+                    formData: this.validateFormValues
+                })
+        .then( result => {
+            console.log('result'+result);
+    
+            console.log('handle validate action calling apex');
+        console.log('this.categoryValues'+JSON.stringify(this.categoryValues));
+    
+            if ( result) {
+                console.log('if result is'+result);
+        
+                this.showToast('Success', 'Data saved successfully!', 'success');
+                //refreshApex(this.categoryResult);  
+                console.log('isVerbalPass'+this.isVerbalPass) 
+                //this.isEmailModelOpen=(this.isVerbalPass && !this.isEmailSent);
+                /*if( this.isEmailModelOpen){
+                     console.log('If  this.isEmailModelOpen inside');
+
+                }
+                else{
+                    refreshApex(this.vrResult); 
+                    this.isModalOpen = false;   
+                }*/
+        
+        console.log('Email'+this.EmailModelOpen)
+        refreshApex(this.vrResult); 
+        this.isModalOpen = false; 
+                
+              } else {
+                console.log('esle result is'+result);
+                this.showToast('Error', error.body.message, 'error');
+        
+              }
+            })
+            
+            .catch(error => {
+            console.log('Error'+error);
+                });
+
+        
+    }
+
+// Validate Button Logic (submit to Salesforce and perform validation)
+handleValidateResult() {
+    console.log('handle validate ');
+  
+    // Perform validation (determine if any Fail exists)
+    let validationStatus = true;  // Default to 'Pass'
+// console.log('this.isTinFail'+this.isTinFail+'this.isPennyFail'+this.isPennyFail+' this.isVerbalFail'+ this.isVerbalFail+'this.isGiactFail'+this.isGiactFail)
+//         // Check if any category has a 'Fail' value
+//         if (this.isTinFail=== 'Fail' || 
+//             this.isPennyFail=== 'Fail' || 
+//             this.isVerbalFail === 'Fail' || 
+//             this.isGiactFail=== 'Fail') {
+//             validationStatus = 'Fail';  // If any category has 'Fail', update validation status to 'Fail'
+//         }
+//        console.log('validationStatus'+validationStatus)
+// Call the Apex method to save data in Salesforce
+handleValidateAction({ updaterecord : this.myrecordId, validationStatus })
+.then( result => {
+    console.log('handle validate action calling apex');
+
+    if ( result === 'success' ) {
+        console.log('if result is'+result);
+
+        this.template.querySelector('c-toast-notification').handleToastNotification('Validate VR Record','Validate VR Record','success',2000,'dismissible');
+        
+        
+        refreshApex(this.vrResult);        
+      } else {
+        console.log('esle result is'+result);
+          this.template.querySelector('c-toast-notification').handleToastNotification('Validate VR Record','Some error occured. Please reach out to your Salesforce Admin for help!','error',2000,'dismissible');
+
+      }
+    }).catch(error => {
+    
+});
+
+// Close the modal after submission
+this.isModalOpen = false;
+}
+
+
+// Handle Submit
+handleSubmit() {
+    console.log('Selected Option:', this.selectedOption);
+   
+    // Perform actions based on the selected value
+    if (this.selectedOption === 'pass') {
+        // Logic for pass
+        console.log('Pass')
+    } else if (this.selectedOption === 'fail') {
+        // Logic for fail
+        console.log('Fail')
+    }
+    
+
+
+      handleValidateaction({updaterecord : this.myrecordId,validateStatus : this.selectedOption})
+    .then( result => {
+       
+       console.log( 'Result ' + JSON.stringify( result ) );
+       
+
+       if ( result === 'sucess' ) {
+
+         this.template.querySelector('c-toast-notification').handleToastNotification('Validate VR Record','Validate VR Record','success',2000,'dismissible');
+         refreshApex(this.vrResult);        
+       } else {
+
+           this.template.querySelector('c-toast-notification').handleToastNotification('Validate VR Record','Some error occured. Please reach out to your Salesforce Admin for help!','error',2000,'dismissible');
+
+       }
+})   
+   
+
+    // Close the modal after submission
+    this.isModalOpen = false;
+}
+
+showToast(title, message, variant) {
+    const event = new ShowToastEvent({
+        title: title,
+        message: message,
+        variant: variant,
+    });
+    this.dispatchEvent(event);
+}
+// -------------------------------Download Functionality
+downloadCSVFile(event) {  
+       
+    
+    let rowEnd = '\n';
+    let csvString = '';
+ 
+    
+    csvString += 'Id#,Vendor Number,Date Last Modified,Stage,Status,Vendor Code\n';
+   
+    // Iterate over the data and add each row to the CSV
+    this.vr.forEach(row => {
+        csvString += `${row.Id},${row.Name},${row.LastModifiedDate},${row.Stage__c},${row.Status_Display_for_all_others__c},${row.VendorCode__c},\n`;
+    });
+
+    // Creating anchor element to download
+    let downloadElement = document.createElement('a');
+
+    // This  encodeURI encodes special characters, except: , / ? : @ & = + $ # (Use encodeURIComponent() to encode these characters).
+    downloadElement.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString);
+    downloadElement.target = '_self';
+    // CSV File Name
+    downloadElement.download = 'VendorRegistrationDetails.csv';
+    // below statement is required if you are using firefox browser
+    document.body.appendChild(downloadElement);
+    // click() Javascript function to download CSV file
+    downloadElement.click(); 
+
+
+}
+
+//-----------------------File Upload 
+ // Handle file change
+ handleFileChange1(event) {
+    const recordId = event.target.dataset.id;
+    const files = event.target.files;
+    let filterUploadFileRecord=[];
+    filterUploadFileRecord = this.vr.filter(row => row.Id === recordId);
+    console.log('filterUploadFileRecord'+JSON.stringify(filterUploadFileRecord)+filterUploadFileRecord[0].Status_Display_for_all_others__c);
+    if (files.length > 0) {
+        [...files].forEach(file => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                // Upload the file to Salesforce
+                uploadFilehome({ recordId: recordId, fileName: file.name, base64Data: reader.result })
+                    .then(result => {
+                        // Store uploaded file information in the respective row
+                       console.log('result file'+result+JSON.stringify(result))
+                        let updatedRows = [...this.vr];
+                        let record = updatedRows.find(row => row.Id === recordId);
+                        if (record) {
+                            if (!record.uploadedFiles) {
+                                record.uploadedFiles = [];
+                            }
+                            console.log('fileId: result.fileId'+result.Id)
+                            record.uploadedFiles.push({ fileName: file.name, fileId: result.fileId,disableuploadfile:true});
+                       // Disable the upload button for this row
+                       record.disableuploadfile = true;
+                       this.template.querySelector('c-toast-notification').handleToastNotification('File Uploaded Successfully','File Uploaded Successfully','success',2000,'dismissible');
+                        }
+                        this.vr = updatedRows;
+                    })
+                    .catch(error => {
+                        console.error('Error uploading file:', error);
+                    });
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+}
+
+// Handle file removal
+removeFile(event) {
+    const fileId = event.target.dataset.id;
+    const recordId = event.target.dataset.rowid;
+console.log('Inside deleted'+fileId)
+     // Call an Apex method to delete the file from Salesforce
+     deleteFile({ fileId: fileId })
+     .then(() => {
+         // Remove the file from the record's uploadedFiles array
+         console.log('Inside deleted then')
+         let updatedRows = [...this.vr];
+         let record = updatedRows.find(row => row.Id === recordId);
+         if (record) {
+             record.uploadedFiles = record.uploadedFiles.filter(file => file.fileId !== fileId);
+         }
+         this.vr = updatedRows;
+
+         // Optionally re-enable the file upload button after removing all files
+         const fileInput = this.template.querySelector(`input[data-id="${recordId}"]`);
+         if (fileInput) {
+             fileInput.disabled = false; // Re-enable file input if necessary
+         }
+     })
+     .catch(error => {
+         console.error('Error deleting file:', error);
+     });
+}
+//-----------------------File Upload End
+//------------------------------New file upload and confirm message ------------
+handleFileChange(event) {
+    const files = event.target.files;
+    this.fileUploadRecordId = event.target.dataset.id;
+    
+    if (files.length > 0) {
+        // Store the selected file and its name
+        this.selectedFile = files[0];
+        this.selectedFileName = this.selectedFile.name;
+
+        // Show the modal for confirmation
+        this.showModal = true;
+    }
+}
+
+confirmUpload() {
+    // If user confirms the upload
+    this.showModal = false; // Hide the modal
+   
+    let filterUploadFileRecord=[];
+    filterUploadFileRecord = this.vr.filter(row => row.Id ===  this.fileUploadRecordId);
+    console.log('filterUploadFileRecord'+JSON.stringify(filterUploadFileRecord)+filterUploadFileRecord[0].Status_Display_for_all_others__c);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        const base64Data = reader.result.split(',')[1]; // Get Base64 data
+        uploadFilehome({ recordId: this.fileUploadRecordId,stage:filterUploadFileRecord[0].Status_Display_for_all_others__c, fileName: this.selectedFile.name, base64Data: base64Data })
+            .then(result => {
+                // Handle successful upload
+                console.log('File uploaded successfully:', result);
+                refreshApex(this.vrResult); 
+                this.template.querySelector('c-toast-notification').handleToastNotification(
+                    'File Uploaded Successfully', 
+                    'Your file has been uploaded successfully!', 
+                    'success', 
+                    2000, 
+                    'dismissible'
+                );
+            })
+            .catch(error => {
+                console.error('Error uploading file:', error);
+            });
+    };
+
+    // Read the file as Base64 before uploading
+    reader.readAsDataURL(this.selectedFile);
+}
+
+cancelUpload() {
+    // If user cancels the upload
+    this.showModal = false; // Hide the modal
+    this.selectedFile = null; // Reset selected file
+}
+//------------------------------New file upload and confirm message end----------
+//------------------------Filter Functionality----------
+handleFilterChange(event){
+    const fieldLabel = event.target.label;
+    const fieldValue = event.target.value;
+     console.log('label'+fieldLabel+'fieldValue'+fieldValue)
+   /* switch (fieldLabel) {
+        case 'Submission Date':
+            this.filters.submissionDate = fieldValue;
+            break;
+        case 'Registration Type':
+            this.filters.registrationType = fieldValue;
+            break;
+        case 'Vendor Type':
+            this.filters.vendorType = fieldValue;
+            break;
+        case 'Status':
+            this.filters.status = fieldValue;
+            break;
+        case 'VR Vendor Status Display':
+            this.filters.vrVendorStatusDisplay = fieldValue;
+            break;
+        case 'Vendor Name':
+            this.filters.vendorName = fieldValue;
+            break;
+        default:
+            break;
+    }*/
+     // Update filters and create a new object reference for reactivity
+     this.filters = { ...this.filters, [fieldLabel]: fieldValue };
+    console.log('Updated filters:', JSON.stringify(this.filters));
+}
+handlefromDateChange(event){
+    this.fromDate = event.target.value;
+}
+handletoDateChange(event){
+    this.toDate = event.target.value;
+}
+handleStatusChange(event){
+this.status=event.target.value;
+}
+handlereject(){
+    this.rejectModal=true;   
+}
+handlereasonChange(event){
+this.rejectedReason=event.target.value;
+}
+cancelreject(){
+    this.rejectModal=false;
+}
+//=-----------------------Filter Functionality Change--------------
+//-------------------------Modal Email send values--------------
+handleEmailChange(event){
+    console.log('Inside Email change')
+    const category = event.target.name;
+    const value = event.target.value;
+    this.validateFormValues[category]=value;
+    console.log('category'+category+'value'+value);
+    console.log('Validateemail form value'+ this.validateFormValues+'Json'+JSON.stringify( this.validateFormValues))
+}
+handleSendEmail(event){
+console.log('Inside Email send ')
+this.validateEmailFormValues['Id']=this.myrecordId;
+this.validateEmailFormValues['Email_sent__c']=this.isVerbalPass;
+console.log('Validateemail form value'+ this.validateEmailFormValues+'Json'+JSON.stringify( this.validateEmailFormValues))
+/*Update code */
+
+const result = saveVendorRegistration({
+    formData: this.validateEmailFormValues
+})
+.then( result => {
+console.log('result'+result);
+
+
+
+
+if ( result) {
+console.log('if result is'+result);
+
+this.showToast('Success', 'Email Send Successfully!', 'success');
+refreshApex(this.vrResult); 
+ 
+//refreshApex(this.categoryResult);  
+
+
+
+   
+
+} else {
+console.log('esle result is'+result);
+this.showToast('Error', error.body.message, 'error');
+
+}
+})
+
+.catch(error => {
+console.log('Error'+error.body.message);
+});
+
+
+
+
+/*Update code End*/
+
+this.isEmailModelOpen=false;
+this.isModalOpen = false;  
+}
+handleCloseEmail(event){
+    console.log('Inside Email close ');
+    this.isEmailModelOpen=false;
+}
+//-----------------------handle send Email
+/// Save button logic (store selections temporarily)
+/*handleSave() {
+    console.log('handle save');
+    
+  
+    
+    console.log('handle save'+JSON.stringify(this.validateFormValues))
+        
+                const result = saveVendorRegistration({
+                    formData: this.validateFormValues
+                })
+        .then( result => {
+            console.log('result'+result);
+    
+            console.log('handle validate action calling apex');
+        console.log('this.categoryValues'+JSON.stringify(this.categoryValues));
+    
+            if ( result) {
+                console.log('if result is'+result);
+        
+                this.showToast('Success', 'Data saved successfully!', 'success');
+                //refreshApex(this.categoryResult);  
+                console.log('isVerbalPass'+this.isVerbalPass) 
+        this.isEmailModelOpen=this.isVerbalPass;
+        console.log('Email'+this.EmailModelOpen)
+                refreshApex(this.vrResult);    
+                
+              } else {
+                console.log('esle result is'+result);
+                this.showToast('Error', error.body.message, 'error');
+        
+              }
+            })
+            
+            .catch(error => {
+            
+        });
+
+        this.isModalOpen = false;    
+    }*/
+//----------------------handle send email end
+//-------------------------Modal Email send values End----------
+
+// ------------------handle save with Email send logic------------
+handleSavewithEmail() {
+    console.log('handle save email');
+    this.validateFormValues['Id']=this.myrecordId;
+    console.log('handle save'+JSON.stringify(this.validateFormValues))
+    this.isEmailModelOpen=(this.isVerbalPass && !this.isEmailSent);
+    if( !this.isEmailModelOpen){
+        console.log('Inside if condition')
+    this.handleSave();
+        
+        
+   }    
+    
+    }
+    handleSendEmailAction(){
+       
+            console.log('Inside if condition inside send Email Action')
+            this.validateFormValues['Email_sent__c']=this.isVerbalPass;
+            //console.log('If  this.isEmailModelOpen inside');
+            this.isEmailModelOpen=false;
+            this.handleSave();
+            
+       
+    }
+//-------------------handle save with email send logic end-----------
+
+
+
+
+
+}
