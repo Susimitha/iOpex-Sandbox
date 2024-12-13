@@ -1,23 +1,33 @@
 <template>
-    <!--Form Actions-->
-    <lightning-button class = "slds-p-around_small" variant="brand" label="Approve" onclick={handleapprove}></lightning-button>
-    <lightning-button class = "slds-p-around_small" variant="brand" label="Reject VR" onclick={handlereject}></lightning-button>
-    <!-- <lightning-button class = "slds-p-around_small" variant="brand" label="Validate" disable={disableValidate} onclick={handleValidate} ></lightning-button> -->
-    <lightning-button  class = "slds-p-around_small" variant="brand" label="Export" onclick={downloadCSVFile}></lightning-button>
-    <lightning-button class = "slds-p-around_small" variant="brand" label="Save Vendor Code" onclick={handleSaveChanges}></lightning-button>
-    <!--Form Actions-->
-    <!--Filter Section-->
+  
     
-    <div class="head">
-        <h1>Submission Date</h1>
-    </div>
-        <div class="filter-search">
+    
+        
+            <div class="slds-grid slds-m-top_small slds-wrap filter-search">
+<div class="slds-m-horizontal_x-large slds-m-top_x-large ">
+  <!--Form Actions-->
+  <lightning-button class = "slds-col slds-p-right_small slds-size_1-of-12 " variant="brand" label="Approve" onclick={handleapprove}></lightning-button>
+  <lightning-button class = "slds-col slds-p-right_small slds-size_1-of-12 " variant="brand" label="Reject VR" onclick={handlereject}></lightning-button>
+  <!-- <lightning-button class = "slds-p-around_small" variant="brand" label="Validate" disable={disableValidate} onclick={handleValidate} ></lightning-button> -->
+  <lightning-button  class = "slds-col slds-p-right_small slds-size_1-of-12 " variant="brand" label="Export" onclick={downloadCSVFile}></lightning-button>
+  <lightning-button class = "slds-col slds-p-right_small slds-size_1-of-12 " variant="brand" label="Save Vendor Code" onclick={handleSaveChanges}></lightning-button>
+  <!--Form Actions-->
+  <!--Filter Section-->
+
+</div>
+
+
+
+            <div class=" slds-col slds-size_5-of-6 slds-m-horizontal_medium head">
+                <h1>Submission Date</h1>
+            </div>
+
         <!-- <div class="slds-col slds-size_1-of-4 slds-p-around_medium">
             <lightning-input type="datetime" name="Submission Date" onchange={handleFilterChange} label="Submission Date"
               ></lightning-input>
             </div> -->
             
-              <div class="slds-col slds-size_1-of-4 slds-p-around_medium">
+              <div class="slds-col slds-size_1-of-4 slds-m-left_medium slds-p-around_medium">
                 <lightning-input type="date" name="fromDate" onchange={handlefromDateChange} label="From "
                   value={fromDate}></lightning-input>
               </div>
@@ -43,7 +53,7 @@
             onchange={handleFilterChange}>
         </lightning-combobox>
         </div> -->
-        <div class="slds-col slds-size_2-of-4 slds-p-around_medium">
+        <div class="slds-col slds-size_1-of-4 slds-p-around_medium">
                     
             <lightning-combobox
             label="Status"
@@ -62,11 +72,11 @@
         <div class="slds-col slds-size_1-of-2 slds-p-around_medium">
             <lightning-input name="Vendor Name" value="" label="Vendor Name" onchange={handleFilterChange}> </lightning-input>
         </div> -->
-      </div>
+      
+    </div>
     <!--Filter Section END-->
     <template if:true={vr}>
-    
-        <div class="slds-grid">
+            <div class="slds-grid">
         <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout">
             <thead>
                 <tr>
@@ -86,6 +96,8 @@
                     <th scope="col">Vendor Code</th>
     
                     <th scope="col">Accounting Validation</th>
+                    <th scope="col">Validate</th>
+                    <th scope="col">Upload File</th>
     
                     
                 </tr>
@@ -360,13 +372,21 @@
 <!--Modal Popup for Email send end-->
 
 
+
+
+
+
+
+
+
+
     <template if:false={vr}>
         No Information found.
     </template> 
     
     <c-toast-notification></c-toast-notification>
     </template>
-------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------
 JS
 
 import { LightningElement,wire,track,api } from 'lwc';
