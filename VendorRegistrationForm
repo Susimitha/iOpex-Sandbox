@@ -1,3 +1,59 @@
+<!--VendorRegistrationForm-->
+<template>
+    <lightning-card>
+        <div class="banner">
+            <h1 class="small">SAMSUNG</h1>
+            <h1>Vendor Registration </h1>
+        </div>
+        
+        <lightning-combobox
+            class="first-combobox"
+            name="RecordTypeId"
+            label="Is your company registered in the U.S.?"
+            value={value}
+            placeholder="Select an Option"
+            options={Are_you_located_within_US__c_FIELDValue}
+            onchange={handleChange1}>
+        </lightning-combobox>
+        <!--Table-->
+        <template if:true={vr}>
+
+            <div class="slds-grid">
+            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout">
+                <thead>
+                    <tr>
+                        
+                        <th scope="col">Application Id</th>
+                        <th scope="col">Submission Date</th>
+                        <th scope="col">Registration Type</th>
+                        <th scope="col">Status</th>
+                       
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={vr} for:item="row">
+                                <tr key={row.Id}>
+                                   
+                                   
+                                    <td> <a href={row.nameUrl} target="_blank">{row.Name}</a></td>
+                                    <td>{row.formattedCreatedDate}</td>
+                                    <td>{row.Registration_Type__c}</td>
+                                    <td>{row.VR_Vendor_Status_Display__c}</td>
+                                    <td>
+                                        <lightning-button  label="Resubmit" name="Resubmit" data-id={row.Id} disabled={row.isresubmit} 
+                                        onclick={handleresubmit}></lightning-button>
+                                    </td>
+                                    </tr>
+                                    </template>
+                                    </tbody>
+                                    
+                        </table>
+                        </div>
+                        </template>
+        <!--Table End-->
+    </lightning-card>
+    </template>
+
 <!--Domestic Form-->
 <template>
     <lightning-card>
