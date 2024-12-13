@@ -1,0 +1,2032 @@
+<!--Domestic Form-->
+<template>
+    <lightning-card>
+    <div>
+        <h1>SAMSUNG</h1>
+        <h1>Vendor Registration </h1>
+    </div>
+    
+    <template if:true={detailssection}>
+   
+    <div class="slds-grid slds-wrap">
+        <div style="margin-top:0px;" class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 slds-p-horizontal_large">  
+            <h2> General Information </h2>
+            
+        </div> 
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        
+     <lightning-input class="slds-p-vertical_small" type="text" value={formValues.Name_as_shown_on_your_W_9__c} name="Name_as_shown_on_your_W_9__c" label="Name (as shown on your W-9)" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+     <lightning-input class="slds-p-vertical_small" type="text" value={formValues.DBA_Business_Name_Disregarded_Entity__c} name="DBA_Business_Name_Disregarded_Entity__c" label="DBA Business Name / Disregarded Entity (if different from above)" onchange={handleChange} ></lightning-input>
+     <lightning-input class="slds-p-vertical_small" type="text"  value={formValues.Company_Address__c} name="Company_Address__c" label="Company Address (number, street, or suite no) " onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+     
+     
+     
+        <lightning-input class="slds-p-vertical_small" type="text" value={formValues.City__c} name="City__c" label="City " onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+
+    <div class="slds-grid new-flex">
+        <div class="slds-col slds-size_1-of-2 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_small" style="padding-left:0;">
+        <lightning-combobox
+        name="State__C"
+        class="slds-p-vertical_small"
+        label="State"
+        placeholder="Select an Option"
+        options={State__c_FIELDValue}
+        onchange={handleChange}
+        value={formValues.State__C}
+        required="true" message-when-value-missing="Please Complete this field">
+    </lightning-combobox>
+</div>
+<div class="slds-col slds-size_1-of-2 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_small" style="padding-right:0;">
+        <lightning-input class="slds-p-vertical_small" type="text" name="Zip_Code__c" value={formValues.Zip_Code__c} label="Zip Code" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"
+        pattern="[0-9]*" message-when-pattern-mismatch="Zip Code Allow only digits"></lightning-input>
+        </div>
+    </div>
+
+    <lightning-input class="slds-p-vertical_small" type="text" name="Remittance_Address__c" value={formValues.Remittance_Address__c} label="Remittance Address(if different from Company Address)"  onchange={handleChange} required={isRemittance_Address_mandatory} message-when-value-missing="Please Complete this field"></lightning-input>
+
+    <div class="slds-grid new-flex">
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-horizontal_small" style="padding-left:0;">
+            <lightning-input class="slds-p-vertical_small" type="text" name="Remittance_Address_City__c" value={formValues.Remittance_Address_City__c} label="City " onchange={handleChange} required={isRemittance_Address_mandatory} message-when-value-missing="Please Complete this field"></lightning-input>
+</div>
+<div class="slds-col slds-size_1-of-2 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-horizontal_small" style="padding-left:0;padding-right:0;">
+    <lightning-combobox
+    class="slds-p-vertical_small"
+        name="Remittance_State__c"
+        value={formValues.Remittance_State__c}
+        label="State"
+        placeholder="Select an Option"
+        options={State__c_FIELDValue}
+        onchange={handleChange}
+        required={isRemittance_Address_mandatory}
+        message-when-value-missing="Please Complete this field"
+        >
+    </lightning-combobox>
+</div>
+        <div class="slds-col slds-size_1-of-2 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-horizontal_small" style="padding-right:0;">
+            <lightning-input class="slds-p-vertical_small" type="text" name="Remittance_Address_Zip_Code__c" value={formValues.Remittance_Address_Zip_Code__c} label="Zip Code" onchange={handleChange}  required={isRemittance_Address_mandatory} message-when-value-missing="Please Complete this field"
+            pattern="[0-9]*" message-when-pattern-mismatch="Zip Code Allow only digits"></lightning-input>
+        </div>
+    </div>
+
+   </div>
+   <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+     <lightning-input class="slds-p-vertical_small" type="text" name="Tax_ID__c" value={formValues.Tax_ID__c} label="Tax ID " onchange={handleChange} required="true" pattern="[0-9]*" message-when-pattern-mismatch="Tax Id Allow only digits" message-when-value-missing="Please Complete this field"></lightning-input>
+    
+    <lightning-combobox
+        name="Name_on_the_Invoice__c"
+        class="slds-p-vertical_small"
+        label="Name on the Invoice"
+        value={Name_on_the_Invoice__c}
+        placeholder="Select an Option"
+        options={optionsBank}
+        onchange={handleChange}
+        required="true" message-when-value-missing="Please Complete this field">
+    </lightning-combobox>
+
+   
+    <lightning-combobox
+    name="Registration_Type__c"
+    class="slds-p-vertical_small"
+    label="Registration Type"
+    value={formValues.Registration_Type__c}
+    placeholder="Select an Option"
+    options={Registration_Type__c_FIELDValue}
+    onchange={handleChange}
+    required="true" message-when-value-missing="Please Complete this field">
+</lightning-combobox>
+
+<template if:true={isExistingVendorModification}>
+    <label class="slds-p-vertical_small" style="display: block" ><span style="color:red;">*</span> Modification Type</label>
+    <div class={ismodificationtypeerror}>
+        <template for:each={Modification_Type__c_FIELDValue} for:item="option" >
+            <div key={option.value}>
+                <lightning-input 
+                    type="checkbox" 
+                    label={option.label} 
+                    data-value={option.value}
+                    onchange={handleCheckboxChange}
+                    checked={option.checked}>
+                </lightning-input>
+            </div>
+        </template>
+        <div style="color:red;">Please Complete this field</div>
+        </div>
+</template>
+
+<template if:true={isReasonforBankChange}>
+    <div style="margin-top: 3rem;">
+        <lightning-input class="slds-p-vertical_small"  type="text" name="Reason_for_bank_change__c" value={formValues.Reason_for_bank_change__c} label="Reason for bank change" onchange={handleChange} required={isReasonforBankChange} message-when-value-missing="Please Complete this field"></lightning-input>
+    </div>
+
+
+</template>
+
+<template if:true={isReasonforBankChangepenny}>
+    <div style="margin-top: 1rem;">
+***All banking modification is subject to a penny test***</br>
+  1. Direct wire of small amount will be sent to the vendor's account</br>
+  2.Vendor is required to provide proof of received wire</br>
+  3. Proof should include account name,account number, and amount</br>
+  
+  *Alternative to penny test, vendor will need to provide SSI with a Power of Attorney to verify banking information with vendor's bank directly
+    </div>
+
+</template>
+
+</div>
+
+<div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 slds-p-horizontal_large">  
+<h2>Payment Information </h2>
+    
+  </div>  
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+          
+     <lightning-combobox
+        name="Preferred_Payment_Method__c"
+        value={formValues.Preferred_Payment_Method__c} 
+        class="slds-p-vertical_small"
+        label="Preferred Payment Method"
+        placeholder="Select an Option"
+        options={Preferred_Payment_Method__c_FIELDValue}
+        onchange={handleChange}
+        required="true" message-when-value-missing="Please Complete this field">
+    </lightning-combobox> 
+    <lightning-combobox
+    name="Bank_Account_Beneficiary_Name__c"
+    value={formValues.Bank_Account_Beneficiary_Name__c}
+    label="Bank Account Beneficiary Name (Account Holder Name)"
+    placeholder="Select an Option"
+    options={optionsBank}
+    onchange={handleChange} onclick={handleclickAccount} required={ispaymentinfo_Mandatory} message-when-value-missing="Please Complete this field"></lightning-combobox>
+ 
+    <!-- <lightning-input class="slds-p-vertical_small" type="text" name="Bank_Account_Beneficiary_Name__c" value={formValues.Bank_Account_Beneficiary_Name__c}  label="Bank Account Beneficiary Name (Account Holder Name)" onchange={handleChange} required={ispaymentinfo_Mandatory} message-when-value-missing="Please Complete this field"></lightning-input> -->
+    <lightning-input class="slds-p-vertical_small" type="text" name="Bank_Account_Number__c" value={formValues.Bank_Account_Number__c} label="Bank Account Number" onchange={handleChange} required={ispaymentinfo_Mandatory} message-when-value-missing="Please Complete this field"
+    pattern="[0-9]*" message-when-pattern-mismatch="Bank Account Number Allow only digits" ></lightning-input>
+</div>
+
+
+<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+          
+    <lightning-combobox
+    class="slds-p-vertical_small"
+    name="Banking_Support_Provided__c"
+    value={formValues.Banking_Support_Provided__c} 
+    label="Banking Support Provided"
+    placeholder="Select an Option"
+    options={Banking_Support_Provided__c_FIELDValue}
+    onchange={handleChange}
+    required={ispaymentinfo_Mandatory} message-when-value-missing="Please Complete this field">
+</lightning-combobox>
+<lightning-input class="slds-p-vertical_small" name="Bank_ACH_Routing_Number__c" value={formValues.Bank_ACH_Routing_Number__c}  label="Bank ACH Routing Number(9 digits)" maxlength="9" onchange={handleChange} required={ispaymentinfo_Mandatory} pattern="[0-9]{9}" message-when-pattern-mismatch="Please enter exactly 9 digits" message-when-value-missing="Please Complete this field"></lightning-input>
+<lightning-combobox
+class="slds-p-vertical_small"
+name="Payment_Term__c"
+value={formValues.Payment_Term__c} 
+label="Payment Term"
+placeholder="Select an Option"
+options={Payment_Term__c_FIELDValue}
+onchange={handleChange}
+ >
+</lightning-combobox>
+<template if:true={isPaymenttermOther}>
+<lightning-input class="slds-p-vertical_small" name="PaymentTerm_other__c" value={formValues.PaymentTerm_other__c}  label="Payment term other"  onchange={handleChange} required={isPaymenttermOther}></lightning-input>
+<lightning-input class="slds-p-vertical_small" name="Reason_for_non_Net30_payment_term__c" value={formValues.Reason_for_non_Net30_payment_term__c}  label="Please provide a reason for requiring payment term not listed above" onchange={handleChange} required={isPaymenttermOther}></lightning-input>
+</template>  
+</div>
+   <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+          
+    <lightning-input class="slds-p-vertical_small" type="text" name="Bank_Name__c" value={formValues.Bank_Name__c}  label="Bank Name" onchange={handleChange}  required={ispaymentinfo_Mandatory} message-when-value-missing="Please Complete this field"></lightning-input>
+   <lightning-input class="slds-p-vertical_small" type="text" name="Bank_Address__c" value={formValues.Bank_Address__c}  label="Bank Address" onchange={handleChange}  required={ispaymentinfo_Mandatory} message-when-value-missing="Please Complete this field"></lightning-input>
+  </div>
+  <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+          
+    <lightning-input class="slds-p-vertical_small" type="text" name="Bank_Contact_Name__c" value={formValues.Bank_Contact_Name__c}  label="Bank Contact Name" onchange={handleChange}   message-when-value-missing="Please Complete this field"></lightning-input>
+    <lightning-input class="slds-p-vertical_small" type="text" name="Bank_Contact_Title_Position__c" value={formValues.Bank_Contact_Title_Position__c}  label="Bank Contact Title / Position" onchange={handleChange}   message-when-value-missing="Please Complete this field"></lightning-input>
+    
+   </div>
+   
+   <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-6 slds-large-size_2-of-12 slds-p-horizontal_large">
+   <lightning-input class="slds-p-vertical_small" type="text" name="Bank_City__c" value={formValues.Bank_City__c}  label="City " onchange={handleChange}  required={ispaymentinfo_Mandatory} message-when-value-missing="Please Complete this field"></lightning-input>
+   </div>
+   <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-6 slds-large-size_2-of-12 slds-p-horizontal_large">
+   <lightning-combobox
+        class="slds-p-vertical_small"
+        name="Bank_State__c"
+        value={formValues.Bank_State__c} 
+        label="State"
+        placeholder="Select an Option"
+        options={Bank_State__c_FIELDValue}
+        onchange={handleChange}
+        required={ispaymentinfo_Mandatory} message-when-value-missing="Please Complete this field">
+    </lightning-combobox>
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-6 slds-large-size_2-of-12 slds-p-horizontal_large">
+    <lightning-input class="slds-p-vertical_small" type="text" name="Bank_Zip_Code__c" value={formValues.Bank_Zip_Code__c}  label="Zip Code" onchange={handleChange}  required={ispaymentinfo_Mandatory} message-when-value-missing="Please Complete this field"
+    pattern="[0-9]*" message-when-pattern-mismatch="Zip Code Allow only digits"></lightning-input>
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        <lightning-input class="slds-p-vertical_small" type="email" name="Bank_Contact_Email__c" value={formValues.Bank_Contact_Email__c}  label="Bank Contact Email" onchange={handleChange}   message-when-value-missing="Please Complete this field"></lightning-input>
+    </div>
+    <!--
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+    <lightning-input class="slds-p-vertical_small" type="text" name="Remittance_Address__c" value={formValues.Remittance_Address__c} label="Remittance Address(if different from Company Address)"  onchange={handleChange} required={isRemittance_Address_mandatory} message-when-value-missing="Please Complete this field"></lightning-input>
+    </div>
+     <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large"></div> -->
+   <!-- <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-6 slds-large-size_2-of-12 slds-p-horizontal_large">
+    <lightning-input class="slds-p-vertical_small" type="text" name="Remittance_Address_City__c" value={formValues.Remittance_Address_City__c} label="City " onchange={handleChange} required={isRemittance_Address_mandatory} message-when-value-missing="Please Complete this field"></lightning-input>
+   </div>
+   <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-6 slds-large-size_2-of-12 slds-p-horizontal_large">
+    <lightning-combobox
+    class="slds-p-vertical_small"
+        name="Remittance_State__c"
+        value={formValues.Remittance_State__c}
+        label="State"
+        placeholder="Select an Option"
+        options={State__c_FIELDValue}
+        onchange={handleChange}
+        required={isRemittance_Address_mandatory}
+        message-when-value-missing="Please Complete this field"
+        >
+    </lightning-combobox>
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-6 slds-large-size_2-of-12 slds-p-horizontal_large">
+            <lightning-input class="slds-p-vertical_small" type="text" name="Remittance_Address_Zip_Code__c" value={formValues.Remittance_Address_Zip_Code__c} label="Zip Code" onchange={handleChange}  required={isRemittance_Address_mandatory} message-when-value-missing="Please Complete this field"></lightning-input>
+  </div>-->
+        <!-- </div> -->
+
+<!-- </div> -->
+   
+   <div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 slds-p-horizontal_large">
+    
+    Vendor Contact Information
+   </div>
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+          
+    <lightning-input class="slds-p-vertical_small" type="text" name="Primary_Contact_Name__c" value={formValues.Primary_Contact_Name__c} label="Primary Contact Name" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field" ></lightning-input>
+   
+    <lightning-input class="slds-p-vertical_small" type="text" name="Primary_Contact_Title_Position__c" value={formValues.Primary_Contact_Title_Position__c} label="Primary Contact Title/Position" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+    
+    <lightning-input class="slds-p-vertical_small" type="text" name="A_R_Contact_Person_Name__c" value={formValues.A_R_Contact_Person_Name__c} label="A/R Contact Person Name(if different from above)" onchange={handleChange}></lightning-input>
+    
+    <lightning-input class="slds-p-vertical_small" type="text" name="A_R_Contact_Person_Title_Position__c" value={formValues.A_R_Contact_Person_Title_Position__c} label="A/R Contact Person Title/Position" onchange={handleChange}></lightning-input>
+    
+</div>
+<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+    <lightning-input class="slds-p-vertical_small" type="tel" name="Phone_Number__c" value={formValues.Phone_Number__c} label="Phone Number" onchange={handleChange} pattern="[0-9]*" message-when-pattern-mismatch="Phone Number Allow only digits" required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+    <lightning-input class="slds-p-vertical_small" type="email" name="Primary_Contact_Email__c"  value={formValues.Primary_Contact_Email__c} label="Primary Contact Email" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+    <lightning-input class="slds-p-vertical_small" type="text" name="A_R_Contact_Phone_Number__c" value={formValues.A_R_Contact_Phone_Number__c} label="A/R Contact Phone Number" onchange={handleChange} pattern="[0-9]*" message-when-pattern-mismatch="Phone Number Allow only digits"></lightning-input>
+    <lightning-input class="slds-p-vertical_small" type="email" name="A_R_Contact_Email__c" value={formValues.A_R_Contact_Email__c} label="A/R Contact Email"  onchange={handleChange} ></lightning-input>
+</div>
+<div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 slds-p-horizontal_large">
+  <h1>  Samsung Contact Information</h1>
+  
+  </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+      
+    <lightning-input class="slds-p-vertical_small" type="text" name="Samsung_Contact_Name__c" value={formValues.Samsung_Contact_Name__c} label="Samsung Contact Name" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+    <lightning-input class="slds-p-vertical_small" type="email" name="Samsung_Contact_Email__c" value={formValues.Samsung_Contact_Email__c} label="Samsung Contact Email" pattern=".+@(samsung\.com|partner\.samsung\.com|SAMSUNG\.COM|PARTNER\.SAMSUNG\.COM)"  message-when-pattern-mismatch="Samsung contact email has domain of @samsung.com or @partner.samsung.com" placeholder="username@(samsung.com or  partner.samsung.com)"  onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+    <!-- <lightning-input class="slds-p-vertical_small" type="email" name="Samsung_Contact_Email__c" value={formValues.Samsung_Contact_Email__c} label="Samsung Contact Email" pattern=".+@(samsung\.com|partner\.samsung\.com)" message-when-pattern-mismatch="Samsung contact email has domain of @samsung.com or @partner.samsung.com" placeholder="username@(samsung.com or  partner.samsung.com)"  onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input> -->
+</div>
+</div> 
+<div class="slds-p-vertical_large slds-p-horizontal_large">
+    <lightning-button variant="brand" label="Proceed to Register" title="Proceed to Register" onclick={handleProceedtoRegister} class="slds-m-left_x-small"></lightning-button>
+    <lightning-button variant="brand" label="Cancel" title="Cancel" onclick={handleCancel} class="slds-m-left_x-small"></lightning-button>
+</div>   
+</template>
+    <template if:true={signaturesection}>
+       
+        <c-signature-capture filtered-signature-form-values={filteredSignatureFormValues} onsignaturecapture={handlesignature}></c-signature-capture>
+        <!-- <lightning-button variant="brand" label="Proceed to Register" title="Proceed to Register" onclick={handleProceedtoRegister1} class="slds-m-left_x-small"></lightning-button> -->
+        <!-- <lightning-button variant="brand" label="Cancel" title="Cancel" onclick={handleCancel} class="slds-m-left_x-small"></lightning-button> -->
+       
+    </template>
+    <template if:true={filessection}>
+         <!-- select files
+       
+         <lightning-input type="file" accept=".xlsx, .xls, .csv, .png, .doc, .docx, .pdf"
+                        label='W9 (Domestic vendor) or W8 BEN (International vendor)' multiple="false" onchange={handleFilesChange}
+                        required="true" ></lightning-input>
+                        <lightning-input type="file" accept=".xlsx, .xls, .csv, .png, .doc, .docx, .pdf"
+                        label="Bank Account Support (Certificate of Acccount from bank or voided check)" multiple="false" onchange={handleFilesChange}  ></lightning-input>
+                        <lightning-input type="file" accept=".xlsx, .xls, .csv, .png, .doc, .docx, .pdf"
+                        label="Legal Document (Any state or federal issued document that displays Business Name)" multiple="false" onchange={handleFilesChange}  ></lightning-input>
+                        <lightning-input type="file" accept=".xlsx, .xls, .csv, .png, .doc, .docx, .pdf"
+                        label="Letter of Address Change Letter should have company letter head,  old address, new address, signature and date)" multiple="false" onchange={handleFilesChange} 
+                        required={isLetterofAddress}></lightning-input>
+                        -->
+                        <!--File Upload-->
+                        <template if:false={resubmitform}>
+                        <div class="slds-m-bottom_small">
+                            <lightning-input 
+                                type="file" 
+                                label="W9 (Domestic vendor) or W8 BEN (International vendor)" 
+                                data-id="file1" 
+                                onchange={handleFileChange} required={isW9FileRequired}>
+                            </lightning-input>
+                            <template if:true={fileContents.file1}>
+                                <div class="slds-pill_container slds-m-top_small">
+                                    <div class="slds-pill">
+                                        <span class="slds-pill__label">{file1Title}</span>
+                                        <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" data-id="file1" onclick={removeFile}>
+                                            <lightning-icon icon-name="utility:close" alternative-text="Remove" size="small"></lightning-icon>
+                                            <span class="slds-assistive-text">Remove</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    
+                        <div class="slds-m-bottom_small">
+                            <lightning-input 
+                                type="file" 
+                                label="Bank Account Support (Certificate of Acccount from bank or voided check)" 
+                                data-id="file2" 
+                                onchange={handleFileChange} required={isBankAccountSupportRequired}>
+                            </lightning-input>
+                            <template if:true={fileContents.file2}>
+                                <div class="slds-pill_container slds-m-top_small">
+                                    <div class="slds-pill">
+                                        <span class="slds-pill__label">{file2Title}</span>
+                                        <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" data-id="file2" onclick={removeFile}>
+                                            <lightning-icon icon-name="utility:close" alternative-text="Remove" size="small"></lightning-icon>
+                                            <span class="slds-assistive-text">Remove</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    
+                        <div class="slds-m-bottom_small">
+                            <lightning-input 
+                                type="file" 
+                                label="Legal Document (Any state or federal issued document that displays Business Name)" 
+                                data-id="file3" 
+                                onchange={handleFileChange} required={isLegalDocRequired}>
+                            </lightning-input>
+                            <template if:true={fileContents.file3}>
+                                <div class="slds-pill_container slds-m-top_small">
+                                    <div class="slds-pill">
+                                        <span class="slds-pill__label">{file3Title}</span>
+                                        <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" data-id="file3" onclick={removeFile}>
+                                            <lightning-icon icon-name="utility:close" alternative-text="Remove" size="small"></lightning-icon>
+                                            <span class="slds-assistive-text">Remove</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    
+                        <div class="slds-m-bottom_small">
+                            <lightning-input 
+                                type="file" 
+                                label="Letter of Address Change Letter should have company letter head,  old address, new address, signature and date)" 
+                                data-id="file4" 
+                                onchange={handleFileChange} required={isLetterofAddress}>
+                            </lightning-input>
+                            <template if:true={fileContents.file4}>
+                                <div class="slds-pill_container slds-m-top_small">
+                                    <div class="slds-pill">
+                                        <span class="slds-pill__label">{file4Title}</span>
+                                        <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" data-id="file4" onclick={removeFile}>
+                                            <lightning-icon icon-name="utility:close" alternative-text="Remove" size="small"></lightning-icon>
+                                            <span class="slds-assistive-text">Remove</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <!--File on Resubmit-->
+                    <template if:true={resubmitform}>
+                    <div class="slds-m-bottom_small">
+                        <lightning-input 
+                            type="file" 
+                            label="Resubmit File verberige " 
+                            data-id="file5" 
+                            onchange={handleFileChange} >
+                        </lightning-input>
+                        <template if:true={fileContents.file5}>
+                            <div class="slds-pill_container slds-m-top_small">
+                                <div class="slds-pill">
+                                    <span class="slds-pill__label">{file5Title}</span>
+                                    <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" data-id="file2" onclick={removeFile}>
+                                        <lightning-icon icon-name="utility:close" alternative-text="Remove" size="small"></lightning-icon>
+                                        <span class="slds-assistive-text">Remove</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    </template>
+                    <!--File on resubmit End-->
+                        <!-- <lightning-button label="Upload" onclick={uploadFiles} class="slds-m-top_medium"></lightning-button> -->
+                    <!--new code file
+                    File Upload Child Component
+        <c-file-upload-component
+        onfileupload={handleFileUpload}
+    ></c-file-upload-component>
+
+   
+    <template if:true={uploadedFiles}>
+        <p>Uploaded Files:</p>
+        <ul>
+            <template for:each={uploadedFiles} for:item="file">
+                <li key={file.fileId}>{file.fileName}</li>
+            </template>
+        </ul>
+    </template>-->
+                    <!--new code file End-->
+                       
+                        <div class="slds-p-vertical_large slds-p-horizontal_large">
+                            <lightning-button variant="brand" label="Back" title="Back" onclick={handleFileback} class="slds-m-left_x-small"></lightning-button>
+                         <!-- <lightning-button variant="brand" label="Register" title="Proceed to Register" onclick={handleRegister} class="slds-m-left_x-small"></lightning-button> -->
+                         <lightning-button variant="brand" label="Register" title="Proceed to Register" onclick={uploadFiles} class="slds-m-left_x-small"></lightning-button>
+                         <lightning-button variant="brand" label="Cancel" title="Cancel" onclick={handleCancel} class="slds-m-left_x-small"></lightning-button>
+                        </div>
+                        <template if:true={isLoading}>
+                            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                        </template>
+                        <!--File Upload End-->
+       
+       
+         <c-toast-notification></c-toast-notification>
+    </template>
+</lightning-card>
+</template>
+<!--International Form-->
+<template>
+    <lightning-card>
+    <div>
+        <h1>SAMSUNG</h1>
+        <h1>Vendor Registration </h1>
+    </div>
+    
+    <template if:true={detailssection}>
+    <div class="slds-grid slds-wrap"> 
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 slds-p-horizontal_large">    
+    <h2>General Information </h2>
+    
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        <lightning-input type="text" name="Name_of_organization_beneficial_owner__c" value={formValues.Name_of_organization_beneficial_owner__c} label="Name of organization that is the beneficial owner (as shown on your W-8BEN) " required="true" message-when-value-missing="Please Complete this field" onchange={handleChange}></lightning-input>
+        <lightning-input type="text" name="Name_of_disregarded_entity__c" value={formValues.Name_of_disregarded_entity__c} label="Name of disregarded entity receiving the payment (if different from above)"  onchange={handleChange}></lightning-input>
+        <lightning-input type="text" name="Company_Address__c" value={formValues.Company_Address__c} label="Company Address (number, street, or suite no) " onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+      <!--  <lightning-combobox
+                        name="Registration_Type__c"
+                        label="Registration Type"
+                        value={formValues.Registration_Type__c}
+                        placeholder="Select an Option"
+                        options={Registration_Type__c_FIELDValue}
+                        onchange={handleChange}
+                        required="true" message-when-value-missing="Please Complete this field">
+        </lightning-combobox>
+        <template if:true={isNewVendor}>
+                 <div class="slds-p-top_medium">
+                    <p><strong>***All banking modification is subject to a penny test***</strong></p>
+                    <ol class="slds-list_ordered">
+                        <li>Direct wire of small amount will be sent to the vendor's account</li>
+                        <li>Vendor is required to provide proof of received wire</li>
+                        <li>Proof should include account name, account number, and amount</li>
+                    </ol>
+                    <p class="slds-p-top_small">
+                        <em>Alternative to penny test: vendor will need to provide SSI with a Power of Attorney to verify banking information with vendor's bank directly</em>
+                    </p>
+                </div>
+        
+        </template>-->
+        <div class="slds-grid slds-grid_vertical">
+
+            <div class="slds-col slds-size_1-of-1 slds-p-right_x-small">
+                <span>
+                    <lightning-input 
+                            type="text" 
+                            name="City__c" 
+                            value={formValues.City__c} 
+                            label="City" 
+                            onchange={handleChange} 
+                            required="true" 
+                            message-when-value-missing="Please Complete this field">
+                    </lightning-input>
+                </span>
+                
+            </div>
+           
+              
+                <div class="slds-col slds-size_1-of-1 slds-p-right_x-small">
+                    <span>
+                        <lightning-input 
+                            type="text" 
+                            name="International_State__C" 
+                            value={formValues.International_State__C} 
+                            label="State" 
+                            onchange={handleChange}>
+                        </lightning-input>
+                    </span>
+                </div>
+              
+            
+           
+          </div>
+        
+    
+        <div class="slds-grid slds-gutters slds-wrap">
+            
+            <div class="slds-col slds-size_1-of-2 slds-p-left_x-small">
+                <lightning-input 
+                    type="text" 
+                    name="Zip_Code__c" 
+                    value={formValues.Zip_Code__c} 
+                    label="Zip Code" 
+                    onchange={handleChange}>
+                </lightning-input>
+            </div>
+           
+            <div class="slds-col slds-size_1-of-2 slds-p-left_x-small">
+                <lightning-input 
+                    type="text" 
+                    name="Country__c" 
+                    value={formValues.Country__c} 
+                    label="Country" 
+                    onchange={handleChange} 
+                    required="true" 
+                    message-when-value-missing="Please Complete this field">
+                </lightning-input>
+            </div>
+        </div>
+
+        
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        <lightning-input type="text" name="Foreign_TIN__c" value={formValues.Foreign_TIN__c} label="Foreign TIN " required="true" message-when-value-missing="Please Complete this field" onchange={handleChange}></lightning-input>
+        
+        <lightning-combobox
+        name="Name_on_the_Invoice__c"
+        label="Name on the Invoice"
+        value={Name_on_the_Invoice__c}
+        placeholder="Select an Option"
+        options={options}
+        onchange={handleChange}
+        required="true" message-when-value-missing="Please Complete this field">
+    </lightning-combobox>
+   <lightning-combobox
+                        name="Registration_Type__c"
+                        label="Registration Type"
+                        value={formValues.Registration_Type__c}
+                        placeholder="Select an Option"
+                        options={Registration_Type__c_FIELDValue}
+                        onchange={handleChange}
+                        required="true" message-when-value-missing="Please Complete this field">
+        </lightning-combobox>
+        <template if:true={isNewVendor}>
+                 <div class="slds-p-top_medium">
+                    <p><strong>***All banking modification is subject to a penny test***</strong></p>
+                    <ol class="slds-list_ordered">
+                        <li>Direct wire of small amount will be sent to the vendor's account</li>
+                        <li>Vendor is required to provide proof of received wire</li>
+                        <li>Proof should include account name, account number, and amount</li>
+                    </ol>
+                    <p class="slds-p-top_small">
+                        <em>Alternative to penny test: vendor will need to provide SSI with a Power of Attorney to verify banking information with vendor's bank directly</em>
+                    </p>
+                </div>
+        
+        </template>
+
+    
+    
+    
+   <!--</div>-->
+    
+   
+   
+    
+    
+    <!--<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">-->
+        
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 flex">
+                
+            
+            <template if:true={isExistingVendorModification}>
+                <label class="slds-p-vertical_small" style="display: block">
+                    <span style="color: red;">*</span> Modification Type
+                </label>
+                
+                <div class={ismodificationtypeerror}>
+                    <template for:each={Modification_Type__c_FIELDValue} for:item="option">
+                        <div key={option.value}>
+                            <lightning-input 
+                                type="checkbox" 
+                                label={option.label} 
+                                data-value={option.value}
+                                onchange={handleCheckboxChange}
+                                checked={option.checked}>
+                            </lightning-input>
+                        </div>
+                    </template>
+                </div>
+                
+                <div style="color: red;">Please Complete this field</div>
+            </template>
+        </div>
+        
+        <template if:true={isReasonforBankChange}>
+            <lightning-input 
+                class="slds-p-vertical_small"
+                type="text"
+                name="Reason_for_bank_change__c"
+                value={formValues.Reason_for_bank_change__c}
+                label="Reason for bank change"
+                onchange={handleChange}
+                required={isReasonforBankChange}
+                message-when-value-missing="Please Complete this field">
+            </lightning-input>
+        </template>
+        
+        <template if:true={isReasonforBankChangepenny}>
+            <div class="slds-p-top_medium">
+                <p><strong>***All banking modification is subject to a penny test***</strong></p>
+                <ol class="slds-list_ordered">
+                    <li>Direct wire of small amount will be sent to the vendor's account</li>
+                    <li>Vendor is required to provide proof of received wire</li>
+                    <li>Proof should include account name, account number, and amount</li>
+                </ol>
+                <p class="slds-p-top_small">
+                    <em>Alternative to penny test: vendor will need to provide SSI with a Power of Attorney to verify banking information with vendor's bank directly</em>
+                </p>
+            </div>
+        </template>
+    </div>
+    
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 slds-p-horizontal_large">  
+    <h2>International Vendor Questionnaire</h2>
+    
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        <lightning-combobox
+        name="Entity_Type_applies_to_you__c"
+        value={formValues.Entity_Type_applies_to_you__c}
+        label="If your entity type is 'Corporate,' please select one that applies to you: " 
+        placeholder="Select an Option"
+        options={Entity_Type_applies_to_you__c_FIELDValue}
+        onchange={handleChange}
+        required="true" message-when-value-missing="Please Complete this field">
+        </lightning-combobox>
+        <lightning-input type="text" name="Describe_servicetype_or_Delivered_SSI__c" value={formValues.Describe_servicetype_or_Delivered_SSI__c} label="Please describe the type of service or product that will be delivered to SSI: " onchange={handleChange}  required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+        <lightning-input type="text" name="Receiving_Payment_Service__c" value={formValues.Receiving_Payment_Service__c} label="If the vendor is receiving payment for service, please provide country and city where the contracted services will be performed:" onchange={handleChange}  required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+        
+    
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+       
+        
+    </div>
+    
+    
+    
+    
+    
+    <!-- <lightning-combobox
+        name="Preferred Payment Method"
+        label="Preferred Payment Method"
+        value={value}
+        placeholder="Select an Option"
+        options={Preferred_Payment_Method_FIELDValue}
+        onchange={handleChange}
+        required="true"> 
+    </lightning-combobox>-->
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 slds-p-horizontal_large">  
+    <h2>Payment Information </h2>
+    <h3>Please note USD is strongly recommended. Currency other than USD may delay the payment. </h3>
+    <h3>Certificate of Account/bank letter issued and signed by bank within 2 months of submission date is required for vendor registration submission </h3>
+    
+    </div>
+    
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+    
+        <lightning-combobox
+        name="Invoice_Currency__c"
+        value={formValues.Invoice_Currency__c}
+        label="Invoice Currency"
+        placeholder="Select an Option"
+        options={Invoice_Currency__c_FIELDValue}
+        onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-combobox>
+        
+        <template if:true={isOtherCurrency}>
+            <lightning-input type="text" value={formValues.Describe_Other_Invoice_Currency__c} name="Describe_Other_Invoice_Currency__c" label='Please specific currency type' onchange={handleChange} required={isOtherCurrency}></lightning-input>
+        </template>
+        
+       </div>
+       <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        <lightning-combobox
+class="slds-p-vertical_small"
+name="Payment_Term__c"
+value={formValues.Payment_Term__c} 
+label="Payment Term"
+placeholder="Select an Option"
+options={Payment_Term__c_FIELDValue}
+onchange={handleChange}
+ >
+</lightning-combobox>
+<template if:true={isPaymenttermOther}>
+    <lightning-input class="slds-p-vertical_small" name="PaymentTerm_other__c" value={formValues.PaymentTerm_other__c}  label="Payment term other"  onchange={handleChange} required={isPaymenttermOther}></lightning-input>
+    <lightning-input class="slds-p-vertical_small" name="Reason_for_non_Net30_payment_term__c" value={formValues.Reason_for_non_Net30_payment_term__c}  label="Please provide a reason for requiring payment term not listed above"  onchange={handleChange} required={isPaymenttermOther}></lightning-input>   
+</template> 
+       </div>
+       <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        <lightning-combobox
+           name="Account_Beneficiary_Name__c"
+           value={formValues.Account_Beneficiary_Name__c}
+           label="Account Beneficiary Name (Account Holder Name)"
+           placeholder="Select an Option"
+           options={options}
+           onchange={handleChange} onclick={handleclickAccount} required="true" message-when-value-missing="Please Complete this field"></lightning-combobox>
+        <lightning-input type="text" name="International_Bank_Account_Number_IBAN__c" value={formValues.International_Bank_Account_Number_IBAN__c} label="International Bank Account Number(IBAN)" onchange={handleChange}></lightning-input>
+        <lightning-input type="text" name="Bank_Name__c" value={formValues.Bank_Name__c} label="Bank Name" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+        <lightning-input type="text" name="Bank_Address__c" value={formValues.Bank_Address__c} label="Bank Address" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        <lightning-input type="text" name="Bank_Account_Number__c" value={formValues.Bank_Account_Number__c} label="Bank Account Number" required="true" message-when-value-missing="Please Complete this field" pattern="[0-9]*" message-when-pattern-mismatch="Bank Account Number Allow only digits" onchange={handleChange}></lightning-input>
+        <lightning-input type="text" name="Swift_Bank_Identifier_Code_IBC__c" value={formValues.Swift_Bank_Identifier_Code_IBC__c} label="Swift/Bank Identifier Code(BIC)" required="true" message-when-value-missing="Please Complete this field" onchange={handleChange}></lightning-input>  
+        <lightning-input type="text" name="Bank_Contact_Name__c" value={formValues.Bank_Contact_Name__c} label="Bank Contact Name" onchange={handleChange}></lightning-input>
+        <lightning-input type="text" name="Bank_Contact_Title_Position__c" value={formValues.Bank_Contact_Title_Position__c} label="Bank Contact Title / Position" onchange={handleChange}></lightning-input>
+       
+        
+        
+    </div>
+    
+    
+    
+    
+    
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        <div class="slds-grid slds-wrap">
+        
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-right_small">
+            <lightning-input type="text" name="Bank_City__c" value={formValues.Bank_City__c} label="City" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+        
+          </div>
+          <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12">
+            <lightning-input type="text" name="International_Bank_State__c"  value={formValues.International_Bank_State__c} label="State" onchange={handleChange}></lightning-input>
+            </div>
+        
+        
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12  slds-p-right_small">  
+                  <lightning-input type="text" name="Bank_Zip_Code__c" value={formValues.Bank_Zip_Code__c} label="Zip Code" onchange={handleChange}></lightning-input>
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 ">
+            <lightning-input type="text" name="Bank_Country__c" value={formValues.Bank_Country__c} label="Country" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input> 
+        
+        </div>
+        </div>
+        </div>
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+            <lightning-input type="email" name="Bank_Contact_Email__c"  value={formValues.Bank_Contact_Email__c} label="Bank Contact Email" onchange={handleChange}></lightning-input>  
+        </div>
+    
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 slds-p-horizontal_large">  
+    Contact Information
+    
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        <lightning-input type="text" name="Primary_Contact_Name__c" value={formValues.Primary_Contact_Name__c} label="Primary Contact Name" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field" ></lightning-input>
+        <lightning-input type="text" name="Primary_Contact_Title_Position__c" value={formValues.Primary_Contact_Title_Position__c} label="Primary Contact Title/Position" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+        <lightning-input type="text" name="A_R_Contact_Person_Name__c" value={formValues.A_R_Contact_Person_Name__c} label="A/R Contact Person Name(if different from above)" onchange={handleChange}></lightning-input>
+        <lightning-input type="text" name="A_R_Contact_Person_Title_Position__c" value={formValues.A_R_Contact_Person_Title_Position__c} label="A/R Contact Person Title/Position" onchange={handleChange}></lightning-input> 
+        
+    </div>
+    
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        <lightning-input type="tel" name="Phone_Number__c"  value={formValues.Phone_Number__c} label="Phone Number" onchange={handleChange} pattern="[0-9]*" message-when-pattern-mismatch="Phone Number Allow only digits" required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+        <lightning-input type="email" name="Primary_Contact_Email__c" value={formValues.Primary_Contact_Email__c} label="Primary Contact Email" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+        <lightning-input type="text" name="A_R_Contact_Phone_Number__c" value={formValues.A_R_Contact_Phone_Number__c} label="A/R Contact Phone Number" onchange={handleChange} pattern="[0-9]*" message-when-pattern-mismatch="Phone Number Allow only digits" ></lightning-input>
+        <lightning-input type="email" name="A_R_Contact_Email__c" value={formValues.A_R_Contact_Email__c} label="A/R Contact Email"  onchange={handleChange} ></lightning-input>
+        
+    </div>
+    
+    
+    
+    
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 slds-p-horizontal_large">  
+    Samsung Contact Information
+    
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+        <lightning-input type="text" name="Samsung_Contact_Name__c" value={formValues.Samsung_Contact_Name__c} label="Samsung Contact Name" onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+        
+    </div>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-horizontal_large">
+       
+        <lightning-input type="email" name="Samsung_Contact_Email__c" value={formValues.Samsung_Contact_Email__c} label="Samsung Contact Email" pattern=".+@(samsung\.com|partner\.samsung\.com|SAMSUNG\.COM|PARTNER\.SAMSUNG\.COM)" message-when-pattern-mismatch="Samsung contact email has domain of @samsung.com or @partner.samsung.com" placeholder="username@(samsung.com or  partner.samsung.com)"  onchange={handleChange} required="true" message-when-value-missing="Please Complete this field"></lightning-input>
+    </div>
+    
+    
+    </div>
+    <div class="slds-p-vertical_large slds-p-horizontal_large">
+    <lightning-button variant="brand" label="Proceed to Register" title="Proceed to Register" onclick={handleProceedtoRegister} class="slds-m-left_x-small"></lightning-button>
+    <lightning-button variant="brand" label="Cancel" title="Cancel" onclick={handleCancel} class="slds-m-left_x-small"></lightning-button>
+    </div>
+    </template>
+    <template if:true={signaturesection}>
+       
+    <c-signature-capture filtered-signature-form-values={filteredSignatureFormValues} onsignaturecapture={handlesignature}></c-signature-capture>
+        
+    </template>
+    <template if:true={filessection}>
+        <!-- <div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 slds-p-horizontal_large">  
+            Add Documents :
+            <hr></hr>
+    </div>
+            <lightning-input type="file" accept=".xlsx, .xls, .csv, .png, .doc, .docx, .pdf"
+            label='W9 (Domestic vendor) or W8 BEN (International vendor)' multiple="false" onchange={handleFilesUpload}
+            required="true" ></lightning-input>
+            <lightning-input type="file" accept=".xlsx, .xls, .csv, .png, .doc, .docx, .pdf"
+            label="Bank Account Support (Certificate of Acccount from bank or voided check)" multiple="false" onchange={handleFilesUpload} required="true" ></lightning-input>
+            <lightning-input type="file" accept=".xlsx, .xls, .csv, .png, .doc, .docx, .pdf"
+            label="Legal Document (Any state or federal issued document that displays Business Name)" multiple="false" onchange={handleFilesUpload} required="true" ></lightning-input>
+            <lightning-input type="file" accept=".xlsx, .xls, .csv, .png, .doc, .docx, .pdf"
+            label="Letter of Address Change Letter should have company letter head,  old address, new address, signature and date)" multiple="false" onchange={handleFilesUpload} 
+            required={isLetterofAddress}></lightning-input>
+    
+    
+            <lightning-button variant="brand" label="Back" title="Back" onclick={handleFileback} class="slds-m-left_x-small"></lightning-button>
+    <lightning-button variant="brand" label="Register" title="Proceed to Register" onclick={handleRegister} class="slds-m-left_x-small"></lightning-button>
+    <lightning-button variant="brand" label="Cancel" title="Cancel" onclick={handleCancel} class="slds-m-left_x-small"></lightning-button> -->
+    <template if:false={resubmitform}>
+    <div class="slds-m-bottom_small">
+        <lightning-input 
+            type="file" 
+            label="W9 (Domestic vendor) or W8 BEN (International vendor)" 
+            data-id="file1" 
+            onchange={handleFileChange} required="true" message-when-value-missing="Please Complete this field">
+        </lightning-input>
+        <template if:true={fileContents.file1}>
+            <div class="slds-pill_container slds-m-top_small">
+                <div class="slds-pill">
+                    <span class="slds-pill__label">{file1Title}</span>
+                    <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" data-id="file1" onclick={removeFile}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Remove" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Remove</span>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+    
+    <div class="slds-m-bottom_small">
+        <lightning-input 
+            type="file" 
+            label="Bank Account Support (Certificate of Acccount from bank or voided check)" 
+            data-id="file2" 
+            onchange={handleFileChange} required="true" message-when-value-missing="Please Complete this field">
+        </lightning-input>
+        <template if:true={fileContents.file2}>
+            <div class="slds-pill_container slds-m-top_small">
+                <div class="slds-pill">
+                    <span class="slds-pill__label">{file2Title}</span>
+                    <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" data-id="file2" onclick={removeFile}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Remove" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Remove</span>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+    
+    <div class="slds-m-bottom_small">
+        <lightning-input 
+            type="file" 
+            label="Legal Document (Any state or federal issued document that displays Business Name)" 
+            data-id="file3" 
+            onchange={handleFileChange} message-when-value-missing="Please Complete this field" required={isLegalDocRequired}>
+        </lightning-input>
+        <template if:true={fileContents.file3}>
+            <div class="slds-pill_container slds-m-top_small">
+                <div class="slds-pill">
+                    <span class="slds-pill__label">{file3Title}</span>
+                    <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" data-id="file3" onclick={removeFile}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Remove" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Remove</span>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+    
+    <div class="slds-m-bottom_small">
+        <lightning-input 
+            type="file" 
+            label="Letter of Address Change Letter should have company letter head,  old address, new address, signature and date)" 
+            data-id="file4" 
+            onchange={handleFileChange} required={isLetterofAddress} message-when-value-missing="Please Complete this field">
+        </lightning-input>
+        <template if:true={fileContents.file4}>
+            <div class="slds-pill_container slds-m-top_small">
+                <div class="slds-pill">
+                    <span class="slds-pill__label">{file4Title}</span>
+                    <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" data-id="file4" onclick={removeFile}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Remove" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Remove</span>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+    </template>
+     <!--File on Resubmit-->
+     <template if:true={resubmitform}>
+        <div class="slds-m-bottom_small">
+            <lightning-input 
+                type="file" 
+                label="Resubmit File verberige " 
+                data-id="file5" 
+                onchange={handleFileChange} >
+            </lightning-input>
+            <template if:true={fileContents.file5}>
+                <div class="slds-pill_container slds-m-top_small">
+                    <div class="slds-pill">
+                        <span class="slds-pill__label">{file5Title}</span>
+                        <button class="slds-button slds-button_icon slds-pill__remove" title="Remove" data-id="file2" onclick={removeFile}>
+                            <lightning-icon icon-name="utility:close" alternative-text="Remove" size="small"></lightning-icon>
+                            <span class="slds-assistive-text">Remove</span>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+        </template>
+    <!-- <lightning-button label="Upload" onclick={uploadFiles} class="slds-m-top_medium"></lightning-button> -->
+    
+    
+    <div class="slds-p-vertical_large slds-p-horizontal_large">
+        <lightning-button variant="brand" label="Back" title="Back" onclick={handleFileback} class="slds-m-left_x-small"></lightning-button>
+     <!-- <lightning-button variant="brand" label="Register" title="Proceed to Register" onclick={handleRegister} class="slds-m-left_x-small"></lightning-button> -->
+     <lightning-button variant="brand" label="Register" title="Proceed to Register" onclick={uploadFiles} class="slds-m-left_x-small"></lightning-button>
+     <lightning-button variant="brand" label="Cancel" title="Cancel" onclick={handleCancel} class="slds-m-left_x-small"></lightning-button>
+    </div>
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+    </template>
+    <!--File Upload End-->
+    
+    
+    <c-toast-notification></c-toast-notification>
+    
+    </template>
+    </lightning-card>
+    </template>
+//---------------------------------------JS------------------------
+import { LightningElement,wire,track } from 'lwc';
+import { getObjectInfo, getPicklistValues,getPicklistValuesByRecordType } from 'lightning/uiObjectInfoApi';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import VENDORREGISTRATION_OBJECT from '@salesforce/schema/Vendor_Registration__c'; // Replace with your object API name
+import Are_you_located_within_US__c_FIELD from '@salesforce/schema/Vendor_Registration__c.Are_you_located_within_US__c'; // Replace with your field API name
+import Preferred_Payment_Method__c_FIELD from '@salesforce/schema/Vendor_Registration__c.Preferred_Payment_Method__c'; // Replace with your field API name
+import getvr from '@salesforce/apex/VendorRegistrationController.getvr';
+import getVendorRegistrationRecordsdetails from '@salesforce/apex/VendorRegistrationController.getVendorRegistrationRecordsdetails';
+import saveVendorRegistration from '@salesforce/apex/VendorRegistrationController.saveVendorRegistration';
+import getVendorFormValues from '@salesforce/apex/VendorRegistrationController.getVendorFormValues';
+import uploadFile from '@salesforce/apex/VendorRegistrationController.uploadFile';
+import generateAndAttachPDFForAccount from '@salesforce/apex/VendorRegistrationController.generateAndAttachPDFForAccount';
+//import fileupload from '@salesforce/apex/VendorRegistrationController.fileupload';
+import DomesticForm from './DomesticForm.html';
+import InternationalForm from './InternationalForm.html';
+import VendorRegistrationFormscreen from './vendorRegistrationForm.html';
+
+export default class VendorRegistrationForm extends LightningElement {
+    Are_you_located_within_US__c_FIELDValue = [];//get Are_you_located_within_US__c_FIELDValues
+    Preferred_Payment_Method__c_FIELDValue=[];//get Preferred_Payment_Method__c_FIELDValue
+    Banking_Support_Provided__c_FIELDValue=[];//get Banking_Support_Provided__c_FIELDValue 
+    Name_on_the_Invoice__c_FIELDValue=[];//get Name_on_the_Invoice__c_FIELDValue
+    Modification_Type__c_FIELDValue=[];//get Modification_Type__c_FIELDValue
+    Registration_Type__c_FIELDValue=[];//get Registration_Type__c_FIELDValue
+    State__c_FIELDValue=[];//get State__c_FIELDValue
+    Bank_State__c_FIELDValue=[];//get Bank_State__c_FIELDValue
+    Remittance_State__c_FIELDValue=[];//get Remittance_State__c_FIELDValue
+    Entity_Type_applies_to_you__c_FIELDValue=[];//get Entity_Type_applies_to_you__c_FIELDValue
+    Invoice_Currency__c_FIELDValue=[];//get Invoice_Currency__c_FIELDValue
+    Account_Beneficiary_Name__c_FIELDValue=[];//get Account_Beneficiary_Name__c_FIELDValue
+    Payment_Term__c_FIELDValue=[]; //get Payment_Term__c_FIELDValue
+    selectedScreen;
+    defaultRecordTypeId;
+    @track isOtherCurrency= false;
+    detailssection=true;
+    signaturesection=false;
+    filessection=false;
+    signatureData;
+    value;
+    isW9FileRequired = false;
+    isBankAccountSupportRequired = false;
+    isLegalDocRequired = false;
+    isLetterofAddress=false;
+    isRemittance_Address_mandatory=false;
+    isReasonforBankChange=false;
+    isReasonforBankChangepenny=false;
+    ismodificationtype=false;
+    ismodificationtypeerror='noerror';
+    isExistingVendorModification=false;
+    isNewVendor=false;
+    ispaymentinfo_Mandatory=true;
+    resubmitform=false;
+    selecteditems;
+    files=[];
+    allfiles=[];
+    vendorResister={
+        Are_you_located_within_US__c:null,
+        Preferred_Payment_Method__c:null
+    }
+    modificationTypeOptions;
+    recordId;
+    @track Name_of_organization_beneficial_owner__c;
+    @track Name_of_disregarded_entity__c;
+    @track Name_as_shown_on_your_W_9__c;
+    @track DBA_Business_Name_Disregarded_Entity__c;
+    @track Name_on_the_Invoice__c;
+    @track vr = []; // To store the processed result with disable actions
+
+    //uploadedFiles = [];//new file
+
+    get file1Title() {
+        return this.fileContents.file1 ? this.fileContents.file1.Title : 'No Title';
+    }
+    
+    get file2Title() {
+        return this.fileContents.file2 ? this.fileContents.file2.Title : 'No Title';
+    }
+    
+    get file3Title() {
+        return this.fileContents.file3 ? this.fileContents.file3.Title : 'No Title';
+    }
+    
+    get file4Title() {
+        return this.fileContents.file4 ? this.fileContents.file4.Title : 'No Title';
+    }
+    //File on resubmit
+    get file5Title() {
+        return this.fileContents.file5 ? this.fileContents.file5.Title : 'No Title';
+    }
+    @track fileContents = {
+        file1: null,
+        file2: null,
+        file3: null,
+        file4: null,
+        file5: null,//file on resubmit
+    };
+    isLoading = false;
+    @track filteredSignatureFormValues={
+        Agree_terms__c:false,
+        Sign_Date__c:'',
+        Signer_Name__c:'',
+        Signer_Title__c:'',
+        Signature_Image__c:'',
+        dataURL:''
+    };
+    @track formValues = {
+        Name_as_shown_on_your_W_9__c: '',
+        Name_of_organization_beneficial_owner__c:'',
+        DBA_Business_Name_Disregarded_Entity__c: '',
+        Company_Address__c:'',
+        City__c:'',
+        State__C:'',
+        Zip_Code__c:'',
+        Tax_ID__c:'',
+        Name_on_the_Invoice__c:'',
+        Registration_Type__c:'',
+        Reason_for_bank_change__c:'',
+        Preferred_Payment_Method__c:'',
+        Bank_Account_Beneficiary_Name__c:'',
+        Bank_ACH_Routing_Number__c:'',
+        Banking_Support_Provided__c:'',
+        Bank_Name__c:'',
+        Bank_Account_Number__c:'',
+        Bank_Address__c:'',
+        Bank_Contact_Name__c:'',
+        Bank_Contact_Title_Position__c:'',
+        Bank_City__c:'',
+        Bank_State__c:'',
+        Bank_Zip_Code__c:'',
+        Bank_Contact_Email__c:'',
+        Remittance_Address__c:'',
+        Remittance_Address_City__c:'',
+        Remittance_State__c:'',
+        Remittance_Address_Zip_Code__c:'',
+        Primary_Contact_Name__c:'',
+        Primary_Contact_Title_Position__c:'',
+        A_R_Contact_Person_Name__c:'',
+        A_R_Contact_Person_Title_Position__c:'',
+        Phone_Number__c:'',
+        Primary_Contact_Email__c:'',
+        A_R_Contact_Phone_Number__c:'',
+        A_R_Contact_Email__c:'',
+        Samsung_Contact_Name__c:'',
+        Samsung_Contact_Email__c:'',
+        Foreign_TIN__c:'',
+        Name_of_disregarded_entity__c:'',
+        International_State__C:'',
+        Country__c:'',
+        Entity_Type_applies_to_you__c:'',
+        Describe_servicetype_or_Delivered_SSI__c:'',
+        Receiving_Payment_Service__c:'',
+        Invoice_Currency__c:'',
+        Account_Beneficiary_Name__c:'',
+        International_Bank_Account_Number_IBAN__c:'',
+        Swift_Bank_Identifier_Code_IBC__c:'',
+        International_Bank_State__c:'',
+        Bank_Country__c:'',
+        Agree_terms__c:false,
+        Sign_Date__c:'',
+        Signer_Name__c:'',
+        Signer_Title__c:'',
+        Signature_Image__c:'',
+        Reason_for_non_Net30_payment_term__c:'',
+        PaymentTerm_other__c:'',
+        Id:''
+    };
+
+    
+    @wire(getObjectInfo, { objectApiName: VENDORREGISTRATION_OBJECT })
+    objectInfo;
+    render(){
+        console.log('this.detailssection'+this.detailssection);
+        console.log('this.ssection'+this.signaturesection);
+        console.log('this.section'+this.filessection);
+        const selectedrecordtype=this.getLabelByValue(this.selectedScreen)
+        this.value=selectedrecordtype;
+        if(selectedrecordtype=='No'){
+        return InternationalForm;
+        }
+        else if(selectedrecordtype=='Yes'){
+           return DomesticForm; 
+        }
+        else{
+           return VendorRegistrationFormscreen;
+        }
+        
+        }
+        // Function to get label by value
+getLabelByValue(value) {
+    const result = this.Are_you_located_within_US__c_FIELDValue.filter(item => item.value === value);
+    return result.length > 0 ? result[0].label : null;
+}
+get options() {
+    return [
+        { label: this.Name_of_organization_beneficial_owner__c, value: this.Name_of_organization_beneficial_owner__c },
+        { label: this.Name_of_disregarded_entity__c, value: this.Name_of_disregarded_entity__c }
+        
+    ];
+}
+get optionsBank() {
+    return [
+        { label: this.Name_as_shown_on_your_W_9__c, value: this.Name_as_shown_on_your_W_9__c },
+        { label: this.DBA_Business_Name_Disregarded_Entity__c, value: this.DBA_Business_Name_Disregarded_Entity__c }
+        
+    ];
+}
+
+       @wire(getObjectInfo, { objectApiName: VENDORREGISTRATION_OBJECT })
+        results({ error, data }) {
+          if (data) {
+             const recordTypeInfos = data.recordTypeInfos;
+              console.log('recordTypeinfo'+recordTypeInfos);
+              console.log('recordTypeinfo stringyfy'+JSON.stringify(recordTypeInfos));
+              this.defaultRecordTypeId = Object.keys(recordTypeInfos).find(
+                      rtId => recordTypeInfos[rtId].defaultRecordTypeMapping
+                  );
+                console.log('this.defaultRecordTypeId'+this.defaultRecordTypeId)  
+                
+// Iterate and store label and value pairs without the master record
+this.Are_you_located_within_US__c_FIELDValue = Object.keys(recordTypeInfos)
+    .filter(key => !recordTypeInfos[key].master)
+    .map(key => ({
+        label: recordTypeInfos[key].name,
+        value: recordTypeInfos[key].recordTypeId
+    }));
+
+console.log(this.Are_you_located_within_US__c_FIELDValue);
+// Iterate and store end
+
+             
+            
+          } else if (error) {
+            this.error = error;
+            
+          }
+          
+        }
+        @wire(getPicklistValuesByRecordType, { objectApiName: VENDORREGISTRATION_OBJECT, recordTypeId: '$defaultRecordTypeId' })
+        wiredPicklistValues({ error, data }) {
+            if (data) {
+               console.log('data'+data)
+               console.log('data'+JSON.stringify(data));
+                // Get picklist values for this fields 'Status__c' and 'Tracking_Status__c'
+          //  this.Are_you_located_within_US__c_FIELDValue = data.picklistFieldValues.Are_you_located_within_US__c.values;
+           this.Preferred_Payment_Method__c_FIELDValue = data.picklistFieldValues.Preferred_Payment_Method__c.values;
+           this.Banking_Support_Provided__c_FIELDValue=data.picklistFieldValues.Banking_Support_Provided__c.values;
+           this.Name_on_the_Invoice__c_FIELDValue=data.picklistFieldValues.Name_on_the_Invoice__c.values;
+           this.Modification_Type__c_FIELDValue=data.picklistFieldValues.Modification_Type__c.values;
+           this.Registration_Type__c_FIELDValue=data.picklistFieldValues.Registration_Type__c.values;
+           this.State__c_FIELDValue=data.picklistFieldValues.State__c.values;
+           this.Bank_State__c_FIELDValue=data.picklistFieldValues.	Bank_State__c.values;
+           this.Remittance_State__c_FIELDValue=data.picklistFieldValues.Remittance_State__c.values;
+           this.Entity_Type_applies_to_you__c_FIELDValue=data.picklistFieldValues.Entity_Type_applies_to_you__c.values;
+           this.Invoice_Currency__c_FIELDValue=data.picklistFieldValues.Invoice_Currency__c.values;
+           this.Account_Beneficiary_Name__c_FIELDValue=data.picklistFieldValues.Account_Beneficiary_Name__c.values;
+           this.Payment_Term__c_FIELDValue=data.picklistFieldValues.Payment_Term__c.values;
+           // this.Are_you_located_within_US__c_FIELD.unshift({"label":'ALL',"value":''}); // Add All to the status picklist
+           // this.Preferred_Payment_Method__c_FIELD.unshift({"label":'ALL',"value":''});// Add All to the status picklist
+            
+            } else if (error) {
+                // Handle error
+                console.log('error')
+                console.log(error);
+            }
+            else{
+                console.log('n');
+            }
+        }
+        
+
+
+    handleChange1(event) {
+        console.log('Inside handlechange1')
+        this.selectedScreen = event.detail.value;
+        this.defaultRecordTypeId=event.detail.value;
+        const fieldName = event.target.name;
+        const fieldValue = event.target.value;
+        this.formValues[fieldName] = fieldValue;
+        console.log('Updated Form Values:', JSON.stringify(this.formValues));
+        console.log('this.selectedScreen'+this.selectedScreen)
+        console.log('Inside handle change 1 this.defaultRecordTypeId'+this.defaultRecordTypeId);
+    }
+    
+    handleCheckboxChange(event) {
+        console.log('Onchange')
+        const value = event.target.dataset.value;
+        const checked = event.target.checked;
+       /* if(value=='Bank Account' && checked){
+          this.isReasonforBankChange=true;
+        }
+        else if(value=='Vendor Company Address' || value=='Vendor Remittance Address' && checked ){
+          this.isLetterofAddress=true;
+        }
+        else{
+            this.isReasonforBankChange=false;
+            this.isLetterofAddress=false;
+        }*/
+        // Update the modificationTypeOptions array
+        this.Modification_Type__c_FIELDValue = this.Modification_Type__c_FIELDValue.map(option => {
+            return option.value === value ? { ...option, checked } : option;
+        });
+
+        // Log the selected values
+        console.log('Selected Values:', this.getSelectedValues());
+        this.selecteditems=this.getSelectedValues();
+        console.log('Selected Items'+ this.selecteditems)
+        this.checkitempresent( this.selecteditems);
+        }
+
+    getSelectedValues() {
+        return this.Modification_Type__c_FIELDValue.filter(option => option.checked).map(option => option.value);
+    }
+    checkitempresent(selecteditem){
+console.log('Inside Checkitempresent');
+// Value you want to check
+let valueToCheck;
+let valueToCheckReasonForBackChange='Bank Account';
+if(this.value=='Yes'){
+    valueToCheck = ['Bank Account'];
+}
+else if(this.value=='No'){
+    valueToCheck = ['Bank Account','Name'];
+}
+
+this.isReasonforBankChange=selecteditem.includes(valueToCheckReasonForBackChange);
+
+
+console.log('valueToCheck'+valueToCheck)
+// Check if the value is in the filtered list
+this.isReasonforBankChangepenny = valueToCheck.some(value => selecteditem.includes(value));
+console.log('isvaluePresent r'+this.isReasonforBankChange)
+// List of values you want to check
+const valuesToCheck = ['Company Address', 'Remittance Address'];
+
+//this.isLetterofAddress=valuesToCheck.some(value => selecteditem.includes(value));
+console.log('isvaluePresent'+this.isLetterofAddress)
+    }
+
+    handleChange(event) {
+        const fieldName = event.target.name;
+        const fieldValue = event.target.value;
+        
+        if(fieldName == 'Preferred_Payment_Method__c' && fieldValue == 'Check'){
+            this.isRemittance_Address_mandatory=true;
+            this.ispaymentinfo_Mandatory=false;
+        }
+        if(fieldName == 'Preferred_Payment_Method__c' && fieldValue != 'Check'){
+            this.isRemittance_Address_mandatory=false;
+            this.ispaymentinfo_Mandatory=true;
+        }
+        if(fieldName == 'Registration_Type__c' && fieldValue=='Existing Vendor Modification' ){
+            this.isExistingVendorModification=true;
+        }
+        if(fieldName == 'Registration_Type__c' && fieldValue!='Existing Vendor Modification' ){
+            this.isExistingVendorModification=false;
+        }
+        if(fieldName == 'Registration_Type__c' && fieldValue=='New Vendor' ){
+            this.isNewVendor=true;
+        }
+        if(fieldName == 'Registration_Type__c' && fieldValue!='New Vendor' ){
+            this.isNewVendor=false;
+        }
+        if(fieldName == 'Payment_Term__c' && fieldValue=='Other' ){
+            this.isPaymenttermOther=true;
+        }
+        if(fieldName == 'Payment_Term__c' && fieldValue!='Other' ){
+            this.isPaymenttermOther=false;
+        }
+        if(fieldName == 'Invoice_Currency__c' && fieldValue =='Other (please specify)'){
+            this.isOtherCurrency= true;
+
+        }
+        if(fieldName == 'Invoice_Currency__c' && fieldValue !='Other (please specify)'){
+            this.isOtherCurrency= false;
+
+        }
+        if(fieldName == 'Name_of_organization_beneficial_owner__c'){
+            this.Name_of_organization_beneficial_owner__c=fieldValue;
+            /*let newOptions = [];
+            console.log('inside name')
+            newOptions.push({ label: fieldValue, value: fieldValue });
+            //this.options = [...{ label: fieldValue, value: fieldValue }];
+            this.options = [...this.options, ...newOptions];
+            console.log('options'+this.options)
+            console.log('options'+JSON.stringify(this.options))*/
+            
+        }
+        if(fieldName == 'Name_of_disregarded_entity__c'){
+            this.Name_of_disregarded_entity__c=fieldValue;
+            console.log('inside name')
+           /* let newOptions = [];
+            console.log('inside name')
+            newOptions.push({ label: fieldValue, value: fieldValue });
+            //this.options = [...{ label: fieldValue, value: fieldValue }];
+            this.options = [...this.options, ...newOptions];
+            console.log('options'+this.options)
+            console.log('options'+JSON.stringify(this.options))*/
+            
+        }
+        if(fieldName == 'Name_as_shown_on_your_W_9__c'){
+            this.Name_as_shown_on_your_W_9__c=fieldValue;
+            console.log('inside name')
+        }
+        if(fieldName == 'DBA_Business_Name_Disregarded_Entity__c'){
+            this.DBA_Business_Name_Disregarded_Entity__c=fieldValue;
+            console.log('inside name')
+        }
+
+
+       /* if(fieldName == 'Samsung_Contact_Email__c'){
+            console.log('inside if')
+            if () {
+                console.log('inside inner if')
+            //this.showToast('Error', 'Email must be from @samsung.com domain', 'error');
+        } 
+        else {
+            console.log('inside inner else')
+            this.formValues[fieldName] = fieldValue;
+            console.log('Updated Form Values:inside', JSON.stringify(this.formValues));
+            this.showToast('Success', 'Email is valid', 'success');
+            // You can proceed with your form submission logic here
+        }
+       }
+       else{
+        console.log('inside else')
+        this.formValues[fieldName] = fieldValue;
+        console.log('Updated Form Values:', JSON.stringify(this.formValues));
+       }
+        */
+
+        
+        this.formValues[fieldName] = fieldValue;
+        console.log('Updated Form Values:', JSON.stringify(this.formValues));
+        
+    }
+    handleSaveValue(fieldName,fieldValue){
+        this.formValues[fieldName] = fieldValue;
+        console.log('Updated Form Values:', JSON.stringify(this.formValues));
+    }
+    
+    handleProceedtoRegister(event){
+         // Check the validity of all lightning-input and lightning-combobox fields
+
+
+         console.log('my item------------------>'+ this.selecteditems+'this.resubmitform'+this.resubmitform);
+         if(this.resubmitform==false){
+            console.log('Inside resubmit'+this.resubmitform+this.isW9FileRequired+this.isLetterofAddress+this.isBankAccountSupportRequired +this.isLegalDocRequired)
+            if(this.selecteditems=='Company Address' ){
+                this.isW9FileRequired=true;
+                this.isLetterofAddress=true;
+                this.isBankAccountSupportRequired = false;
+                this.isLegalDocRequired = false;
+                console.log('w9'+this.isW9FileRequired+'la'+this.isLetterofAddress+'bank'+this.isBankAccountSupportRequired+'legal'+this.isLegalDocRequired);
+
+            }else if(this.selecteditems=='Remittance Address' ){
+                this.isW9FileRequired=true;
+                this.isLetterofAddress=false;
+                this.isBankAccountSupportRequired = false;
+                this.isLegalDocRequired = false;
+                console.log('w9'+this.isW9FileRequired+'la'+this.isLetterofAddress+'bank'+this.isBankAccountSupportRequired+'legal'+this.isLegalDocRequired);
+            }else if(this.selecteditems=='Payment Information' ){
+                this.isW9FileRequired=true;
+                this.isLetterofAddress=false;
+                this.isBankAccountSupportRequired = false;
+                this.isLegalDocRequired = false;
+                console.log('w9'+this.isW9FileRequired+'la'+this.isLetterofAddress+'bank'+this.isBankAccountSupportRequired+'legal'+this.isLegalDocRequired);
+            }else if(this.selecteditems=='Payment Term' ) {
+                this.isW9FileRequired=true;
+                this.isLetterofAddress=false;
+                this.isBankAccountSupportRequired = false;
+                this.isLegalDocRequired = false;
+                console.log('w9'+this.isW9FileRequired+'la'+this.isLetterofAddress+'bank'+this.isBankAccountSupportRequired+'legal'+this.isLegalDocRequired);
+            }else if(this.selecteditems=='Bank Account'){
+                this.isW9FileRequired=true;
+                this.isLetterofAddress=false;
+                this.isBankAccountSupportRequired = true;
+                this.isLegalDocRequired = false;
+                console.log('w9'+this.isW9FileRequired+'la'+this.isLetterofAddress+'bank'+this.isBankAccountSupportRequired+'legal'+this.isLegalDocRequired);
+            }else if(this.selecteditems=='Reactivate/Unblock?'){
+                this.isW9FileRequired=true;
+                this.isLetterofAddress=false;
+                this.isBankAccountSupportRequired = true;
+                this.isLegalDocRequired = false;
+                console.log('w9'+this.isW9FileRequired+'la'+this.isLetterofAddress+'bank'+this.isBankAccountSupportRequired+'legal'+this.isLegalDocRequired);
+            }else if(this.selecteditems=='Name' ){
+                this.isW9FileRequired=true;
+                this.isLetterofAddress=false;
+                this.isBankAccountSupportRequired =true;
+                this.isLegalDocRequired = true;
+                console.log('w9'+this.isW9FileRequired+'la'+this.isLetterofAddress+'bank'+this.isBankAccountSupportRequired+'legal'+this.isLegalDocRequired);
+            }else {
+                this.isW9FileRequired=true;
+                this.isLetterofAddress=false;
+                this.isBankAccountSupportRequired =true;
+                this.isLegalDocRequired = true;
+                console.log('w9'+this.isW9FileRequired+'la'+this.isLetterofAddress+'bank'+this.isBankAccountSupportRequired+'legal'+this.isLegalDocRequired);
+            }
+        }
+
+
+
+         const allInputs = [...this.template.querySelectorAll('lightning-input, lightning-combobox')];
+         const allValid = allInputs.reduce((validSoFar, inputCmp) => {
+             inputCmp.reportValidity();
+             return validSoFar && inputCmp.checkValidity();
+         }, true);
+         const ismodificationtype=false;
+         const selectedValues = this.getSelectedValues();
+         let selectedValuesString = selectedValues.join(';');
+       
+         // Now you can pass this string to your Apex method or use it as needed
+         console.log(selectedValuesString);  // Output: "Option1;Option2;Option3"
+         console.log(selectedValues.length+'length')
+         console.log('this.isExistingVendorModification'+this.isExistingVendorModification)
+         if (selectedValues.length === 0 && this.isExistingVendorModification) {
+            // this.showErrorToast();
+            console.log('inside if selectedvalues') 
+             
+             this.ismodificationtype=true;
+             this.ismodificationtypeerror='error';
+             console.log('modification'+this.ismodificationtypeerror)
+         } else {
+             // Handle form submission logic
+             this.ismodificationtype=false;
+             this.ismodificationtypeerror='noerror';
+             console.log('Form submitted with values:', selectedValues);
+             const fieldName='Modification_Type__c';
+             this.formValues[fieldName] = selectedValuesString;
+             console.log('Updated Form Values:', JSON.stringify(this.formValues));
+             this.filerequiredsetup(selectedValues);//-------------Call function to configure file required options
+            console.log('After update required')
+            }
+    if (allValid && !this.ismodificationtype) {
+        console.log('Inside all valid')
+        this.detailssection=false;
+        this.signaturesection=true;
+        this.filessection=false;
+    }
+    else{
+        console.log('Inside invalid')
+    }
+       
+    }
+
+    filerequiredsetup(selectedValues){
+        console.log('Inside selected values'+selectedValues);
+        // Initialize flags to false, to be updated based on selected items
+this.isW9FileRequired = false;
+this.isLetterofAddress = false;
+this.isBankAccountSupportRequired = false;
+this.isLegalDocRequired = false;
+console.log('Inside exis'+this.isExistingVendorModification+'this.selectedrecordtype'+this.value+'remi'+this.isRemittance_Address_mandatory)
+if((this.isExistingVendorModification) && ((this.value=='Yes' && !this.isRemittance_Address_mandatory) || (this.value=='No'))){
+     console.log('Existing'+this.isExistingVendorModification); 
+    const settingsMap = {
+            'Company Address': { isW9FileRequired: true, isLetterofAddress: true, isBankAccountSupportRequired: false, isLegalDocRequired: false },
+            'Remittance Address': { isW9FileRequired: true, isLetterofAddress: false, isBankAccountSupportRequired: false, isLegalDocRequired: false },
+            'Payment Information': { isW9FileRequired: true, isLetterofAddress: false, isBankAccountSupportRequired: false, isLegalDocRequired: false },
+            'Payment Term': { isW9FileRequired: true, isLetterofAddress: false, isBankAccountSupportRequired: false, isLegalDocRequired: false },
+            'Bank Account': { isW9FileRequired: true, isLetterofAddress: false, isBankAccountSupportRequired: true, isLegalDocRequired: false },
+            'Reactivate/Unblock?': { isW9FileRequired: true, isLetterofAddress: false, isBankAccountSupportRequired: true, isLegalDocRequired: false },
+            'Name': { isW9FileRequired: true, isLetterofAddress: false, isBankAccountSupportRequired: true, isLegalDocRequired: true },
+            'default': { isW9FileRequired: true, isLetterofAddress: false, isBankAccountSupportRequired: true, isLegalDocRequired: true }
+        };
+        console.log('Inside selected')
+        // Iterate through the selected items array and apply the settings
+        selectedValues.forEach((item) => {
+            console.log('Inside itemarray')
+            const settings = settingsMap[item] || { isW9FileRequired: true, isLetterofAddress: false, isBankAccountSupportRequired: true, isLegalDocRequired: true};
+            console.log('after setting itemarray')
+            // Combine the settings by using OR (||) to retain any true value
+            this.isW9FileRequired = this.isW9FileRequired || settings.isW9FileRequired || false;
+            this.isLetterofAddress = this.isLetterofAddress || settings.isLetterofAddress || false;
+            this.isBankAccountSupportRequired = this.isBankAccountSupportRequired || settings.isBankAccountSupportRequired || false;
+            this.isLegalDocRequired = this.isLegalDocRequired || settings.isLegalDocRequired || false;
+        });
+    }
+    else if((!this.isExistingVendorModification) && ((this.value=='Yes' && !this.isRemittance_Address_mandatory) || (this.value=='No'))){
+        console.log('new else if'+this.isExistingVendorModification);
+        this.isW9FileRequired= true;
+       this.isLetterofAddress= false;
+        this.isBankAccountSupportRequired=true;
+        this.isLegalDocRequired=true;
+    }
+        // Log the combined results
+console.log(
+    `Final settings - w9: ${this.isW9FileRequired}, la: ${this.isLetterofAddress}, bank: ${this.isBankAccountSupportRequired}, legal: ${this.isLegalDocRequired}`
+);
+
+    }
+    handleCancel(event){
+       /* this.selectedScreen='';
+        this.detailssection=true;
+        this.signaturesection=false;
+        this.filessection=false;*/
+        window.location.reload();
+    }
+    handleProceedtoRegister1(event){
+        this.detailssection=false;
+        this.signaturesection=false;
+        this.filessection=true;
+    }
+  
+    async handleRegister() {
+        // Check the validity of all lightning-input and lightning-combobox fields
+        const allInputs = [...this.template.querySelectorAll('lightning-input, lightning-combobox')];
+        const allValid = allInputs.reduce((validSoFar, inputCmp) => {
+            inputCmp.reportValidity();
+            return validSoFar && inputCmp.checkValidity();
+        }, true);
+    
+        if (allValid) {
+            // Set form field values
+            /* Actual Status proccess
+
+           const fieldName = 'Status_Display_for_all_others__c';
+            const fieldValue = 'Vendor Submission';
+            this.formValues[fieldName] = fieldValue;
+    
+            const fieldName1 = 'VR_Vendor_Status_Display__c';
+            const fieldValue1 = 'Submitted';
+            this.formValues[fieldName1] = fieldValue1;
+           
+           
+           */ 
+            const fieldName = 'Status_Display_for_all_others__c';
+            const fieldValue = 'Pending Accounting Review';
+            this.formValues[fieldName] = fieldValue;
+    
+            const fieldName1 = 'VR_Vendor_Status_Display__c';
+            const fieldValue1 = 'Under Review';
+            this.formValues[fieldName1] = fieldValue1;
+    
+            // Filter out null or empty values
+            const filteredFormValues = Object.fromEntries(
+                Object.entries(this.formValues).filter(([_, value]) => value !== '')
+            );
+    
+            console.log('Filtered Form Values:', JSON.stringify(filteredFormValues));
+    
+            try {
+                // Save vendor registration (this now returns a Promise)
+                const result = await saveVendorRegistration({
+                    formData: filteredFormValues
+                });
+    
+                // Handle success response
+                this.recordId = result;
+                const fieldName = 'Id';
+                this.formValues[fieldName] = this.recordId;
+    
+                console.log('Record saved successfully:', this.recordId);
+    
+                // Update UI or navigate as needed
+                /* this.detailssection = false;
+                this.signaturesection = false;
+                this.filessection = true; // Show files section after registration */
+    
+                // Optional: Reset file contents (if needed)
+              /*  this.fileContents = {
+                    file1: null,
+                    file2: null,
+                    file3: null,
+                    file4: null
+                };*/
+    
+            } catch (error) {
+                // Handle error response
+                console.error('Error saving record:', error);
+            }
+        } else {
+            console.log('Form validation failed');
+        }
+    }
+    
+    
+    
+    navigateWithDelay(delay) {
+        setTimeout(() => {
+            window.location.reload();
+        }, delay);
+    }
+    handleSignatureCapture(event) {
+        console.log('Inside handlesignature')
+    this.signatureData = event.detail.signatureURL;
+    const fieldName = event.detail.signatureImage;
+
+    console.log('Captured signature:',  this.signatureData );
+    console.log('Additional value:', fieldName);
+        console.log('Signature detail'+ this.signatureData);
+      // const fieldName='Signature_Image__c';
+       this.formValues[fieldName] ='<img src="' + this.signatureData + '" />';
+        console.log('Updated Form Values:s', JSON.stringify(this.formValues));
+    }
+    handlesignature(event){
+        const formnew = event.detail.form;
+        console.log('value from sign'+JSON.stringify(formnew))
+        // Pushing the array of objects from newArray into mainArray
+       // const formData = JSON.parse(formnew);
+        //this.formValues.push(...formData);
+       /* if (Array.isArray(formData)) {
+            console.log('inside formarray')
+           // this.formValues.push(...formnew);
+        } else {
+            console.error('formnew is not an array:', formnew);
+        }*/
+        //this.formValues.push(...formnew);
+       // Check if formnew is an object and convert to JSON string if necessary
+    // if (typeof formnew === 'object' && formnew !== null) {
+    //     formnew = JSON.stringify(formnew);
+    // }
+
+   
+        // Assuming event.detail contains the JSON string or object
+        const formDataString = event.detail; // Update this if the JSON string is in event.detail.someProperty
+        console.log('event.detail'+formDataString+ 'typeof'+typeof(formDataString));
+
+        try {
+             // Check if formDataObject is indeed an object
+        if (typeof formDataString === 'object' && formDataString !== null) {
+            console.log('Form data object:', formDataString);
+
+            // Ensure formValues is an array before spreading its contents
+            if (!Array.isArray(this.formValues)) {
+               // this.formValues = [];
+                console.log('not array form value')
+            }
+//Check whether it is back or save
+const filteredFormValues = Object.fromEntries(
+    Object.entries(formDataString).filter(([key, value]) => key !== 'Back' && key !=='dataURL')
+);
+console.log('filteredFormValues'+filteredFormValues)
+            
+            // Push the object to the formValues array
+            this.formValues = {...this.formValues, ...filteredFormValues};
+            //this.filteredSignatureFormValues=formDataString;
+//data from child
+
+
+this.filteredSignatureFormValues = {
+    ...this.filteredSignatureFormValues,
+    ...Object.keys(this.filteredSignatureFormValues).reduce((acc, key) => {
+        acc[key] = formDataString.hasOwnProperty(key) ? formDataString[key] : this.filteredSignatureFormValues[key];
+        return acc;
+    }, {})
+};
+
+console.log('Updated filteredSignatureFormValues:', this.filteredSignatureFormValues);
+
+
+//data from child end
+            console.log('Filtered data'+JSON.stringify(this.filteredSignatureFormValues));
+            
+            console.log('Updated formValues:', this.formValues);
+            console.log('Updated formValues string:', JSON.stringify(this.formValues));
+            console.log('with signature'+this.formValues);
+            if (formDataString.Back == true) {
+                console.log('inside back form value')
+                this.detailssection=true;
+                this.signaturesection=false;
+                this.filessection=false;
+                console.log('inside +detail'+ this.detailssection+'sign'+ this.signaturesection+'file'+this.filessection)
+        console.log('with signature'+this.formValues);
+            }
+            else{
+                console.log('inside back form else')
+                
+                this.detailssection=false;
+                this.signaturesection=false;
+                this.filessection=true;
+                console.log('inside +detail'+ this.detailssection+'sign'+ this.signaturesection+'file'+this.filessection)
+                this.fileContents = {
+                    file1: null,
+                    file2: null,
+                    file3: null,
+                    file4: null,
+                    file5: null// file on resubmit
+                };//-----------------------Added this code in handlesignature
+              /*  const fieldName = 'Status_Display_for_all_others__c';
+                const fieldValue = 'Pending Employee Consent';
+                this.formValues[fieldName] = fieldValue;
+                const fieldName1 = 'VR_Vendor_Status_Display__c';
+                const fieldValue1 = 'Submitted';
+                this.formValues[fieldName1] = fieldValue1;*/
+
+              //  this.handleRegister();//-------------------command to handle after file upload
+                console.log('with signature'+this.formValues);
+            }
+        
+        }
+        else if(typeof formDataString === 'string' && formDataString==='Back'){
+            console.log('Inside back')
+            this.detailssection=true;
+            this.signaturesection=false;
+            this.filessection=false;   
+            console.log('inside +detail'+ this.detailssection+'sign'+ this.signaturesection+'file'+this.filessection)
+        }
+        else {
+            console.error('Event detail is not a valid object:', event.detail);
+        }
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+        }
+        
+    }
+    handleFilesUpload(event){
+       console.log('Inside file reader')
+        const uploadedFiles = event.detail.files;
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+        let fileTooLarge = false;
+        if(uploadedFiles){
+            for(let i=0; i < uploadedFiles.length; i++){
+               if (uploadedFiles[i].size > MAX_FILE_SIZE) {
+                    console.log('Inside for file reader loop')
+                    fileTooLarge = true;
+                    break;
+                }
+                else{
+                this.setupReader(uploadedFiles[i],i);
+               console.log('Inside file reader loop')
+                }
+               
+            } 
+            if (fileTooLarge) {
+                console.log('inside too long')
+                 this.template.querySelector('c-toast-notification').handleToastNotification('Error', 'File size exceeds the 5MB limit.', 'error');
+            } else {
+                console.log('inside else long')
+                this.template.querySelector('c-toast-notification').handleToastNotification('Consolidated Files Upload','Files read successfully','success',2000,'dismissible');
+                // Process the files further as needed
+            }
+           
+        }
+        }
+        setupReader(file, i){
+            var reader = new FileReader();
+            reader.onload = () => {
+                let base64 = 'base64,';
+                let content = reader.result.indexOf(base64) + base64.length;
+                let fileContents = reader.result.substring(content);
+           
+            this.files[i] = {
+                'Title': file.name,
+                'VersionData': fileContents
+            }
+            this.allfiles.push({
+                'Title': file.name,
+                'VersionData': fileContents
+            });
+            
+            console.log('File info'+this.files[i].Title+','+ this.files[i].VersionData);
+            console.log('All files size'+ this.allfiles.length)
+           }
+           reader.readAsDataURL(file);
+        }
+
+        handleFileback(event){
+    console.log('inside handle back')
+    this.detailssection=false;
+    this.signaturesection=true;
+    this.filessection=false; 
+    console.log('d'+ this.detailssection+'s'+this.signaturesection+'this.filessection'+this.filessection)
+}
+    
+
+
+//------------------Async Await File Upload
+
+
+
+
+
+handleFileChange(event) {
+    const fileInputId = event.target.dataset.id;
+    if (event.target.files.length > 0) {
+        this.readFile(event.target.files[0], fileInputId);
+    }
+}
+
+// Now, update uploadFiles to await handleRegister
+async uploadFiles() {
+    // Wait for handleRegister to finish before proceeding
+    await this.handleRegister();  
+    console.log('Registration completed');
+    console.log('this.fileContents', this.fileContents);
+    console.log('this.fileContents (JSON)', JSON.stringify(this.fileContents));
+
+    console.log('All validity before');
+    const allInputs = [...this.template.querySelectorAll('lightning-input, lightning-combobox')];
+    const allValid = allInputs.reduce((validSoFar, inputCmp) => {
+        inputCmp.reportValidity();
+        return validSoFar && inputCmp.checkValidity();
+    }, true);
+    console.log('After all validity check');
+
+    if (allValid) {
+        console.log('Inside All validity before');
+        this.isLoading = true;
+        try {
+            console.log('Inside try block');
+            for (const fileId in this.fileContents) {
+                if (this.fileContents[fileId]) {
+                    const fileData = this.fileContents[fileId];
+                    // Wait for each file upload to complete
+                    const resultData = await uploadFile({ 
+                        fileDataJson: JSON.stringify(fileData), 
+                        recordId: this.recordId 
+                    });
+                    console.log('Returned Data:', resultData);
+                }
+            }
+              // Call the Apex method to generate and attach the PDF after files are uploaded
+              await generateAndAttachPDFForAccount({ vrId: this.recordId });
+              console.log('PDF generation and attachment complete');
+            this.showToast('Success', 'Vendor Registration Record Saved successfully', 'success');
+            this.navigateWithDelay(3000);
+        } catch (error) {
+            this.showToast('Error', error.body.message, 'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+}
+
+readFile(file, fileInputId) {
+    const reader = new FileReader();
+    reader.onload = () => {
+        const base64String = reader.result.split(',')[1];
+        this.fileContents = { ...this.fileContents, [fileInputId]: { Title: file.name, VersionData: base64String } };
+    };
+    reader.onerror = () => {
+        this.showToast('Error', 'Error reading file', 'error');
+    };
+    reader.readAsDataURL(file);
+}
+
+removeFile(event) {
+    const fileInputId = event.target.dataset.id;
+    this.fileContents = { ...this.fileContents, [fileInputId]: null };
+    this.template.querySelector(`input[data-id="${fileInputId}"]`).value = null;
+}
+
+showToast(title, message, variant) {
+    const evt = new ShowToastEvent({
+        title: title,
+        message: message,
+        variant: variant,
+    });
+    this.dispatchEvent(evt);
+}
+
+//----------------Async Await File Upload End
+//-----------------------------------------Details table----------------
+@wire(getVendorRegistrationRecordsdetails) 
+vrResult(result){
+    console.log('inside vrresult')
+    this.vrResult = result;
+    console.log('Inside vrresult'+this.vrResult )
+    const { data, error } = result;
+    
+    if (result.data) {
+        let nameUrl;
+        console.log('result.data'+result.data);
+        console.log('result.data json'+JSON.stringify(result.data));
+        this.vr = data.map(row => { 
+            let isresubmit=true;
+            nameUrl = 'https://samsung2022--portal.sandbox.my.site.com/vendorregistration'+`/s/vendor-registration/${row.Id}`;
+            let formattedCreatedDate=this.handleformatedate(row.CreatedDate);
+           if(row.VR_Vendor_Status_Display__c==='rejected'){
+            isresubmit=false;
+           }
+            return {...row ,formattedCreatedDate, nameUrl,isresubmit} 
+            })
+    }
+}
+handleformatedate(date){
+    let formattedDate;
+    if (date) {
+        const dateObj = new Date(date);
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        formattedDate = dateObj.toLocaleDateString('en-US', options);
+    
+        // Check if the formatted date is correct
+        console.log('Formatted Date:', formattedDate);
+    
+      //  row.LastModifiedDate = formattedDate;
+      return formattedDate;
+    } else {
+        console.error('Invalid LastModifiedDate:', date);
+        return date;
+      
+    }
+   }
+//-----------------------------------------Details table end--------------
+//----------------New file upload
+ /*// Handle file uploads from the child component
+ handleFileUpload(event) {
+    const uploadedFile = {
+        fileId: event.detail.fileId,
+        fileName: event.detail.fileName,
+        fileContent: event.detail.fileContent,
+        fileType: event.detail.fileType
+    };
+
+    // Add the uploaded file to the array of uploaded files
+    const existingFileIndex = this.uploadedFiles.findIndex(file => file.fileId === uploadedFile.fileId);
+
+    // Replace the file if already exists, or add a new one
+    if (existingFileIndex > -1) {
+        this.uploadedFiles[existingFileIndex] = uploadedFile;
+    } else {
+        this.uploadedFiles = [...this.uploadedFiles, uploadedFile];
+    }
+}*/
+//----------------New file upload end
+//-------------------------------Handle Resubmit-----------------
+handleresubmit(event){
+    this.resubmitform=true;
+    console.log('Inside handle resubmit')
+    const recordId=event.target.dataset.id;
+    console.log('Inside handle recordId'+recordId)
+    getVendorFormValues({ recordId: recordId })
+            .then(result => {
+                console.log('Inside handle result'+result)
+                
+                console.log('Inside handle recordtypeId'+result.RecordTypeId)
+                //this.defaultRecordTypeId=result.RecordTypeId;
+                this.selectedScreen=result.RecordTypeId;
+                console.log('this.selectedScreen'+this.selectedScreen)
+                this.formValues = { ...result };
+                this.filteredSignatureFormValues={ ...result };
+                this.DBA_Business_Name_Disregarded_Entity__c=this.formValues.DBA_Business_Name_Disregarded_Entity__c;
+                this.Name_as_shown_on_your_W_9__c=this.formValues.Name_as_shown_on_your_W_9__c;
+                this.Name_of_disregarded_entity__c=this.formValues.Name_of_disregarded_entity__c;
+                this.Name_of_organization_beneficial_owner__c=this.formValues.Name_of_organization_beneficial_owner__c;
+                this.Name_on_the_Invoice__c=this.formValues.Name_on_the_Invoice__c;
+                console.log('Inside handle result'+JSON.stringify(result))
+                console.log('{formValues.Name_on_the_Invoice__c}'+this.formValues.Name_on_the_Invoice__c)
+                console.log('Inside handle Names'+'this.DBA_Business_Name_Disregarded_Entity__c'+this.DBA_Business_Name_Disregarded_Entity__c);
+                console.log(' this.Name_as_shown_on_your_W_9__c'+ this.Name_as_shown_on_your_W_9__c);
+                console.log('this.Name_of_disregarded_entity__c'+this.Name_of_disregarded_entity__c);
+                console.log('this.Name_of_organization_beneficial_owner__c'+this.Name_of_organization_beneficial_owner__c)
+                console.log('optionsBank'+this.optionsBank);
+                console.log('options'+this.options)
+            })
+            .catch(error => {
+                console.error('Error fetching form data:', error);
+            });
+    }
+
+
+    
+}
