@@ -1,0 +1,161 @@
+@isTest
+public class RMASITestClass {
+
+    @TestSetup
+    static void setupTestData() {
+        // Step 1: Create an Account for the Community User
+        Account testAccount = new Account(Name = 'Test Community Account');
+        insert testAccount;
+
+        // Step 2: Create a Contact linked to the Account
+        Contact testContact = new Contact(FirstName = 'Test', LastName = 'CommunityUser', Email = 'communityuser@example.com', AccountId = testAccount.Id);
+        insert testContact;
+
+        // Step 3: Fetch the Profile for the Community User
+        Profile communityUserProfile = [SELECT Id FROM Profile WHERE Name = 'Customer Community User - Customer' LIMIT 1];
+        UserRole role=[SELECT Id, Name FROM UserRole Limit 1];
+        // Step 4: Create the Community User with the Contact and Profile
+        User communityUser = new User(
+            FirstName = 'Test',
+            LastName = 'CommunityUser',
+            Alias = 'tcomuser',
+            Email = 'communityuser@example.com',
+            Username = 'communityuser@example.com.test', // The Username must be unique and in email format
+            EmailEncodingKey = 'UTF-8',
+            LanguageLocaleKey = 'en_US',
+            LocaleSidKey = 'en_US',
+            TimeZoneSidKey = 'America/Los_Angeles',
+            ProfileId = communityUserProfile.Id, // Use the correct Profile
+            UserRoleId=role.Id,
+            ContactId = testContact.Id, // Link the User to the Contact
+            CommunityNickname = 'CommunityUserNick',
+            IsActive = true
+        );
+
+        // Step 5: Insert the Community User
+        insert communityUser;
+         RMA_Master__c master = new RMA_Master__c(
+            Requestor_Email__c = 'sample@sample.com',
+            Requestor_Phone__c = '1234567891',
+            Samsung_Sales_Ops_Email__c = 'sample@sample.com',
+            Shipper_Contact_Email__c = 'sample@sample.com',
+            Shipper_Contact_Phone__c = '1234567891',
+            Status__c = 'New'
+        );
+        insert master;
+        
+        RMA_Detail__c detail = new RMA_Detail__c(
+            RMA_Master__c = master.Id,
+            Name = 'Sample Detail',
+            Invoice_Number__c = 'Sample Inv',
+            PO_Number__c = '12345',
+            Date_Code__c = '2023-09',
+            Serial_Number__c = 'SN123',
+            Customer_Part_Number__c = 'CPN123',
+            Samsung_Part_Number__c = 'SPN123',
+            COO__c = 'USA',
+            Remarks1__c = 'Test Remark 1',
+            Remarks__c = 'Test Remark',
+            Reason_For_Return__c = 'Defective',
+            Failure_Location__c = 'Assembly'
+        );
+        insert detail;
+        
+        Box_Detail__c box = new Box_Detail__c(RMA_Master__c = master.Id);
+        insert box;
+        
+       ContentVersion objCV = new ContentVersion(
+            Title = 'TestShippingLabel',
+             RMA_Stage__c = 'Shipping Label',
+            PathOnClient = 'TestShippingLabel.pdf',    
+            VersionData = Blob.valueOf('Test')
+        );
+       
+        insert objCV;    
+        
+        objCV = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :objCV.Id];    
+        
+        ContentDocumentLink objCDL = new ContentDocumentLink(
+            ContentDocumentId = objCV.ContentDocumentId,
+            LinkedEntityId = master.Id,
+            Visibility = 'AllUsers'
+        );
+        insert objCDL;
+    }
+
+    @IsTest
+    static void testCommunityUserInsert() {
+        // Your test logic goes here
+        
+        // Example: Retrieve the Community User
+        User communityUser = [SELECT Id, FirstName, LastName FROM User WHERE Username = 'communityuser@example.com.test' LIMIT 1];
+        System.assertNotEquals(null, communityUser, 'Community User should have been inserted');
+         System.runAs(communityUser) {
+            
+        Test.startTest();
+              RMA_Master__c master = new RMA_Master__c(
+            Requestor_Email__c = 'sample@sample.com',
+            Requestor_Phone__c = '1234567891',
+            Samsung_Sales_Ops_Email__c = 'sample@sample.com',
+            Shipper_Contact_Email__c = 'sample@sample.com',
+            Shipper_Contact_Phone__c = '1234567891',
+            Status__c = 'New',
+                  Show_Unit_Price__c=true,
+                  Show_End_Customer__c=true,
+                  RMA_SO__c=true
+        );
+        insert master;
+        
+        RMA_Detail__c detail = new RMA_Detail__c(
+            RMA_Master__c = master.Id,
+            Name = 'Sample Detail',
+            Invoice_Number__c = 'Sample Inv',
+            PO_Number__c = '12345',
+            Date_Code__c = '2023-09',
+            Serial_Number__c = 'SN123',
+            Customer_Part_Number__c = 'CPN123',
+            Samsung_Part_Number__c = 'SPN123',
+            COO__c = 'USA',
+            Remarks1__c = 'Test Remark 1',
+            Remarks__c = 'Test Remark',
+            Reason_For_Return__c = 'Defective',
+            Failure_Location__c = 'Assembly'
+        );
+        insert detail;
+        
+        Box_Detail__c box = new Box_Detail__c(RMA_Master__c = master.Id);
+        insert box;
+        
+      /* ContentVersion objCV = new ContentVersion(
+            Title = 'TestShippingLabel',
+             RMA_Stage__c = 'Shipping Label',
+            PathOnClient = 'TestShippingLabel.pdf',    
+            VersionData = Blob.valueOf('Test')
+        );
+       
+        insert objCV;    
+        
+        objCV = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :objCV.Id];    
+        
+        ContentDocumentLink objCDL = new ContentDocumentLink(
+            ContentDocumentId = objCV.ContentDocumentId,
+            LinkedEntityId = master.Id,
+            Visibility = 'AllUsers'
+        );
+        insert objCDL;*/
+           
+        RMASIReminderEmailNotification.SendShippingInstructionReminderEmail(new List<Id>{master.Id});
+             RMAShippingInstructionEmailNotification.SendShippingInstructionEmail(new List<Id>{master.Id});
+       Test.stopTest();
+    }
+}
+     @isTest
+    static void testRMALogisticReminder() {
+        RMA_Master__c master = [SELECT Id, LastModifiedDate FROM RMA_Master__c ORDER BY LastModifiedDate ASC LIMIT 1 ];
+        master.Tracked_Date__c = Date.today().addDays(-3);
+        master.Status__c = 'Logistics reviewed';
+        master.PackingList_Batch__c=null;
+            update master;
+        RMALogisticReminder.SendRMALogisticReminderEmail();
+    }
+}
