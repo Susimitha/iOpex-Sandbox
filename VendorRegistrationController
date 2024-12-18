@@ -23,12 +23,13 @@ public with sharing class VendorRegistrationController {
         
                 return picklistValues;
         }*/
-             
+          public  Vendor_Registration__c vrRecord {get;set;}    
            @AuraEnabled
             public static string saveVendorRegistration(Map<String, Object> formData) {
           
              Vendor_Registration__c vr = new Vendor_Registration__c();
-    
+               Boolean isEmailSent = false,isVendorSubmission_or_Resubmit=false; // Initialize a flag
+
             Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Vendor_Registration__c.fields.getMap();
     
             for (String fieldName : formData.keySet()) {
@@ -47,11 +48,38 @@ public with sharing class VendorRegistrationController {
                 } else {
                     vr.put(fieldName, fieldValue);
                 }
+                if (fieldName == 'Email_sent__c' && fieldValue == true) {
+            isEmailSent = true; // Set the flag if Emailsent is true
+            System.debug('Emailsent is true');
+           
+        }
+                 if (fieldName == 'Status_Display_for_all_others__c' && fieldValue == 'Vendor Submission') {
+            isVendorSubmission_or_Resubmit = true; // Set the flag if Emailsent is true
+            System.debug('isVendorSubmission_or_Resubmit is true');
+           
+        }
             }
     
             try {
                 upsert vr;
-               vrSubmittedNotification.SendVRSubmittedEmail(vr.Id);
+               
+               
+
+// Retrieve the latest data from the database
+/*Vendor_Registration__c updatedvr = [SELECT Id, Status_Display_for_all_others__c 
+      FROM Vendor_Registration__c 
+      WHERE Id = :vr.Id LIMIT 1];
+ system.debug('vr'+updatedvr.Status_Display_for_all_others__c);
+                if(updatedvr.Status_Display_for_all_others__c=='Vendor Submission'){
+                  vrSubmittedNotification.SendVRSubmittedEmail(updatedvr.Id);   
+                }*/
+                if(isEmailSent){
+                     vrValidationEmailNotification.SendVRValidateEmail(vr.Id);
+                }
+                if(isVendorSubmission_or_Resubmit){
+                    vrSubmittedNotification.SendVRSubmittedEmail(vr.Id); 
+                }
+                
                 return vr.Id;
             } catch (Exception e) {
                 throw new AuraHandledException(e.getMessage());
@@ -152,6 +180,7 @@ public with sharing class VendorRegistrationController {
                 vr.Attachments_Created__c =true;
                 vr.Id=recordId;
                 update vr;
+                //generateAndAttachPDFForAccount(recordId);
                 return 'File uploaded successfully';
             } catch (Exception e) {
                 throw new AuraHandledException('File upload failed: ' + e.getMessage());
@@ -213,7 +242,7 @@ public with sharing class VendorRegistrationController {
         }
         @AuraEnabled(cacheable=true)
         public static List<Vendor_Registration__c> getVendorRegistrationRecords(string status,Date fromDate,Date toDate) {
-            String query = 'SELECT Id, Name, TIN_Check_Status__c, Validate_Status__c, isAccountingUploadFile__c, isAccountingRegistrationUploadFile__c, isAccountingVerificationUploadFile__c, isPurchasingUploadFile__c, isTaxUploadFile__c, IsValid__c, GIACT_Status__c, Verbal_Confirmation_Status__c, Penny_Test_Status__c, VR_Vendor_Status_Display__c, VendorCode__c, ProcessingDay__c, Validate__c, Name_on_the_Invoice__c, Status_Display_for_all_others__c, createdDate, Vendor_Type__c, Registration_Type__c, LastModifiedDate, Penny_Test_Timestamp__c, Verbal_Confirmation_Timestamp__c, GIACT_Timestamp__c, TIN_Check_Timestamp__c,Penny_Test_Modified_Timestamp__c,Verbal_Confirmation_Modified_Timestamp__c,	TIN_Check_Modified_Timestamp__c,GIACT_Modified_Timestamp__c,Reason_for_Rejection__c FROM Vendor_Registration__c ';
+            String query = 'SELECT Id, Name, TIN_Check_Status__c,Email_sent__c,Validate_Status__c, isAccountingUploadFile__c, isAccountingRegistrationUploadFile__c, isAccountingVerificationUploadFile__c, isPurchasingUploadFile__c, isTaxUploadFile__c, IsValid__c, GIACT_Status__c, Verbal_Confirmation_Status__c, Penny_Test_Status__c, VR_Vendor_Status_Display__c, VendorCode__c, ProcessingDay__c, Validate__c, Name_on_the_Invoice__c, Status_Display_for_all_others__c, createdDate, Vendor_Type__c, Registration_Type__c, LastModifiedDate, Penny_Test_Timestamp__c, Verbal_Confirmation_Timestamp__c, GIACT_Timestamp__c, TIN_Check_Timestamp__c,Penny_Test_Modified_Timestamp__c,Verbal_Confirmation_Modified_Timestamp__c,	TIN_Check_Modified_Timestamp__c,GIACT_Modified_Timestamp__c,Reason_for_Rejection__c FROM Vendor_Registration__c ';
          List<String> conditions = new List<String>();
             if (fromDate != null) {
                 //conditions += 'DAY_ONLY(createdDate) >= :fromDate';
@@ -255,8 +284,56 @@ public with sharing class VendorRegistrationController {
                  // Perform DML operation only once
              if (!approvedrecords.isEmpty()) {
                  update approvedrecords;
+                 //*********************************
+                // Query all records with specified IDs and fetch only relevant fields
+List<Vendor_Registration__c> allStatusRecords = [
+    SELECT Id, Name, Name_on_the_Invoice__c, Reason_for_Rejection__c, Vendor_Contact__c, Vendor_Email__c, Status_Display_for_all_others__c
+    FROM Vendor_Registration__c
+    WHERE Id IN :approvedrecords
+];
+
+// Initialize maps to store records by their status
+List<Vendor_Registration__c> approvedStatusRecords = new List<Vendor_Registration__c>();
+List<Vendor_Registration__c> rejectedStatusRecords = new List<Vendor_Registration__c>();
+List<Vendor_Registration__c> accountingVerificationRecords = new List<Vendor_Registration__c>();
+List<Vendor_Registration__c> purchasingVerificationRecords = new List<Vendor_Registration__c>();
+List<Vendor_Registration__c> taxVerificationRecords = new List<Vendor_Registration__c>();
+List<Vendor_Registration__c> verificationapprovedRecords = new List<Vendor_Registration__c>();
+
+// Loop through records and add them to the appropriate list based on their status
+for (Vendor_Registration__c vr : allStatusRecords) {
+    system.debug('status'+vr.Status_Display_for_all_others__c);
+    switch on vr.Status_Display_for_all_others__c {
+        when 'Approved' {
+            approvedStatusRecords.add(vr);
+        }
+        when 'rejected' {
+            system.debug('Inside reject');
+            rejectedStatusRecords.add(vr);
+        }
+        when 'Pending Accounting Review', 'Accounting Verification' {
+            accountingVerificationRecords.add(vr);
+        }
+        when 'Accounting Registration' {
+            accountingVerificationRecords.add(vr);
+            verificationapprovedRecords.add(vr);
+        }
+        when 'Pending Purchasing Review' {
+            purchasingVerificationRecords.add(vr);
+              
+        }
+        when 'Pending Tax Review' {
+            taxVerificationRecords.add(vr);
+        }
+        // Add additional cases as needed
+        when else {
+            // Handle other statuses if necessary
+        }
+    }
+}
+                 //***********************************
                    // Fetch only the records that match the given Stage criteria
-                   List<Vendor_Registration__c> approvedStatusRecords = [
+                 /*  List<Vendor_Registration__c> approvedStatusRecords = [
                                 SELECT Id, Name,Name_on_the_Invoice__c,Vendor_Contact__c, Vendor_Email__c, Status_Display_for_all_others__c
                                 FROM Vendor_Registration__c
                                 WHERE Id IN :approvedrecords AND Status_Display_for_all_others__c = 'Approved' // Filter by 'Approved' stage
@@ -267,11 +344,47 @@ public with sharing class VendorRegistrationController {
                                 FROM Vendor_Registration__c
                                 WHERE Id IN :approvedrecords AND Status_Display_for_all_others__c = 'rejected' // Filter by 'Approved' stage
                                 ];
+                 //to fetch Accounting records
+                 List<Vendor_Registration__c> accountingVerificationRecords = [
+                                SELECT Id, Name,Name_on_the_Invoice__c,	Reason_for_Rejection__c,Vendor_Contact__c, Vendor_Email__c, Status_Display_for_all_others__c
+                                FROM Vendor_Registration__c
+                                WHERE Id IN :approvedrecords AND (Status_Display_for_all_others__c = 'Pending Accounting Review' 
+                                                             OR Status_Display_for_all_others__c = 'Accounting Registration' 
+                                                             OR Status_Display_for_all_others__c = 'Accounting Verification')
+                                ];// Filter by 'Accounting' stage
+                 //to fetch Purchasing records
+                 List<Vendor_Registration__c> purchasingVerificationRecords = [
+                                SELECT Id, Name,Name_on_the_Invoice__c,	Reason_for_Rejection__c,Vendor_Contact__c, Vendor_Email__c, Status_Display_for_all_others__c
+                                FROM Vendor_Registration__c
+                                WHERE Id IN :approvedrecords AND Status_Display_for_all_others__c = 'Pending Purchasing Review' // Filter by 'Approved' stage
+                                ];
+                 //to fetch Tax records
+                 List<Vendor_Registration__c> taxVerificationRecords = [
+                                SELECT Id, Name,Name_on_the_Invoice__c,	Reason_for_Rejection__c,Vendor_Contact__c, Vendor_Email__c, Status_Display_for_all_others__c
+                                FROM Vendor_Registration__c
+                                WHERE Id IN :approvedrecords AND Status_Display_for_all_others__c = 'Pending Tax Review' // Filter by 'Approved' stage
+                                ];*/
+                 system.debug(rejectedStatusRecords.size());
                  if(!approvedStatusRecords.isEmpty()){
                      vrApprovedRejectedEmailNotification.SendVRApprovedRejectedEmail(approvedStatusRecords,'Approved');
                  }
                   if(!rejectedStatusRecords.isEmpty()){
+                      system.debug('inside Reject list');
                      vrApprovedRejectedEmailNotification.SendVRApprovedRejectedEmail(rejectedStatusRecords,'rejected');
+                 }
+                 if(!accountingVerificationRecords.isEmpty()){
+                     system.debug('Inside Accounting ver records');
+                  //   vrApprovedRejectedEmailNotification.SendVRApprovedRejectedEmail(accountingVerificationRecords);
+                  vrReviewingEmailNotification.SendReviewingEmailNotification(accountingVerificationRecords,'Customer Community User - VR Accounting');
+                 }
+                 if(!purchasingVerificationRecords.isEmpty()){
+                     vrReviewingEmailNotification.SendReviewingEmailNotification(purchasingVerificationRecords,'Customer Community User - VR Purchasing');
+                 }
+                 if(!taxVerificationRecords.isEmpty()){
+                     vrReviewingEmailNotification.SendReviewingEmailNotification(taxVerificationRecords,'Customer Community User - VR Tax');
+                 }
+                  if(!verificationapprovedRecords.isEmpty()){
+                     vrReviewingEmailNotification.SendVerifiedVRrecordsEmail(verificationapprovedRecords);
                  }
                  
              }
@@ -523,6 +636,45 @@ public with sharing class VendorRegistrationController {
                 throw new AuraHandledException('Error retrieving form data: ' + e.getMessage());
             }
         }
+    
+    
+    //pdf generator controller
+    @AuraEnabled
+     public static Id generateAndAttachPDFForAccount(Id vrId) {
+         system.debug('Inside generatepdf');
+        try {
+            //vrRecord=getVendorFormValues(vrId);
+             system.debug('Inside try generate pdf');
+            // Reference the Visualforce page as PDF
+            PageReference pdfPage = Page.VRForm;
+            pdfPage.getParameters().put('id', vrId);
+            
+            // Generate the PDF Blob
+            Blob pdfBlob = pdfPage.getContentAsPDF();
+            
+            // Create a ContentVersion record to store the PDF file and attach it to the Account
+            ContentVersion contentVersion = new ContentVersion();
+            contentVersion.Title = 'VR Detail PDF';
+            contentVersion.PathOnClient = 'VRDetail.pdf';
+            contentVersion.VersionData = pdfBlob;
+            contentVersion.FirstPublishLocationId = vrId; // Associate with the Account record ID
+            insert contentVersion;
+             system.debug('Inside contentVersion'+contentVersion.Id);
+            // Query ContentDocumentId to confirm the ContentDocument is linked
+            ContentDocumentLink contentLink = [
+                SELECT ContentDocumentId 
+                FROM ContentDocumentLink 
+                WHERE LinkedEntityId = :vrId 
+                LIMIT 1
+            ];
+             system.debug('Inside contentVersion'+contentLink.Id);
+            // Return ContentDocumentId or ContentVersionId if needed
+            return contentLink.ContentDocumentId;
+        } catch (Exception e) {
+            throw new AuraHandledException('Failed to generate and attach PDF: ' + e.getMessage());
+        }
+    }
+    //pdf generator controller end
          // Helper method for testing in Anonymous Apex
         public static void testGetVendorRegistrationRecords() {
             Map<String, Object> filters = new Map<String, Object>();
