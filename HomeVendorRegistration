@@ -84,14 +84,28 @@
                         <lightning-input type="checkbox" onchange={handleSelectAll}></lightning-input>
                     </th>
                     <th scope="col">Id#</th>
-                    <th scope="col">Submission Date</th>
+                   <!-- <th scope="col">Submission Date</th>-->
+                   <th scope="col">
+                    <a href="javascript:void(0);" onclick={sortBySubmissionDate}>
+                        Submission Date
+                        <lightning-icon icon-name={submissionDateSortDirectionIcon} size="xx-small" alternative-text="Sort" class="slds-m-left_xx-small"></lightning-icon>
+                    </a>
+                </th>
+               
+                
                     <th scope="col">Vendor Name</th>
                     <!--th scope="col">VR Number</th-->
                     <th scope="col">Vendor Type</th>
                     <th scope="col">Registration Type</th>
-                    <th scope="col">Processing Days</th>
+                    <!--<th scope="col">Processing Days</th>-->
+                    <th scope="col">
+                        <a href="javascript:void(0);" onclick={sortByProcessingDays}>
+                            Processing Days
+                            <lightning-icon icon-name={processingDaysSortDirectionIcon} size="xx-small" alternative-text="Sort" class="slds-m-left_xx-small"></lightning-icon>
+                        </a>
+                    </th>
                     <th scope="col">Date Last Modified</th>
-                    <th scope="col">VR Vendor Status Display</th>
+                   <!-- <th scope="col">VR Vendor Status Display</th>-->
                     <th scope="col">Status</th>
                     <th scope="col">Vendor Code</th>
     
@@ -113,9 +127,9 @@
                         <td> <a href={row.nameUrl} target="_blank">{row.Name_on_the_Invoice__c}</a></td>
                         <td>{row.Vendor_Type__c }</td>
                         <td>{row.Registration_Type__c}</td>
-                        <td>{row.ProcessingDay__c}</td>
+                        <td class={row.proccessingDays_Clr}>{row.ProcessingDay__c}</td>
                         <td>{row.formattedModifiedDate}</td>
-                        <td>{row.VR_Vendor_Status_Display__c}</td>
+                       <!--<td>{row.VR_Vendor_Status_Display__c}</td>-->
                         <td>{row.Status_Display_for_all_others__c}</td>
                         <td><lightning-input 
                             type="text" 
@@ -385,10 +399,11 @@
     </template> 
     
     <c-toast-notification></c-toast-notification>
-    </template>
-----------------------------------------------------------------
-JS
+</template>
 
+-------------------------------------------
+
+JS
 import { LightningElement,wire,track,api } from 'lwc';
 import VENDORREGISTRATION_OBJECT from '@salesforce/schema/Vendor_Registration__c'; // Replace with your object API name
 import { getObjectInfo, getPicklistValues,getPicklistValuesByRecordType } from 'lightning/uiObjectInfoApi';
@@ -525,6 +540,18 @@ Vendor_Type__c_FIELDValue=[];
 Status_Display_for_all_others__c_FIELDValue=[];
 VR_Vendor_Status_Display__c_FIELDValue=[];   
 Are_you_located_within_US__c_FIELDValue=[];
+//------------------Sorting function-------
+ // Sorting variables to track current sort direction
+ submissionDateSortDirection = 'asc'; // 'asc' or 'desc'
+ processingDaysSortDirection = 'asc'; // 'asc' or 'desc'
+// Icons for sorting directions (up/down)
+ submissionDateSortDirectionIcon = 'utility:arrowup';
+ processingDaysSortDirectionIcon = 'utility:arrowup';
+//------------------Sorting function End-------
+
+
+
+
 
 
 @wire(getObjectInfo, { objectApiName: VENDORREGISTRATION_OBJECT })
@@ -754,8 +781,9 @@ processVRData(data) {
                console.log('disable action'+disableAction+'disableValidation'+disableValidate+'disableVendorCode'+disableVendorCode)   
                let formattedCreatedDate=this.handleformatedate(row.CreatedDate);
                let formattedModifiedDate=this.handleformatedate(row.LastModifiedDate);
-
-                return {...row ,formattedModifiedDate,formattedCreatedDate, nameUrl ,disableAction,disableValidate,disableVendorCode,disableuploadfile,isvalidaterequired,isSelected: isSelected} 
+               let proccessingDays_Clr=this.processdays_clr(row.ProcessingDay__c);
+               console.log('color'+proccessingDays_Clr);
+                return {...row ,formattedModifiedDate,formattedCreatedDate, nameUrl ,disableAction,disableValidate,disableVendorCode,disableuploadfile,isvalidaterequired,isSelected: isSelected,proccessingDays_Clr} 
             })
             console.log('vrlist'+JSON.stringify(this.vr))
             this.error = null;
@@ -1979,8 +2007,175 @@ handleSavewithEmail() {
     }
 //-------------------handle save with email send logic end-----------
 
+//-------------------Sort function
+// Sorting the table by Submission Date
+sortBySubmissionDate() {
+    const isAscending = this.submissionDateSortDirection === 'asc';
+    
+    this.vr = [...this.vr].sort((a, b) => {
+        const dateA = new Date(a.formattedCreatedDate);
+        const dateB = new Date(b.formattedCreatedDate);
 
+        return isAscending
+            ? dateA - dateB
+            : dateB - dateA;
+    });
 
+    // Toggle sort direction
+    this.submissionDateSortDirection = isAscending ? 'desc' : 'asc';
+    this.submissionDateSortDirectionIcon = isAscending ? 'utility:arrowdown' : 'utility:arrowup';
+}
+
+// Sorting the table by Processing Days
+sortByProcessingDays() {
+    const isAscending = this.processingDaysSortDirection === 'asc';
+
+    this.vr = [...this.vr].sort((a, b) => {
+        const daysA = parseInt(a.ProcessingDay__c, 10);
+        const daysB = parseInt(b.ProcessingDay__c, 10);
+
+        return isAscending
+            ? daysA - daysB
+            : daysB - daysA;
+    });
+
+    // Toggle sort direction
+    this.processingDaysSortDirection = isAscending ? 'desc' : 'asc';
+    this.processingDaysSortDirectionIcon = isAscending ? 'utility:arrowdown' : 'utility:arrowup';
+}
+//-------------------Sort function End
+processdays_clr(processingdays){
+
+    if(processingdays <=2){
+        console.log('processingdays'+processingdays+'green')
+        return 'green';
+    }
+    else if(processingdays ==3){
+        console.log('processingdays'+processingdays+'orange')
+        return 'orange';
+    }
+    else if(processingdays >=4){
+        console.log('processingdays'+processingdays+'red')
+        return 'red';
+    }
+    else{
+        console.log('processingdays'+processingdays+'red')
+        return 'black'; 
+    }
+
+   
+}
 
 
 }
+
+-----------------------------------------------------------------------------
+CSS
+.disable-checkbox .slds-checkbox {
+    display: none; /* Hide the checkbox for rows where disableAction is true */
+}
+
+.disable-checkbox {
+    pointer-events: none; /* Prevent any interaction with the row */
+    background-color: #f4f6f9; /* Optional: Different background color */
+    color: #ccc; /* Optional: Different text color */
+}
+.slds-grid{
+    flex-direction: column !important;
+}
+.custom-modal .slds-modal__container {
+    width: 60%; /* Increase width to 60% of the screen */
+}
+
+.custom-table tr{
+    border-collapse: collapse;
+    width: 100%;
+    color: #222;
+}
+
+.custom-table th, .custom-table td {
+    border: 1px solid #000000; /* Change the border color and thickness */
+    padding: 8px;
+    text-align: center;
+}
+
+.custom-table th {
+    background-color: #f3f2f2;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px; /* Add spacing between buttons */
+    padding-right: 5px;
+    padding-left: 5px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size:15px;
+}
+
+.custom-footer {
+    display: flex;
+    justify-content: center; /* Center the buttons horizontally */
+}
+
+h1 {
+    padding: 31px 3px 9px 14px;
+}
+
+.custom-button{
+    /*width: 80px;*/
+    padding-right: 5px;
+    padding-left: 5px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size:15px;
+}
+.modal {
+    display: block; /* Show the modal */
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%;
+    z-index: 99999 !important;
+    position: relative !important;
+}
+
+.slds-grid.filter-search{
+ flex-direction: row !important;
+}
+.filter-search{
+    margin-top: 20px;
+    flex-direction: row !important;
+    display: flex;
+    border: 1px solid #ccc;
+    border-radius: 11px;
+}
+/*Processing days color*/
+.red{
+color:red;
+font-weight: bold;
+}
+.green{
+color:green;
+font-weight: bold;
+}
+.orange{
+color:orange;
+font-weight: bold;
+}
+.black{
+    color:black;
+    font-weight: bold;   
+}
+/*Processing days color*/
